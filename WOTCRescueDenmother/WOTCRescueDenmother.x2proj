@@ -1,0 +1,71 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Default" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Guid>563606c7-4671-4c9a-af56-bd173484b105</Guid>
+    <Name>WOTCRescueDenmother</Name>
+    <Description>Makes it possible to rescue Denmother from the first Retaliation mission so that she joins your crew as a soldier.</Description>
+    <SteamPublishID>0</SteamPublishID>
+    <AssemblyName>WOTCRescueDenmother</AssemblyName>
+    <RootNamespace>WOTCRescueDenmother</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Folder Include="Config\" />
+    <Folder Include="Localization\" />
+    <Folder Include="Content" />
+    <Folder Include="Src\" />
+    <Folder Include="Src\WOTCRescueDenmother\" />
+    <Folder Include="Src\WOTCRescueDenmother\Classes\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Config\XComContent.ini">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Config\XComDenmotherRifle.ini">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Content\Iridar_Denmother_Assets.upk">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Content\Iridar_Denmother_GD.upk">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Content\IRIDenmotherRifle.upk">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Localization\WOTCRescueDenmother.int">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="ReadMe.txt" />
+    <Content Include="ModPreview.jpg" />
+    <Content Include="Config\XComEditor.ini" />
+    <Content Include="Config\XComEngine.ini" />
+    <Content Include="Config\XComGame.ini" />
+    <Content Include="Localization\XComGame.int" />
+    <Content Include="Src\WOTCRescueDenmother\Classes\Denmother.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTCRescueDenmother\Classes\UIScreenListener_Denmother.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTCRescueDenmother\Classes\X2Ability_Denmother.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTCRescueDenmother\Classes\X2DownloadableContentInfo_WOTCRescueDenmother.uc" />
+    <Content Include="Src\WOTCRescueDenmother\Classes\X2Effect_DeployDenmother.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTCRescueDenmother\Classes\X2Effect_ObjectiveTracker.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTCRescueDenmother\Classes\X2EventListener_Denmother.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTCRescueDenmother\Classes\X2Item_DenmotherRifle.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTCRescueDenmother\Classes\X2StrategyElement_DenmotherReward.uc">
+      <SubType>Content</SubType>
+    </Content>
+  </ItemGroup>
+  <Import Project="$(MSBuildLocalExtensionPath)\XCOM2.targets" />
+</Project>
