@@ -25,25 +25,23 @@ static function CHEventListenerTemplate Create_TacticalListenerTemplate()
 
 static function EventListenerReturn ListenerEventFunction_Immediate(Object EventData, Object EventSource, XComGameState NewGameState, Name Event, Object CallbackData)
 {
-	//local XComTacticalMissionManager		MissionManager;
 	local XComGameState_MissionCalendar		CalendarState;
 	local XComGameStateHistory				History;
 	local XComGameState_MissionSite			MissionState;
 	local XComGameState_BattleData			BattleData;
-	local X2CharacterTemplateManager		CharMgr;
-    local X2CharacterTemplate				CharTemplate;
-	local XComGameState_Unit				UnitState; //, XComUnitState;
+
+	local X2StrategyElementTemplateManager	StratMgr;
+	local X2ObjectiveTemplate				NewObjectiveTemplate;
+	local XComGameState_Objective			NewObjectiveState;
+
+	local XComGameState_Unit				UnitState;
 	local vector							Position;
-	//local XGUnit						Unit;
 
 	`LOG("Post Aliens Spawned ListenerEventFunction triggered",, 'IRITEST');
+	//	=================================================================
+	//	INITIAL CHECKS -> Make sure this is the first retaliation in the campaign, exit otherwise.
 
 	History = `XCOMHISTORY;
-	//MissionManager = `TACTICALMISSIONMGR;
-	//`LOG("Mission name:" @ MissionManager.ActiveMission.MissionName @ MissionManager.ActiveMission.sType @ MissionManager.ActiveMission.MissionFamily,, 'IRITEST');
-	//if (MissionManager.ActiveMission.MissionName != 'MissionSource_Retaliation')
-	//	return ELR_NoInterrupt;
-
 	BattleData = XComGameState_BattleData(History.GetSingleGameStateObjectForClass(class'XComGameState_BattleData'));
 	MissionState = XComGameState_MissionSite(History.GetGameStateForObjectID(BattleData.m_iMissionID));
 
@@ -58,21 +56,16 @@ static function EventListenerReturn ListenerEventFunction_Immediate(Object Event
 	if (CalendarState.HasCreatedMultipleMissionsOfSource('MissionSource_Retaliation'))
 		return ELR_NoInterrupt;
 
+	//	=================================================================
+	//	CREATE AND DEPLOY DENMOTHER 
+
 	`LOG("This is First retaliation, creating soldier.",, 'IRITEST');
 
 	//	Generate unit
-	CharMgr = class'X2CharacterTemplateManager'.static.GetCharacterTemplateManager();
-	CharTemplate = CharMgr.FindCharacterTemplate('Soldier');
-
-	UnitState = CharTemplate.CreateInstanceFromTemplate(NewGameState);
+	UnitState = class'Denmother'.static.CreateDenmotherUnit(NewGameState, false);
 
 	UnitState.SetCurrentStat(eStat_SightRadius, 3);
-	//UnitState.SetIndividualConcealment(true, NewGameState);
-	//UnitState.bHasSuperConcealment = true;
-
-	class'Denmother'.static.SetUpDenmother(UnitState);
 	UnitState.TacticalTag = 'IRI_DenmotherReward_Tag';
-	UnitState.ApplyInventoryLoadout(NewGameState);
 
 	`LOG("Old position:" @ `XWORLD.GetPositionFromTileCoordinates(UnitState.TileLocation),, 'IRITEST');
 	Position = GetDenmotherSpawnPosition();
@@ -83,6 +76,17 @@ static function EventListenerReturn ListenerEventFunction_Immediate(Object Event
 	UnitState.bRequiresVisibilityUpdate = true;
 
 	AddStrategyUnitToBoard(UnitState, NewGameState);
+
+	//	=================================================================
+	//	CREATE AND INJECT TRACKING OBJECTIVE
+	StratMgr = class'X2StrategyElementTemplateManager'.static.GetStrategyElementTemplateManager();
+
+	NewObjectiveTemplate = X2ObjectiveTemplate(StratMgr.FindStrategyElementTemplate('IRI_Rescue_Denmother_Objective'));
+	NewObjectiveState = NewObjectiveTemplate.CreateInstanceFromTemplate(NewGameState);
+	NewObjectiveState.StartObjective(NewGameState, true);
+
+	//	Hack, store the reference to Denmother's tactical unit state in the objective
+	NewObjectiveState.MainObjective = UnitState.GetReference();
 
 	return ELR_NoInterrupt;
 }

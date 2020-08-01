@@ -84,10 +84,10 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 	if (UnitState != none)
 	{
 		UnitState.ActionPoints.Length = 0;
-		//	Do it here so that Denmother doesn't appear in the skyranger cinematic
 
 		//	tell the game that the new unit is part of your squad so the mission wont just end if others retreat -LEB
 		UnitState.bSpawnedFromAvenger = true;	
+		UnitState.LowestHP = 1;
 	}
 	super.OnEffectAdded(ApplyEffectParameters, kNewTargetState, NewGameState, NewEffectState);
 }

@@ -38,6 +38,9 @@
     <Content Include="Content\IRIDenmotherRifle.upk">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Content\IRIDenmotherUI.upk">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Localization\WOTCRescueDenmother.int">
       <SubType>Content</SubType>
     </Content>

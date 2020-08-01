@@ -1,4 +1,4 @@
-class Denmother extends Object;
+class Denmother extends Object config (ClassData);
 
 var localized string strDenmotherFirstName;
 var localized string strDenmotherLastName;
@@ -6,6 +6,9 @@ var localized string strDenmotherNickName;
 
 var localized string strDenmotherGoodBackground;
 var localized string strDenmotherBadBackground;
+
+var config name DenmotherSoldierClass;
+var config int	DenmotherStartingRank;
 
 static function FailDenmotherObjective(XComGameState NewGameState)
 {
@@ -56,12 +59,15 @@ static function SucceedDenmotherObjective(XComGameState_Unit UnitState, XComGame
 	}
 
 	//	Will let Denmother walk off Skyranger and actually transition from tactical to strategy
-	AddUnitToSquad(UnitState, NewGameState);
+	AddUnitToSquadAndCrew(UnitState, NewGameState);
 
 	// This will display Denmother on the mission end screen
 	BattleData = XComGameState_BattleData(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_BattleData'));
 	BattleData = XComGameState_BattleData(NewGameState.ModifyStateObject(class'XComGameState_BattleData', BattleData.ObjectID));
 	BattleData.RewardUnits.AddItem(UnitState.GetReference());
+
+	//	This will help find the Denmother unit in avenger crew
+	UnitState.SetUnitFloatValue('IRI_ThisUnitIsDenmother_Value', 1, eCleanup_BeginTactical);
 }
 
 static function XComGameState_Objective GetDenmotherObjective()
@@ -94,6 +100,23 @@ static function AddUnitToSquad(XComGameState_Unit UnitState, XComGameState NewGa
 		XComHQ = XComGameState_HeadquartersXCom(NewGameState.ModifyStateObject(class'XComGameState_HeadquartersXCom', XComHQ.ObjectID));
 	}
 	XComHQ.Squad.AddItem(UnitState.GetReference());
+}
+
+static function AddUnitToSquadAndCrew(XComGameState_Unit UnitState, XComGameState NewGameState)
+{	
+	local XComGameState_HeadquartersXCom XComHQ;
+
+	foreach NewGameState.IterateByClassType(class'XComGameState_HeadquartersXCom', XComHQ)
+	{
+		break;
+	}
+	if (XComHQ == none)
+	{
+		XComHQ = `XCOMHQ;
+		XComHQ = XComGameState_HeadquartersXCom(NewGameState.ModifyStateObject(class'XComGameState_HeadquartersXCom', XComHQ.ObjectID));
+	}
+	XComHQ.Squad.AddItem(UnitState.GetReference());
+	XComHQ.AddToCrew(NewGameState, UnitState);
 }
 
 static function bool WereCiviliansRescued(const XComGameState_BattleData BattleData)
@@ -141,14 +164,6 @@ static function bool WasDenmotherRescued(const XComGameState_BattleData BattleDa
 	return UnitState != none && UnitState.IsAlive();
 }
 
-static function EquipMarksmanCarbine(XComGameState_Unit UnitState, XComGameState NewGameState)
-{
-}
-
-static function XComGameState_Item CreateMarksmanCarbine(XComGameState NewGameState)
-{
-}
-
 static function GiveOneGoodEyeAbility(XComGameState_Unit UnitState)
 {	
 	local SoldierClassAbilityType AbilityStruct;
@@ -173,6 +188,30 @@ static function GiveOneGoodEyeAbility(XComGameState_Unit UnitState)
 
 static function XComGameState_Unit GetDenmotherTacticalUnitState()
 {	
+	local XComGameStateHistory		History;
+	local XComGameState_Unit		UnitState;
+	local XComGameState_Objective	ObjectiveState;
+	
+	ObjectiveState = GetDenmotherObjective();
+	if (ObjectiveState != none)
+	{
+		History = `XCOMHISTORY;
+		UnitState = XComGameState_Unit(History.GetGameStateForObjectID(ObjectiveState.MainObjective.ObjectID));
+
+		if (UnitState != none)
+		{
+			`LOG("GetDenmotherTacticalUnitState: Found Denmother Tactical Unit State, she's alive:" @ UnitState.IsAlive(),, 'IRITEST');
+			return UnitState;
+		}
+		`LOG("GetDenmotherTacticalUnitState: did not find Denmother Unit State",, 'IRITEST');
+		return none;
+	}
+	`LOG("GetDenmotherTacticalUnitState: did not find Denmother Objective State",, 'IRITEST');	
+	return none;
+}
+/*
+static function XComGameState_Unit GetDenmotherTacticalUnitState()
+{	
 	local XComGameStateHistory History;
 	local XComGameState_Unit UnitState;
 
@@ -188,7 +227,7 @@ static function XComGameState_Unit GetDenmotherTacticalUnitState()
 	}
 	`LOG("GetDenmotherTacticalUnitState: did not find Denmother Unit State",, 'IRITEST');
 	return none;
-}
+}*/
 
 static function XComGameState_Unit GetDenmotherCrewUnitState()
 {	
@@ -215,25 +254,78 @@ static function XComGameState_Unit GetDenmotherCrewUnitState()
 	return none;
 }
 
-static function SetUpDenmother(XComGameState_Unit UnitState, optional bool bAsSoldier)
+//	====================================================================
+//			CREATE DENMOTHER UNIT STATE AND CUSTOMIZE APPEARANCE
+//	====================================================================
+//	bAsSoldier = true when generating her as a soldier reward you get for completing the mission.
+//	= false when generating a unit state that will be bleeding out on the mission itself.
+static function XComGameState_Unit CreateDenmotherUnit(XComGameState NewGameState, optional bool bAsSoldier)
+{
+	local XComGameState_Unit NewUnitState;
+	local int idx, StartingIdx;
+
+	NewUnitState = CreateSoldier(NewGameState);
+	NewUnitState.RandomizeStats();
+
+	SetDenmotherAppearance(NewUnitState, bAsSoldier);
+
+	NewUnitState.SetXPForRank(default.DenmotherStartingRank);
+	NewUnitState.StartingRank = default.DenmotherStartingRank;
+	StartingIdx = 0;
+
+	for (idx = StartingIdx; idx < default.DenmotherStartingRank; idx++)
+	{
+		// Rank up to squaddie
+		if (idx == 0)
+		{
+			NewUnitState.RankUpSoldier(NewGameState, default.DenmotherSoldierClass);
+			NewUnitState.ApplyInventoryLoadout(NewGameState, 'DenmotherLoadout');
+			NewUnitState.bNeedsNewClassPopup = false;
+		}
+		else
+		{
+			NewUnitState.RankUpSoldier(NewGameState, default.DenmotherSoldierClass);
+		}
+	}
+	return NewUnitState;
+}
+
+static private function XComGameState_Unit CreateSoldier(XComGameState NewGameState)
+{
+	local X2CharacterTemplateManager	CharTemplateMgr;	
+	local X2CharacterTemplate			CharacterTemplate;
+	local XGCharacterGenerator			CharacterGenerator;
+	local TSoldier						CharacterGeneratorResult;
+	local XComGameState_Unit			SoldierState;
+	
+	CharTemplateMgr = class'X2CharacterTemplateManager'.static.GetCharacterTemplateManager();
+	CharacterTemplate = CharTemplateMgr.FindCharacterTemplate('Soldier');
+	SoldierState = CharacterTemplate.CreateInstanceFromTemplate(NewGameState);
+	
+	//	Probably not gonna end up using any part of the generated appearance, but let's go through the motions just in case
+	CharacterGenerator = `XCOMGRI.Spawn(CharacterTemplate.CharacterGeneratorClass);
+	CharacterGeneratorResult = CharacterGenerator.CreateTSoldier('Soldier');
+	SoldierState.SetTAppearance(CharacterGeneratorResult.kAppearance);
+
+	return SoldierState;
+}
+
+static private function SetDenmotherAppearance(XComGameState_Unit UnitState, optional bool bAsSoldier)
 {
 	UnitState.kAppearance.nmPawn = 'XCom_Soldier_F';
 	UnitState.kAppearance.iGender = eGender_Female; //2;
 	UnitState.kAppearance.iRace = 0; 
 	UnitState.kAppearance.iSkinColor = 0;
-	UnitState.kAppearance.iEyeColor = 3;	//	blue
-	UnitState.kAppearance.iHairColor = 7; // blonde
-	UnitState.kAppearance.iAttitude = 4;	//	happy go lucky
+	UnitState.kAppearance.iEyeColor = 21;	//	black
+	UnitState.kAppearance.iHairColor = 0; // dark brown
+	UnitState.kAppearance.iAttitude = 2;	//	normal
 	UnitState.kAppearance.nmBeard = '';
 	UnitState.kAppearance.nmArms_Underlay = 'CnvUnderlay_Std_Arms_A_M';
 	UnitState.kAppearance.nmLeftArmDeco = '';
 	UnitState.kAppearance.nmRightArmDeco = '';
-	UnitState.kAppearance.nmTorsoDeco = '';
 	UnitState.kAppearance.nmEye = 'DefaultEyes';
-	UnitState.kAppearance.nmFacePropUpper = 'Earring_F';
 	UnitState.kAppearance.nmFacePropLower = '';
 	UnitState.kAppearance.nmPatterns = 'Pat_Nothing';
-	UnitState.kAppearance.nmHelmet = '';
 	UnitState.kAppearance.nmLeftForearm = '';
 	UnitState.kAppearance.nmRightForearm = '';
 	UnitState.kAppearance.nmThighs = '';
@@ -243,36 +335,46 @@ static function SetUpDenmother(XComGameState_Unit UnitState, optional bool bAsSo
 	UnitState.kAppearance.nmTeeth = 'DefaultTeeth';
 	UnitState.kAppearance.iWeaponTint = 5;
 	UnitState.kAppearance.nmWeaponPattern = 'Pat_Nothing';
-	UnitState.kAppearance.nmVoice = 'FemaleVoice10_English_US';
+	UnitState.kAppearance.nmVoice = 'FemaleVoice1_English_US';
 
-	UnitState.kAppearance.nmArms = 'CnvMed_Std_E_F';
+	UnitState.kAppearance.nmHelmet = 'WOTCRescueDenmother_Helmets_F';	//	custom hat
+	UnitState.kAppearance.nmArms = 'WOTCRescueDenmother_Arms_KV_F';	//	custom arms
 	UnitState.kAppearance.nmLeftArm = '';
 	UnitState.kAppearance.nmRightArm = '';
-	UnitState.kAppearance.nmTorso = 'CnvMed_Std_A_F';	//	Torso 0 (just xcom kevlar)
+	UnitState.kAppearance.nmTorso = 'WOTCRescueDenmother_TorsoWithGear_KV_F';	//	custom torso
+	UnitState.kAppearance.nmTorsoDeco = 'WOTCRescueDenmother_TorsoDeco_Backpack_KV_F';	//	custom torso deco
 	UnitState.kAppearance.nmTorso_Underlay = 'CnvUnderlay_Std_A_F';
-	UnitState.kAppearance.nmLegs = 'CnvMed_Std_D_F';	//	xcom kevlar pants
+	UnitState.kAppearance.nmLegs = 'WOTCRescueDenmother_Legs_KV_F';	//	custom legs
 	UnitState.kAppearance.nmLegs_Underlay = 'CnvUnderlay_Std_A_F';
 	UnitState.kAppearance.nmHaircut = 'FemHair_M'; // Bob haircut
-	UnitState.kAppearance.nmHead = 'CaucFem_E';
+	UnitState.kAppearance.nmHead = 'CaucFem_A';
 
-	UnitState.SetCountry('Country_USA');
-	if (bAsSoldier)
+	if (DLCLoaded('DLC_2'))
 	{
-		UnitState.SetCharacterName(default.strDenmotherFirstName, default.strDenmotherLastName, default.strDenmotherNickName);
-		UnitState.SetUnitFloatValue('IRI_ThisUnitIsDenmother_Value', 1, eCleanup_Never);
-
-		//	TODO: add scars here
+		UnitState.kAppearance.nmScars = 'DLC_60_Scar_D';
 	}
 	else
 	{
+		UnitState.kAppearance.nmScars = 'Scars_01_Burn';
+	}
+
+	UnitState.SetCountry('Country_Argentina');
+	if (bAsSoldier)
+	{
+		UnitState.SetCharacterName(default.strDenmotherFirstName, default.strDenmotherLastName, default.strDenmotherNickName);
+		UnitState.kAppearance.nmFacePropUpper = 'Eyepatch_F';
+	}
+	else
+	{
+		//	"Blood McBloodyface is still bleeding out" popups don't mention unit's nickname, so using it as last name so the soldier understand who the hell the popup is talking about
 		UnitState.SetCharacterName("", default.strDenmotherNickName, "");
 	}
 	
+	UnitState.kAppearance.iArmorTint = 0;	//	drab green
+	UnitState.kAppearance.iArmorTintSecondary = 29;	//	dark drab green
 
-	UnitState.kAppearance.iArmorTint = 69;	//	white
-	UnitState.kAppearance.iArmorTintSecondary = 49;	//	blue-grey		
+	UnitState.StoreAppearance(); 
 }
-
 
 static function SetGroupAndPlayer(XComGameState_Unit UnitState, ETeam SetTeam, XComGameState NewGameState)
 {
@@ -312,4 +414,20 @@ static function SetGroupAndPlayer(XComGameState_Unit UnitState, ETeam SetTeam, X
 		Group = XComGameState_AIGroup(NewGameState.ModifyStateObject(class'XComGameState_AIGroup', Group.ObjectID));
 		Group.AddUnitToGroup(UnitState.ObjectID, NewGameState);
 	}
+}
+static private function bool DLCLoaded(name DLCName)
+{
+	local XComOnlineEventMgr	EventManager;
+	local int					Index;
+
+	EventManager = `ONLINEEVENTMGR;
+
+	for(Index = EventManager.GetNumDLC() - 1; Index >= 0; Index--)	
+	{
+		if(EventManager.GetDLCNames(Index) == DLCName)	
+		{
+			return true;
+		}
+	}
+	return false;
 }

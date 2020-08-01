@@ -7,9 +7,13 @@ class X2DownloadableContentInfo_WOTCRescueDenmother extends X2DownloadableConten
 //	 TODO: Check if the sweep objective was completed if she's still alive even if XCOM loses?
 //	align left hand socket better. firing animation, projectiles, sounds
 //	TODO: add a mission check into UISL
-//	custom class:
+//	visual weapon upgrades
+//	figure out how to get rid of the duplicate marksman carbine
+//	todo: recover denmother's weapon if she's killed on the mission, but the mission is success
+//		same, but if she's killed, and XCOM evacuates her body
 
-// GTS unlock allows to train other soldiers like that in GTS?
+
+// GTS unlock allows to train other soldiers like that in GTS? IRIDenmotherUI.GTS_KeeperTraining
 
 //	Denmother rescued or not
 //	XCOM killed all enemies or not
@@ -19,6 +23,7 @@ class X2DownloadableContentInfo_WOTCRescueDenmother extends X2DownloadableConten
 /// Called just before the player launches into a tactical a mission while this DLC / Mod is installed.
 /// Allows dlcs/mods to modify the start state before launching into the mission
 /// </summary>
+/*
 static event OnPreMission(XComGameState StartGameState, XComGameState_MissionSite MissionState)
 {
 	//local XComGameState_Unit				UnitState; 
@@ -74,7 +79,7 @@ static event OnPreMission(XComGameState StartGameState, XComGameState_MissionSit
 		NewObjectiveState.StartObjective(StartGameState, true);
 	}
 }
-
+*/
 static event OnPostMission()
 {
 	//local XComGameState_MissionSite MissionState;
@@ -84,16 +89,16 @@ static event OnPostMission()
 	local XComGameState_Objective	ObjectiveState;
 	local XComGameState_Unit		UnitState;
 
-	local X2StrategyElementTemplateManager	StratMgr;
-	local X2RewardTemplate					RewardTemplate;
-	local XComGameState_Reward				MissionRewardState;
+	//local X2StrategyElementTemplateManager	StratMgr;
+	//local X2RewardTemplate					RewardTemplate;
+	//local XComGameState_Reward				MissionRewardState;
 	//local int i;
 
 	`LOG("On Post Mission",, 'IRITEST');
 
 	ObjectiveState = class'Denmother'.static.GetDenmotherObjective();
 
-	if (ObjectiveState != none && ObjectiveState.ObjState != eObjectiveState_Completed)
+	if (ObjectiveState != none /*&& ObjectiveState.ObjState != eObjectiveState_Completed*/)
 	{
 		`LOG("On Post Mission: Hiding denmother objective.",, 'IRITEST');
 		History = `XCOMHISTORY;
@@ -106,7 +111,7 @@ static event OnPostMission()
 
 		//	Complete the objective so it doesn't appear on the Geoscape, regardless if Denmother was rescued or not
 		ObjectiveState.CompleteObjective(NewGameState);
-
+		/*
 		if (class'Denmother'.static.WasDenmotherRescued(XComGameState_BattleData(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_BattleData'))))
 		{
 			StratMgr = class'X2StrategyElementTemplateManager'.static.GetStrategyElementTemplateManager();
@@ -116,7 +121,7 @@ static event OnPostMission()
 			MissionRewardState.GiveReward(NewGameState);
 			//MissionRewardState.DisplayRewardPopup();
 			MissionRewardState.CleanUpReward(NewGameState);
-		}
+		}*/
 
 		UnitState = class'Denmother'.static.GetDenmotherCrewUnitState();
 		if (UnitState != none)
@@ -137,10 +142,11 @@ static event OnPostMission()
 			}
 
 			class'Denmother'.static.GiveOneGoodEyeAbility(UnitState);
-			class'Denmother'.static.EquipMarksmanCarbine(UnitState, NewGameState);
+
+			//	Fix the name
+			UnitState.SetCharacterName(class'Denmother'.default.strDenmotherFirstName, class'Denmother'.default.strDenmotherLastName, class'Denmother'.default.strDenmotherNickName);
 		}
 		else `LOG("On Post Mission: no denmother in avenger crew.",, 'IRITEST');
-
 
 		if (NewGameState.GetNumGameStateObjects() > 0)
 		{
@@ -156,47 +162,3 @@ static event OnPostMission()
 		`LOG("Objective is complete or doesn't exist, doing nothing",, 'IRITEST');
 	}
 }
-
-//	-----------------------------------------------------------------------------------------------------------------------------
-
-/// <summary>
-/// Called when viewing mission blades, used primarily to modify tactical tags for spawning
-/// Returns true when the mission's spawning info needs to be updated
-/// </summary>
-static function bool ShouldUpdateMissionSpawningInfo(StateObjectReference MissionRef)
-{
-	return false;
-}
-
-/// <summary>
-/// Called when viewing mission blades, used primarily to modify tactical tags for spawning
-/// Returns true when the mission's spawning info needs to be updated
-/// </summary>
-static function bool UpdateMissionSpawningInfo(StateObjectReference MissionRef)
-{
-	return false;
-}
-
-// Start Issue #136
-/// <summary>
-/// Called from XComGameState_MissionSite:CacheSelectedMissionData
-/// Encounter Data is modified immediately prior to being added to the SelectedMissionData, ported from LW2
-/// </summary>
-static function PostEncounterCreation(out name EncounterName, out PodSpawnInfo Encounter, int ForceLevel, int AlertLevel, optional XComGameState_BaseObject SourceObject)
-{
-
-}
-// End Issue #136
-
-// Start Issue #157
-/// <summary>
-/// Called from XComGameState_Missionsite:SetMissionData
-/// lets mods add SitReps with custom spawn rules to newly generated missions
-/// Advice: Check for present Strategy game if you dont want this to affect TQL/Multiplayer/Main Menu 
-/// Example: If (`HQGAME  != none && `HQPC != None && `HQPRES != none) ...
-/// </summary>
-static function PostSitRepCreation(out GeneratedMissionData GeneratedMission, optional XComGameState_BaseObject SourceObject)
-{
-	
-}
-// End Issue #157

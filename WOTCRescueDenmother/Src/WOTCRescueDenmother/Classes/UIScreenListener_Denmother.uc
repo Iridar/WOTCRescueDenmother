@@ -37,3 +37,14 @@ event OnInit(UIScreen Screen)
 		}
 	}
 }
+
+event OnRemoved(UIScreen Screen)
+{
+	
+
+				//	Add an eyepatch here, after creating the pawn, so she's still without an eyepatch on the rewards screen, but with the eyepatch in the barracks
+			UnitState.kAppearance.nmFacePropUpper = 'Eyepatch_F';
+			UnitState.StoreAppearance(); 
+
+			`HQPRES.UINewStaffAvailable(RewardState.RewardObjectReference);
+}

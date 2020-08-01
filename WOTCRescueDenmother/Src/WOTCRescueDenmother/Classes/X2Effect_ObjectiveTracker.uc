@@ -83,19 +83,21 @@ static function EventListenerReturn TacticalGameEnd_Listener(Object EventData, O
 
 	`LOG("TacticalGameEnd_Listener: Removing Objective Tracker effect from:" @ UnitState.GetFullName(),, 'IRITEST');
 
-	//	Add Denmother to squad if she's alive when she exists tactical play so that she can walk off the Skyranger
-	if (UnitState.IsAlive())
+	if (UnitState != none)
 	{
-		`LOG("Denmother is alive, marking objective complete, adding her to squad.",, 'IRITEST');
+		//	Add Denmother to squad if she's alive when she exists tactical play so that she can walk off the Skyranger
+		if (UnitState.IsAlive())
+		{
+			`LOG("Denmother is alive, marking objective complete, adding her to squad.",, 'IRITEST');
 
-		class'Denmother'.static.SucceedDenmotherObjective(UnitState, NewGameState);		
+			class'Denmother'.static.SucceedDenmotherObjective(UnitState, NewGameState);		
+		}
+		else
+		{
+			`LOG("Denmother is dead, marking objective as failed.",, 'IRITEST');
+			class'Denmother'.static.FailDenmotherObjective(NewGameState);		
+		}	
 	}
-	else
-	{
-		`LOG("Denmother is dead, marking objective as failed.",, 'IRITEST');
-		class'Denmother'.static.FailDenmotherObjective(NewGameState);		
-	}	
-	
     return ELR_NoInterrupt;
 }
 
