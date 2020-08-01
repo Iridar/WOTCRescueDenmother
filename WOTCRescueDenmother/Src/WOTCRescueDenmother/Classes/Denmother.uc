@@ -10,20 +10,78 @@ var localized string strDenmotherBadBackground;
 var config name DenmotherSoldierClass;
 var config int	DenmotherStartingRank;
 
+static function bool IsMissionFirstRetaliation(name LogName)
+{
+	local XComGameState_MissionCalendar		CalendarState;
+	local XComGameStateHistory				History;
+	local XComGameState_MissionSite			MissionState;
+	local XComGameState_BattleData			BattleData;
+
+	`LOG("IsMissionFirstRetaliation check by:" @ LogName,, 'IRITEST');
+
+	History = `XCOMHISTORY;
+	BattleData = XComGameState_BattleData(History.GetSingleGameStateObjectForClass(class'XComGameState_BattleData'));
+	if (BattleData == none)
+	{
+		`LOG("IsMissionFirstRetaliation WARNING, no Battle Data",, 'IRITEST');
+		return false;
+	}
+
+	MissionState = XComGameState_MissionSite(History.GetGameStateForObjectID(BattleData.m_iMissionID));
+	if (MissionState == none)
+	{
+		`LOG("IsMissionFirstRetaliation WARNING, no Mission State",, 'IRITEST');
+		return false;
+	}
+	//`LOG("Mission name:" @ MissionState.Source,, 'IRITEST');
+
+	if (MissionState.Source == 'MissionSource_Retaliation')
+	{
+		//`LOG("Mission name check passed, this is retaliation",, 'IRITEST');
+
+		CalendarState = XComGameState_MissionCalendar(History.GetSingleGameStateObjectForClass(class'XComGameState_MissionCalendar'));
+		if (CalendarState == none)
+		{
+			`LOG("IsMissionFirstRetaliation WARNING, no Calendar State",, 'IRITEST');
+			return false;
+		}
+		//	I.e. return "true" if calendar DID NOT create multiple retaliation missions yet
+		if (!CalendarState.HasCreatedMultipleMissionsOfSource('MissionSource_Retaliation'))
+		{
+			`LOG("IsMissionFirstRetaliation check succeeds, this is first retaliation.",, 'IRITEST');
+			return true;
+		}
+		`LOG("IsMissionFirstRetaliation check succeeds, this retaliation is not first.",, 'IRITEST');
+		return false;
+		
+	}
+
+	`LOG("IsMissionFirstRetaliation check fail, different mission source.",, 'IRITEST');
+	return false;
+}
+
+//	Updates the objective list in the upper left corner during tactical mission
 static function FailDenmotherObjective(XComGameState NewGameState)
 {
 	local XComGameStateHistory			History;
 	local XComGameState_ObjectivesList	ObjectiveList;
 	local int i;
 
-	//	Denmother is dead, mark objective as failed
-	History = `XCOMHISTORY;
-	foreach History.IterateByClassType(class'XComGameState_ObjectivesList', ObjectiveList)
+	foreach NewGameState.IterateByClassType(class'XComGameState_ObjectivesList', ObjectiveList)
 	{
 		break;
 	}
+	if (ObjectiveList == none)
+	{
+		History = `XCOMHISTORY;
+		foreach History.IterateByClassType(class'XComGameState_ObjectivesList', ObjectiveList)
+		{
+			break;
+		}
+		ObjectiveList = XComGameState_ObjectivesList(NewGameState.ModifyStateObject(class'XComGameState_ObjectivesList', ObjectiveList != none ? ObjectiveList.ObjectID : -1));
+	}
 
-	ObjectiveList = XComGameState_ObjectivesList(NewGameState.ModifyStateObject(class'XComGameState_ObjectivesList', ObjectiveList != none ? ObjectiveList.ObjectID : -1));
+	//	Denmother is dead, mark objective as red
 	for (i = 0; i < ObjectiveList.ObjectiveDisplayInfos.Length; i++)
 	{
 		if (ObjectiveList.ObjectiveDisplayInfos[i].ObjectiveTemplateName == 'IRI_Rescue_Denmother_Objective')
@@ -41,14 +99,21 @@ static function SucceedDenmotherObjective(XComGameState_Unit UnitState, XComGame
 	local XComGameState_BattleData		BattleData;
 	local int i;
 
-	//	Denmother is rescued, mark objective in the list as green
-	History = `XCOMHISTORY;
-	foreach History.IterateByClassType(class'XComGameState_ObjectivesList', ObjectiveList)
+	foreach NewGameState.IterateByClassType(class'XComGameState_ObjectivesList', ObjectiveList)
 	{
 		break;
 	}
+	if (ObjectiveList == none)
+	{
+		History = `XCOMHISTORY;
+		foreach History.IterateByClassType(class'XComGameState_ObjectivesList', ObjectiveList)
+		{
+			break;
+		}
+		ObjectiveList = XComGameState_ObjectivesList(NewGameState.ModifyStateObject(class'XComGameState_ObjectivesList', ObjectiveList != none ? ObjectiveList.ObjectID : -1));
+	}
 
-	ObjectiveList = XComGameState_ObjectivesList(NewGameState.ModifyStateObject(class'XComGameState_ObjectivesList', ObjectiveList != none ? ObjectiveList.ObjectID : -1));
+	//	Denmother is rescued, mark objective in the list as green
 	for (i = 0; i < ObjectiveList.ObjectiveDisplayInfos.Length; i++)
 	{
 		if (ObjectiveList.ObjectiveDisplayInfos[i].ObjectiveTemplateName == 'IRI_Rescue_Denmother_Objective')
@@ -58,16 +123,13 @@ static function SucceedDenmotherObjective(XComGameState_Unit UnitState, XComGame
 		}
 	}
 
-	//	Will let Denmother walk off Skyranger and actually transition from tactical to strategy
+	//	Will let Denmother walk off Skyranger and transition from tactical to strategy
 	AddUnitToSquadAndCrew(UnitState, NewGameState);
 
 	// This will display Denmother on the mission end screen
 	BattleData = XComGameState_BattleData(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_BattleData'));
 	BattleData = XComGameState_BattleData(NewGameState.ModifyStateObject(class'XComGameState_BattleData', BattleData.ObjectID));
 	BattleData.RewardUnits.AddItem(UnitState.GetReference());
-
-	//	This will help find the Denmother unit in avenger crew
-	UnitState.SetUnitFloatValue('IRI_ThisUnitIsDenmother_Value', 1, eCleanup_BeginTactical);
 }
 
 static function XComGameState_Objective GetDenmotherObjective()
@@ -86,22 +148,6 @@ static function XComGameState_Objective GetDenmotherObjective()
 	return none;
 }
 
-static function AddUnitToSquad(XComGameState_Unit UnitState, XComGameState NewGameState)
-{	
-	local XComGameState_HeadquartersXCom XComHQ;
-
-	foreach NewGameState.IterateByClassType(class'XComGameState_HeadquartersXCom', XComHQ)
-	{
-		break;
-	}
-	if (XComHQ == none)
-	{
-		XComHQ = `XCOMHQ;
-		XComHQ = XComGameState_HeadquartersXCom(NewGameState.ModifyStateObject(class'XComGameState_HeadquartersXCom', XComHQ.ObjectID));
-	}
-	XComHQ.Squad.AddItem(UnitState.GetReference());
-}
-
 static function AddUnitToSquadAndCrew(XComGameState_Unit UnitState, XComGameState NewGameState)
 {	
 	local XComGameState_HeadquartersXCom XComHQ;
@@ -117,6 +163,9 @@ static function AddUnitToSquadAndCrew(XComGameState_Unit UnitState, XComGameStat
 	}
 	XComHQ.Squad.AddItem(UnitState.GetReference());
 	XComHQ.AddToCrew(NewGameState, UnitState);
+
+	//	This will help find the Denmother unit in avenger crew
+	UnitState.SetUnitFloatValue('IRI_ThisUnitIsDenmother_Value', 1, eCleanup_BeginTactical);
 }
 
 static function bool WereCiviliansRescued(const XComGameState_BattleData BattleData)
@@ -172,19 +221,30 @@ static function GiveOneGoodEyeAbility(XComGameState_Unit UnitState)
 	UnitState.AbilityTree[0].Abilities.AddItem(AbilityStruct);
 }
 
-	/*
-	var array<SoldierRankAbilities> AbilityTree; // All Soldier Classes now build and store their ability tree upon rank up to Squaddie (could be at creation time)
+static function FinalizeDenmotherUnitForCrew()
+{
+	local XComGameState_Unit	UnitState;
+	local XComGameState			NewGameState;
 
-	struct native SoldierRankAbilities
+	UnitState = GetDenmotherCrewUnitState();
+	if (UnitState != none)
 	{
-		var array<SoldierClassAbilityType> Abilities;
-	};
-	struct native SoldierClassAbilityType
-	{
-		var name AbilityName;
-		var EInventorySlot ApplyToWeaponSlot;
-		var name UtilityCat;
-	};*/
+		NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Finalizing Denmother Unit");
+
+		UnitState = XComGameState_Unit(NewGameState.ModifyStateObject(class'XComGameState_Unit', UnitState.ObjectID));
+		UnitState.ClearUnitValue('IRI_ThisUnitIsDenmother_Value');
+
+		class'Denmother'.static.GiveOneGoodEyeAbility(UnitState);
+
+		UnitState.SetCharacterName(class'Denmother'.default.strDenmotherFirstName, class'Denmother'.default.strDenmotherLastName, class'Denmother'.default.strDenmotherNickName);
+		UnitState.kAppearance.nmFacePropUpper = 'Eyepatch_F';
+		UnitState.StoreAppearance(); 
+
+		`XCOMGAME.GameRuleset.SubmitGameState(NewGameState);
+
+		`HQPRES.UINewStaffAvailable(UnitState.GetReference());
+	}
+}
 
 static function XComGameState_Unit GetDenmotherTacticalUnitState()
 {	
@@ -209,25 +269,6 @@ static function XComGameState_Unit GetDenmotherTacticalUnitState()
 	`LOG("GetDenmotherTacticalUnitState: did not find Denmother Objective State",, 'IRITEST');	
 	return none;
 }
-/*
-static function XComGameState_Unit GetDenmotherTacticalUnitState()
-{	
-	local XComGameStateHistory History;
-	local XComGameState_Unit UnitState;
-
-	History = `XCOMHISTORY;
-
-	foreach History.IterateByClassType(class'XComGameState_Unit', UnitState)
-	{
-		if (UnitState.TacticalTag == 'IRI_DenmotherReward_Tag')
-		{
-			`LOG("GetDenmotherTacticalUnitState: Found Denmother Unit State, she's alive:" @ UnitState.IsAlive(),, 'IRITEST');
-			return UnitState;
-		}
-	}
-	`LOG("GetDenmotherTacticalUnitState: did not find Denmother Unit State",, 'IRITEST');
-	return none;
-}*/
 
 static function XComGameState_Unit GetDenmotherCrewUnitState()
 {	
@@ -324,6 +365,7 @@ static private function SetDenmotherAppearance(XComGameState_Unit UnitState, opt
 	UnitState.kAppearance.nmLeftArmDeco = '';
 	UnitState.kAppearance.nmRightArmDeco = '';
 	UnitState.kAppearance.nmEye = 'DefaultEyes';
+	UnitState.kAppearance.nmFacePropUpper = '';
 	UnitState.kAppearance.nmFacePropLower = '';
 	UnitState.kAppearance.nmPatterns = 'Pat_Nothing';
 	UnitState.kAppearance.nmLeftForearm = '';
@@ -415,6 +457,7 @@ static function SetGroupAndPlayer(XComGameState_Unit UnitState, ETeam SetTeam, X
 		Group.AddUnitToGroup(UnitState.ObjectID, NewGameState);
 	}
 }
+
 static private function bool DLCLoaded(name DLCName)
 {
 	local XComOnlineEventMgr	EventManager;

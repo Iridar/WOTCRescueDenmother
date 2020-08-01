@@ -1,5 +1,7 @@
 class X2Effect_DeployDenmother extends X2Effect_PersistentStatChange;
 
+//	This effect will remain on Denmother until the mission is over or an XCOM unit activates an ability on her
+
 function RegisterForEvents(XComGameState_Effect EffectGameState)
 {
 	local X2EventManager		EventMgr;
@@ -12,10 +14,7 @@ function RegisterForEvents(XComGameState_Effect EffectGameState)
 	
 	EventMgr.RegisterForEvent(EffectObj, 'AbilityActivated', AbilityActivated_Listener, ELD_OnStateSubmitted,,,, EffectObj);	
 	EventMgr.RegisterForEvent(EffectObj, 'UnitRemovedFromPlay', UnitRemovedFromPlay_Listener, ELD_Immediate,, UnitState,, EffectObj);	
-	
-	
-	//EventMgr.RegisterForEvent(EffectObj, 'UnitSeesUnit', AbilityActivated_Listener, ELD_OnStateSubmitted,,,, EffectObj);	
-	
+
 	super.RegisterForEvents(EffectGameState);
 }
 
@@ -87,11 +86,35 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 
 		//	tell the game that the new unit is part of your squad so the mission wont just end if others retreat -LEB
 		UnitState.bSpawnedFromAvenger = true;	
-		UnitState.LowestHP = 1;
 	}
 	super.OnEffectAdded(ApplyEffectParameters, kNewTargetState, NewGameState, NewEffectState);
 }
+/*
+simulated function OnEffectRemoved(const out EffectAppliedData ApplyEffectParameters, XComGameState NewGameState, bool bCleansed, XComGameState_Effect RemovedEffectState)
+{
+	local XComGameState_Unit			UnitState;
+	
+	UnitState = XComGameState_Unit(NewGameState.GetGameStateForObjectID(ApplyEffectParameters.TargetStateObjectRef.ObjectID));
 
+	`LOG("Removing Objective Tracker effect from:" @ UnitState.GetFullName(),, 'IRITEST');
+
+	//	Add Denmother to squad if she's alive when she exists tactical play so that she can walk off the Skyranger
+	if (UnitState.IsAlive())
+	{
+		`LOG("Denmother is alive, marking objective complete, adding her to squad.",, 'IRITEST');
+
+		class'Denmother'.static.SucceedDenmotherObjective(UnitState, NewGameState);		
+	}
+	else
+	{
+		`LOG("Denmother is dead, marking objective as failed.",, 'IRITEST');
+		class'Denmother'.static.FailDenmotherObjective(NewGameState);		
+	}	
+
+	super.OnEffectRemoved(ApplyEffectParameters,NewGameState, bCleansed, RemovedEffectState);
+}
+
+*/
 defaultproperties
 {
 	EffectName = "IRI_DeployDenmother_Effect"

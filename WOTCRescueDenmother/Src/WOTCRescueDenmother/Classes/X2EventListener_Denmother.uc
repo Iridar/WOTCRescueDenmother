@@ -25,11 +25,6 @@ static function CHEventListenerTemplate Create_TacticalListenerTemplate()
 
 static function EventListenerReturn ListenerEventFunction_Immediate(Object EventData, Object EventSource, XComGameState NewGameState, Name Event, Object CallbackData)
 {
-	local XComGameState_MissionCalendar		CalendarState;
-	local XComGameStateHistory				History;
-	local XComGameState_MissionSite			MissionState;
-	local XComGameState_BattleData			BattleData;
-
 	local X2StrategyElementTemplateManager	StratMgr;
 	local X2ObjectiveTemplate				NewObjectiveTemplate;
 	local XComGameState_Objective			NewObjectiveState;
@@ -41,53 +36,40 @@ static function EventListenerReturn ListenerEventFunction_Immediate(Object Event
 	//	=================================================================
 	//	INITIAL CHECKS -> Make sure this is the first retaliation in the campaign, exit otherwise.
 
-	History = `XCOMHISTORY;
-	BattleData = XComGameState_BattleData(History.GetSingleGameStateObjectForClass(class'XComGameState_BattleData'));
-	MissionState = XComGameState_MissionSite(History.GetGameStateForObjectID(BattleData.m_iMissionID));
+	if (class'Denmother'.static.IsMissionFirstRetaliation('PostAliensSpawned'))
+	{
+		//	=================================================================
+		//	CREATE AND DEPLOY DENMOTHER 
 
-	`LOG("Mission name:" @ MissionState.Source,, 'IRITEST');
+		`LOG("This is First retaliation, creating soldier.",, 'IRITEST');
 
-	if (MissionState.Source != 'MissionSource_Retaliation')
-		return ELR_NoInterrupt;
+		//	Generate unit
+		UnitState = class'Denmother'.static.CreateDenmotherUnit(NewGameState, false);
 
-	`LOG("Mission name check passed, this is retaliation",, 'IRITEST');
+		UnitState.SetCurrentStat(eStat_SightRadius, 3);
+		UnitState.TacticalTag = 'IRI_DenmotherReward_Tag';
 
-	CalendarState = XComGameState_MissionCalendar(History.GetSingleGameStateObjectForClass(class'XComGameState_MissionCalendar'));
-	if (CalendarState.HasCreatedMultipleMissionsOfSource('MissionSource_Retaliation'))
-		return ELR_NoInterrupt;
+		`LOG("Old position:" @ `XWORLD.GetPositionFromTileCoordinates(UnitState.TileLocation),, 'IRITEST');
+		Position = GetDenmotherSpawnPosition();
+		`LOG("New position:" @ Position,, 'IRITEST');
 
-	//	=================================================================
-	//	CREATE AND DEPLOY DENMOTHER 
+		//	Teleport the unit
+		UnitState.SetVisibilityLocationFromVector(Position);
+		UnitState.bRequiresVisibilityUpdate = true;
 
-	`LOG("This is First retaliation, creating soldier.",, 'IRITEST');
+		AddStrategyUnitToBoard(UnitState, NewGameState);
 
-	//	Generate unit
-	UnitState = class'Denmother'.static.CreateDenmotherUnit(NewGameState, false);
+		//	=================================================================
+		//	CREATE AND INJECT TRACKING OBJECTIVE
+		StratMgr = class'X2StrategyElementTemplateManager'.static.GetStrategyElementTemplateManager();
 
-	UnitState.SetCurrentStat(eStat_SightRadius, 3);
-	UnitState.TacticalTag = 'IRI_DenmotherReward_Tag';
+		NewObjectiveTemplate = X2ObjectiveTemplate(StratMgr.FindStrategyElementTemplate('IRI_Rescue_Denmother_Objective'));
+		NewObjectiveState = NewObjectiveTemplate.CreateInstanceFromTemplate(NewGameState);
+		NewObjectiveState.StartObjective(NewGameState, true);
 
-	`LOG("Old position:" @ `XWORLD.GetPositionFromTileCoordinates(UnitState.TileLocation),, 'IRITEST');
-	Position = GetDenmotherSpawnPosition();
-	`LOG("New position:" @ Position,, 'IRITEST');
-
-	//	Teleport the unit
-	UnitState.SetVisibilityLocationFromVector(Position);
-	UnitState.bRequiresVisibilityUpdate = true;
-
-	AddStrategyUnitToBoard(UnitState, NewGameState);
-
-	//	=================================================================
-	//	CREATE AND INJECT TRACKING OBJECTIVE
-	StratMgr = class'X2StrategyElementTemplateManager'.static.GetStrategyElementTemplateManager();
-
-	NewObjectiveTemplate = X2ObjectiveTemplate(StratMgr.FindStrategyElementTemplate('IRI_Rescue_Denmother_Objective'));
-	NewObjectiveState = NewObjectiveTemplate.CreateInstanceFromTemplate(NewGameState);
-	NewObjectiveState.StartObjective(NewGameState, true);
-
-	//	Hack, store the reference to Denmother's tactical unit state in the objective
-	NewObjectiveState.MainObjective = UnitState.GetReference();
-
+		//	Hack, store the reference to Denmother's tactical unit state in the objective
+		NewObjectiveState.MainObjective = UnitState.GetReference();
+	}
 	return ELR_NoInterrupt;
 }
 
@@ -125,7 +107,7 @@ static private function vector GetDenmotherSpawnPosition()
 	return Position;
 }
 
-private static function AddStrategyUnitToBoard(XComGameState_Unit Unit, XComGameState NewGameState /*, Vector SpawnLocation*/)
+static private function AddStrategyUnitToBoard(XComGameState_Unit Unit, XComGameState NewGameState)
 {
 	local StateObjectReference			ItemReference;
 	local XComGameState_Item			ItemState;
@@ -144,10 +126,6 @@ private static function AddStrategyUnitToBoard(XComGameState_Unit Unit, XComGame
 		// add any cosmetic items that might exists
 		ItemState.CreateCosmeticItemUnit(NewGameState);
 	}
-
-	// add abilities -LEB
-	// Must happen after items are added, to do ammo merging properly. -LEB
-	//`TACTICALRULES.InitializeUnitAbilities(NewGameState, Unit);
 
 	//	I assume this triggers the unit's abilities that activate at "UnitPostBeginPlay"
 	Unit.BeginTacticalPlay(NewGameState); 

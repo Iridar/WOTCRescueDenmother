@@ -39,7 +39,7 @@ static function X2AbilityTemplate Create_KnockoutAndBleedoutSelf()
 
 	Effect = new class'X2Effect_DeployDenmother';
 	Effect.BuildPersistentEffect(1, true);
-	Effect.AddPersistentStatChange(eStat_SightRadius, 0.99f);
+	Effect.AddPersistentStatChange(eStat_SightRadius, -0.99f, MODOP_Multiplication);
 	Template.AddTargetEffect(Effect);
 
 	ObjectiveTrackerEffect = new class'X2Effect_ObjectiveTracker';

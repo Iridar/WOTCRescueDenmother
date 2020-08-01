@@ -12,6 +12,9 @@ class X2DownloadableContentInfo_WOTCRescueDenmother extends X2DownloadableConten
 //	todo: recover denmother's weapon if she's killed on the mission, but the mission is success
 //		same, but if she's killed, and XCOM evacuates her body
 
+//	Make sure that all listeners and hooks are relevant only for the first terror mission
+//	One Good Eye ability
+//	none checks and log warnings
 
 // GTS unlock allows to train other soldiers like that in GTS? IRIDenmotherUI.GTS_KeeperTraining
 
@@ -19,114 +22,36 @@ class X2DownloadableContentInfo_WOTCRescueDenmother extends X2DownloadableConten
 //	XCOM killed all enemies or not
 //	Enough civs were saved or not
 
-/// <summary>
-/// Called just before the player launches into a tactical a mission while this DLC / Mod is installed.
-/// Allows dlcs/mods to modify the start state before launching into the mission
-/// </summary>
-/*
-static event OnPreMission(XComGameState StartGameState, XComGameState_MissionSite MissionState)
-{
-	//local XComGameState_Unit				UnitState; 
-	//local X2CharacterTemplateManager		CharMgr;
-	//local X2CharacterTemplate				CharTemplate;
-	//local XComGameState_BattleData			BattleData;
-	local X2StrategyElementTemplateManager	StratMgr;
-//	local X2RewardTemplate					RewardTemplate;
-//	local XComGameState_Reward				MissionRewardState;
-	local XComGameState_MissionCalendar		CalendarState;
-	//local MissionObjectiveDefinition		NewObjective;
-	local X2ObjectiveTemplate				NewObjectiveTemplate;
-	local XComGameState_Objective			NewObjectiveState;
-
-	CalendarState = XComGameState_MissionCalendar(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_MissionCalendar'));
-
-	`LOG("Pre mission for:" @ MissionState.Source @ MissionState.GeneratedMission.Mission.MissionName @ "this is first retaliation:" @ !CalendarState.HasCreatedMultipleMissionsOfSource('MissionSource_Retaliation'),, 'IRITEST');	
-
-	if (MissionState.Source == 'MissionSource_Retaliation' && !CalendarState.HasCreatedMultipleMissionsOfSource('MissionSource_Retaliation'))
-	{
-		//	Generate a new Denmother unit. Its only purpose is to show up on the post-mission screen.
-		//CharMgr = class'X2CharacterTemplateManager'.static.GetCharacterTemplateManager();
-		//CharTemplate = CharMgr.FindCharacterTemplate('Soldier');
-		//UnitState = CharTemplate.CreateInstanceFromTemplate(StartGameState);
-
-		//class'Denmother'.static.SetUpDenmother(UnitState);
-
-		//	Apply rookie loadout so she doesn't stand there with empty hands
-		//UnitState.ApplyInventoryLoadout(StartGameState);
-
-		//BattleData = XComGameState_BattleData(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_BattleData'));
-		//BattleData = XComGameState_BattleData(StartGameState.ModifyStateObject(class'XComGameState_BattleData', BattleData.ObjectID));
-
-		// This will display Denmother on the mission end screen if the mission succeeds, and show "vip lost" if it fails
-		//BattleData.RewardUnits.AddItem(UnitState.GetReference());
-
-		// ----------------------
-
-		//	Inject a new soldier reward into the mission. This is necessary to actually add the Denmother soldier to the barracks.
-		StratMgr = class'X2StrategyElementTemplateManager'.static.GetStrategyElementTemplateManager();
-
-		//RewardTemplate = X2RewardTemplate(StratMgr.FindStrategyElementTemplate('IRI_Reward_DenmotherSoldier'));
-		//MissionRewardState = RewardTemplate.CreateInstanceFromTemplate(StartGameState);
-		//MissionRewardState.GenerateReward(StartGameState, 1, MissionState.Region);
-		//MissionState.Rewards.AddItem(MissionRewardState.GetReference());
-
-		//	-----------------------
-		`LOG("Injecting objective",, 'IRITEST');	
-
-		//	Inject a new objective into the objective list
-		NewObjectiveTemplate = X2ObjectiveTemplate(StratMgr.FindStrategyElementTemplate('IRI_Rescue_Denmother_Objective'));
-		NewObjectiveState = NewObjectiveTemplate.CreateInstanceFromTemplate(StartGameState);
-		NewObjectiveState.StartObjective(StartGameState, true);
-	}
-}
-*/
 static event OnPostMission()
 {
-	//local XComGameState_MissionSite MissionState;
 	local XComGameState_BattleData	BattleData;
 	local XComGameStateHistory		History;
 	local XComGameState				NewGameState;
 	local XComGameState_Objective	ObjectiveState;
 	local XComGameState_Unit		UnitState;
 
-	//local X2StrategyElementTemplateManager	StratMgr;
-	//local X2RewardTemplate					RewardTemplate;
-	//local XComGameState_Reward				MissionRewardState;
-	//local int i;
-
 	`LOG("On Post Mission",, 'IRITEST');
+
+	if (!class'Denmother'.static.IsMissionFirstRetaliation('OnPostMission'))
+		return;
 
 	ObjectiveState = class'Denmother'.static.GetDenmotherObjective();
 
 	if (ObjectiveState != none /*&& ObjectiveState.ObjState != eObjectiveState_Completed*/)
 	{
-		`LOG("On Post Mission: Hiding denmother objective.",, 'IRITEST');
+		`LOG("On Post Mission: Hiding denmother objective. Current status:" @ ObjectiveState.ObjState,, 'IRITEST');
 		History = `XCOMHISTORY;
 
 		BattleData = XComGameState_BattleData(History.GetSingleGameStateObjectForClass(class'XComGameState_BattleData'));
-
-		//MissionState = XComGameState_MissionSite(History.GetGameStateForObjectID(BattleData.m_iMissionID));
 
 		NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Generate Denmother Reward");
 
 		//	Complete the objective so it doesn't appear on the Geoscape, regardless if Denmother was rescued or not
 		ObjectiveState.CompleteObjective(NewGameState);
-		/*
-		if (class'Denmother'.static.WasDenmotherRescued(XComGameState_BattleData(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_BattleData'))))
-		{
-			StratMgr = class'X2StrategyElementTemplateManager'.static.GetStrategyElementTemplateManager();
-			RewardTemplate = X2RewardTemplate(StratMgr.FindStrategyElementTemplate('IRI_Reward_DenmotherSoldier'));
-			MissionRewardState = RewardTemplate.CreateInstanceFromTemplate(NewGameState);
-			MissionRewardState.GenerateReward(NewGameState);
-			MissionRewardState.GiveReward(NewGameState);
-			//MissionRewardState.DisplayRewardPopup();
-			MissionRewardState.CleanUpReward(NewGameState);
-		}*/
 
 		UnitState = class'Denmother'.static.GetDenmotherCrewUnitState();
 		if (UnitState != none)
 		{
-			UnitState.ClearUnitValue('IRI_ThisUnitIsDenmother_Value');
 			`LOG("On Post Mission: found Denmother in avenger crew.",, 'IRITEST');
 
 			UnitState = XComGameState_Unit(NewGameState.ModifyStateObject(class'XComGameState_Unit', UnitState.ObjectID));
@@ -140,11 +65,6 @@ static event OnPostMission()
 				`LOG("On Post Mission: Civilians were NOT rescued, setting bad backstory",, 'IRITEST');
 				UnitState.SetBackground(class'Denmother'.default.strDenmotherBadBackground);
 			}
-
-			class'Denmother'.static.GiveOneGoodEyeAbility(UnitState);
-
-			//	Fix the name
-			UnitState.SetCharacterName(class'Denmother'.default.strDenmotherFirstName, class'Denmother'.default.strDenmotherLastName, class'Denmother'.default.strDenmotherNickName);
 		}
 		else `LOG("On Post Mission: no denmother in avenger crew.",, 'IRITEST');
 
@@ -161,4 +81,152 @@ static event OnPostMission()
 	{
 		`LOG("Objective is complete or doesn't exist, doing nothing",, 'IRITEST');
 	}
+}
+
+/// <summary>
+/// Called after the player exits the post-mission sequence while this DLC / Mod is installed.
+/// </summary>
+static event OnExitPostMissionSequence()
+{
+	if (class'Denmother'.static.IsMissionFirstRetaliation('OnExitPostMissionSequence'))
+	{
+		class'Denmother'.static.FinalizeDenmotherUnitForCrew();
+	}
+}
+
+
+
+static function OnPostTemplatesCreated()
+{
+	local X2ItemTemplateManager ItemTemplateManager;
+
+	ItemTemplateManager = class'X2ItemTemplateManager'.static.GetItemTemplateManager();
+
+	AddCritUpgrade(ItemTemplateManager, 'CritUpgrade_Bsc');
+	AddCritUpgrade(ItemTemplateManager, 'CritUpgrade_Adv');
+	AddCritUpgrade(ItemTemplateManager, 'CritUpgrade_Sup');
+
+	AddAimBonusUpgrade(ItemTemplateManager, 'AimUpgrade_Bsc');
+	AddAimBonusUpgrade(ItemTemplateManager, 'AimUpgrade_Adv');
+	AddAimBonusUpgrade(ItemTemplateManager, 'AimUpgrade_Sup');
+
+	AddClipSizeBonusUpgrade(ItemTemplateManager, 'ClipSizeUpgrade_Bsc');
+	AddClipSizeBonusUpgrade(ItemTemplateManager, 'ClipSizeUpgrade_Adv');
+	AddClipSizeBonusUpgrade(ItemTemplateManager, 'ClipSizeUpgrade_Sup');
+
+	AddFreeFireBonusUpgrade(ItemTemplateManager, 'FreeFireUpgrade_Bsc');
+	AddFreeFireBonusUpgrade(ItemTemplateManager, 'FreeFireUpgrade_Adv');
+	AddFreeFireBonusUpgrade(ItemTemplateManager, 'FreeFireUpgrade_Sup');
+
+	AddReloadUpgrade(ItemTemplateManager, 'ReloadUpgrade_Bsc');
+	AddReloadUpgrade(ItemTemplateManager, 'ReloadUpgrade_Adv');
+	AddReloadUpgrade(ItemTemplateManager, 'ReloadUpgrade_Sup');
+
+	AddMissDamageUpgrade(ItemTemplateManager, 'MissDamageUpgrade_Bsc');
+	AddMissDamageUpgrade(ItemTemplateManager, 'MissDamageUpgrade_Adv');
+	AddMissDamageUpgrade(ItemTemplateManager, 'MissDamageUpgrade_Sup');
+
+	AddFreeKillUpgrade(ItemTemplateManager, 'FreeKillUpgrade_Bsc');
+	AddFreeKillUpgrade(ItemTemplateManager, 'FreeKillUpgrade_Adv');
+	AddFreeKillUpgrade(ItemTemplateManager, 'FreeKillUpgrade_Sup');
+}
+
+
+//	LASER SIGHT
+static function AddCritUpgrade(X2ItemTemplateManager ItemTemplateManager, Name TemplateName)
+{
+	local X2WeaponUpgradeTemplate Template;
+
+	Template = X2WeaponUpgradeTemplate(ItemTemplateManager.FindItemTemplate(TemplateName));
+
+	Template.AddUpgradeAttachment('Optic', 'UIPawnLocation_WeaponUpgrade_AssaultRifle_Optic', "AdventPistol_MG.Meshes.SM_LaserSight", "", 'IRI_DenmotherRifle', , "", "img:///AdventPistol_MG.UI.LaserSight_Inv", "img:///UILibrary_StrategyImages.X2InventoryIcons.Inv_weaponIcon_scope");
+}
+
+//	SCOPE
+static function AddAimBonusUpgrade(X2ItemTemplateManager ItemTemplateManager, Name TemplateName)
+{
+	local X2WeaponUpgradeTemplate Template;
+
+	Template = X2WeaponUpgradeTemplate(ItemTemplateManager.FindItemTemplate(TemplateName));
+
+	Template.AddUpgradeAttachment('Scope', 'UIPawnLocation_WeaponUpgrade_AssaultRifle_Optic', "AdventPistol_MG.Meshes.SM_Scope", "", 'IRI_DenmotherRifle', , "", "img:///AdventPistol_MG.UI.Scope_Inv", "img:///UILibrary_StrategyImages.X2InventoryIcons.Inv_weaponIcon_scope");	
+}
+
+
+//	HAIR TRIGGER
+static function AddFreeFireBonusUpgrade(X2ItemTemplateManager ItemTemplateManager, Name TemplateName)
+{
+	local X2WeaponUpgradeTemplate Template;
+
+	Template = X2WeaponUpgradeTemplate(ItemTemplateManager.FindItemTemplate(TemplateName));
+
+	Template.AddUpgradeAttachment('Trigger', 'UIPawnLocation_WeaponUpgrade_AssaultRifle_Mag', "MagAttachments.Meshes.SM_MagTriggerB", "", 'IRI_DenmotherRifle', , "", "img:///AdventPistol_MG.UI.HairTrigger_Inv", "img:///UILibrary_StrategyImages.X2InventoryIcons.Inv_weaponIcon_trigger");
+}
+
+//	EX MAG
+static function AddClipSizeBonusUpgrade(X2ItemTemplateManager ItemTemplateManager, Name TemplateName)
+{
+	local X2WeaponUpgradeTemplate Template;
+
+	Template = X2WeaponUpgradeTemplate(ItemTemplateManager.FindItemTemplate(TemplateName));
+
+	Template.AddUpgradeAttachment('Mag', 'UIPawnLocation_WeaponUpgrade_Shotgun_Mag', "MagSMG.Meshes.SM_HOR_Mag_SMG_MagA", "", 'IRI_DenmotherRifle', , "", "img:///AdventPistol_MG.UI.ExMag_Inv", "img:///UILibrary_StrategyImages.X2InventoryIcons.Inv_weaponIcon_clip");	
+}
+
+//	AUTO LOADER
+static function AddReloadUpgrade(X2ItemTemplateManager ItemTemplateManager, Name TemplateName)
+{
+	local X2WeaponUpgradeTemplate Template;
+
+	Template = X2WeaponUpgradeTemplate(ItemTemplateManager.FindItemTemplate(TemplateName));
+
+	Template.AddUpgradeAttachment('AutoLoader', 'UIPawnLocation_WeaponUpgrade_AssaultRifle_Mag', "BeamCannon.Meshes.SM_BeamCannon_MagA", "", 'IRI_DenmotherRifle', , "", "img:///AdventPistol_MG.UI.AutoLoader_Inv", "img:///UILibrary_StrategyImages.X2InventoryIcons.Inv_weaponIcon_clip");
+}
+
+//	STOCK
+static function AddMissDamageUpgrade(X2ItemTemplateManager ItemTemplateManager, Name TemplateName)
+{
+	local X2WeaponUpgradeTemplate Template;
+
+	Template = X2WeaponUpgradeTemplate(ItemTemplateManager.FindItemTemplate(TemplateName));
+	
+	Template.AddUpgradeAttachment('Stock', 'UIPawnLocation_WeaponUpgrade_AssaultRifle_Stock', "AdventPistol_MG.Meshes.SM_Stock", "", 'IRI_DenmotherRifle', , "", "img:///AdventPistol_MG.UI.Stock_Inv", "img:///UILibrary_StrategyImages.X2InventoryIcons.Inv_weaponIcon_stock");
+}
+
+//	SUPPRESSOR
+static function AddFreeKillUpgrade(X2ItemTemplateManager ItemTemplateManager, Name TemplateName)
+{
+	local X2WeaponUpgradeTemplate Template;
+
+	Template = X2WeaponUpgradeTemplate(ItemTemplateManager.FindItemTemplate(TemplateName));
+
+	Template.AddUpgradeAttachment('Suppressor', 'UIPawnLocation_WeaponUpgrade_AssaultRifle_Suppressor', "MagReaperRifle.Meshes.SM_HOR_Mag_ReaperRifle_SuppressorB", "", 'IRI_DenmotherRifle', , "", "img:///AdventPistol_MG.UI.Suppressor_Inv", "img:///UILibrary_StrategyImages.X2InventoryIcons.Inv_weaponIcon_barrel");	
+}
+
+
+static function bool AbilityTagExpandHandler(string InString, out string OutString)
+{
+	local name TagText;
+	
+	TagText = name(InString);
+	switch (TagText)
+	{
+	case 'IRI_ONE_GOOD_EYE_AIM':
+		OutString = SetColor(class'X2Effect_OneGoodEye'.default.BonusAimPerShot);
+		return true;
+	case 'IRI_ONE_GOOD_EYE_CRIT':
+		OutString = SetColor(class'X2Effect_OneGoodEye'.default.BonusCritPerShot);
+		return true;
+	case 'IRI_ONE_GOOD_EYE_STACKS':
+		OutString = SetColor(class'X2Effect_OneGoodEye'.default.MaxStacks);
+		return true;
+	//	===================================================
+	default:
+            return false;
+    }  
+}
+
+static function string SetColor(coerce string Value)
+{	
+	return "<font color='#918400'>" $ Value $ "</font>";
 }

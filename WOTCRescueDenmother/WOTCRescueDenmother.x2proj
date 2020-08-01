@@ -66,6 +66,9 @@
     <Content Include="Src\WOTCRescueDenmother\Classes\X2Effect_ObjectiveTracker.uc">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Src\WOTCRescueDenmother\Classes\X2Effect_OneGoodEye.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\WOTCRescueDenmother\Classes\X2EventListener_Denmother.uc">
       <SubType>Content</SubType>
     </Content>
