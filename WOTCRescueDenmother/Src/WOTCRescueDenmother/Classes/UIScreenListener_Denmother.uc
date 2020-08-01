@@ -5,6 +5,7 @@ event OnInit(UIScreen Screen)
 	local UIInventory_LootRecovered LootRecovered;
 	local XComGameState_Unit		UnitState;
 	local string					StatusLabel;
+	local EUIState					VIPState;
 
 	local XComGameState_HeadquartersResistance ResistanceHQ;
 
@@ -12,23 +13,27 @@ event OnInit(UIScreen Screen)
 	if (LootRecovered != none)
 	{
 		UnitState = class'Denmother'.static.GetDenmotherTacticalUnitState();
-		if (UnitState == none)
-		{
-			`LOG("UIScreenListener_Denmother: No Denmother tactical unit state",, 'IRITEST');
-			UnitState = class'Denmother'.static.GetDenmotherCrewUnitState();
-		}
 		if (UnitState != none)
 		{
-			`LOG("UIScreenListener_Denmother: creating Denmother actor pawn",, 'IRITEST');
-			LootRecovered.VIPPanel.CreateVIPPawn(UnitState);
+			if (UnitState.IsAlive())
+			{
+				`LOG("UIScreenListener_Denmother: Denmother is alive, creating actor pawn",, 'IRITEST');
+				LootRecovered.VIPPanel.CreateVIPPawn(class'Denmother'.static.GetDenmotherTacticalUnitState());
 
-			StatusLabel = LootRecovered.VIPPanel.m_strVIPStatus[eVIPStatus_Awarded];
+				StatusLabel = LootRecovered.VIPPanel.m_strVIPStatus[eVIPStatus_Awarded];
+				VIPState = eUIState_Good;
+			}
+			else	// If she was dead by the end of the mission, she gets cleaned up and doesn't exist anymore. TODO: check mission, if there's no Denmother unit state, then she was killed.
+			{
+				StatusLabel = LootRecovered.VIPPanel.m_strVIPStatus[eVIPStatus_Killed];
+				VIPState = eUIState_Bad;
+			}
+
 			ResistanceHQ = class'UIUtilities_Strategy'.static.GetResistanceHQ();
 
-			LootRecovered.VIPPanel.AS_UpdateData(class'UIUtilities_Text'.static.GetColoredText(StatusLabel, eUIState_Good), 
+			LootRecovered.VIPPanel.AS_UpdateData(class'UIUtilities_Text'.static.GetColoredText(StatusLabel, VIPState), 
 				class'UIUtilities_Text'.static.GetColoredText(UnitState.GetFullName(), eUIState_Normal),
 				"", ResistanceHQ.VIPRewardsString);
 		}
-		else `LOG("UIScreenListener_Denmother: No Denmother crew unit state",, 'IRITEST');
 	}
 }

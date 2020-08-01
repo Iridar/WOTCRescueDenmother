@@ -15,7 +15,8 @@ function RegisterForEvents(XComGameState_Effect EffectGameState)
 	//	'TacticalGameEnd' -> too late, apparently unit is already "dead" at that time (I assume if it's not on the XCOM team)
 	//	'OverrideVictoriousPlayer' -> still dead
 	//	'CleanupTacticalMission' -> still dead
-	EventMgr.RegisterForEvent(EffectObj, 'PreCompleteStrategyFromTacticalTransfer', TacticalGameEnd_Listener, ELD_Immediate,,,, EffectObj);	
+	//	'PreCompleteStrategyFromTacticalTransfer' -> can't find unit
+	EventMgr.RegisterForEvent(EffectObj, 'CleanupTacticalMission', TacticalGameEnd_Listener, ELD_Immediate,,,, EffectObj);	
 	
 
 	/*

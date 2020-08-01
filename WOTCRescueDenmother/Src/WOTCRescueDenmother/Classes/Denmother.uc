@@ -141,6 +141,36 @@ static function bool WasDenmotherRescued(const XComGameState_BattleData BattleDa
 	return UnitState != none && UnitState.IsAlive();
 }
 
+static function EquipMarksmanCarbine(XComGameState_Unit UnitState, XComGameState NewGameState)
+{
+}
+
+static function XComGameState_Item CreateMarksmanCarbine(XComGameState NewGameState)
+{
+}
+
+static function GiveOneGoodEyeAbility(XComGameState_Unit UnitState)
+{	
+	local SoldierClassAbilityType AbilityStruct;
+
+	AbilityStruct.AbilityName = 'IRI_OneGoodEye_Passive';
+	UnitState.AbilityTree[0].Abilities.AddItem(AbilityStruct);
+}
+
+	/*
+	var array<SoldierRankAbilities> AbilityTree; // All Soldier Classes now build and store their ability tree upon rank up to Squaddie (could be at creation time)
+
+	struct native SoldierRankAbilities
+	{
+		var array<SoldierClassAbilityType> Abilities;
+	};
+	struct native SoldierClassAbilityType
+	{
+		var name AbilityName;
+		var EInventorySlot ApplyToWeaponSlot;
+		var name UtilityCat;
+	};*/
+
 static function XComGameState_Unit GetDenmotherTacticalUnitState()
 {	
 	local XComGameStateHistory History;
@@ -230,6 +260,8 @@ static function SetUpDenmother(XComGameState_Unit UnitState, optional bool bAsSo
 	{
 		UnitState.SetCharacterName(default.strDenmotherFirstName, default.strDenmotherLastName, default.strDenmotherNickName);
 		UnitState.SetUnitFloatValue('IRI_ThisUnitIsDenmother_Value', 1, eCleanup_Never);
+
+		//	TODO: add scars here
 	}
 	else
 	{

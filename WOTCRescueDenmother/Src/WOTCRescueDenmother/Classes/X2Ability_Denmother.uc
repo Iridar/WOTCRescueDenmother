@@ -5,6 +5,7 @@ static function array<X2DataTemplate> CreateTemplates()
 	local array<X2DataTemplate> Templates;
 
 	Templates.AddItem(Create_KnockoutAndBleedoutSelf());
+	Templates.AddItem(Create_OneGoodEye_Passive());
 
 	return Templates;
 }
@@ -52,10 +53,49 @@ static function X2AbilityTemplate Create_KnockoutAndBleedoutSelf()
 	return Template;
 }
 
+static function X2AbilityTemplate Create_OneGoodEye_Passive()
+{
+	local X2AbilityTemplate		Template;
+	local X2Effect_Persistent	SabotAmmo;
+	
+	`CREATE_X2ABILITY_TEMPLATE(Template, 'IRI_OneGoodEye_Passive');
+
+	SetPassive(Template);
+	Template.IconImage = "img:///IRIDenmotherUI.UIPerk_OneGoodEye";
+	Template.AbilitySourceName = 'eAbilitySource_Perk';
+
+	SabotAmmo = new class'X2Effect_Persistent';
+	SabotAmmo.BuildPersistentEffect(1, true);
+	SabotAmmo.SetDisplayInfo(ePerkBuff_Passive, Template.LocFriendlyName, Template.LocLongDescription, Template.IconImage, true,, Template.AbilitySourceName);
+	Template.AddTargetEffect(SabotAmmo);
+
+	return Template;
+}
+
+
 
 //	========================================
 //				COMMON CODE
 //	========================================
+
+static function SetPassive(out X2AbilityTemplate Template)
+{
+	Template.bIsPassive = true;
+
+	Template.eAbilityIconBehaviorHUD = EAbilityIconBehavior_NeverShow;
+
+	//	These are actually default for X2AbilityTemplate
+	Template.bDisplayInUITacticalText = true;
+	Template.bDisplayInUITooltip = true;
+	Template.bDontDisplayInAbilitySummary = false;
+
+	Template.AbilityToHitCalc = default.DeadEye;
+	Template.AbilityTargetStyle = default.SelfTarget;
+	Template.AbilityTriggers.AddItem(default.UnitPostBeginPlayTrigger);
+
+	Template.Hostility = eHostility_Neutral;
+	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;
+}
 
 static function AddCooldown(out X2AbilityTemplate Template, int Cooldown)
 {
@@ -167,23 +207,6 @@ static function X2AbilityTemplate Create_AnimSet_Passive(name TemplateName, stri
 	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;
 
 	return Template;
-}
-
-static function SetPassive(out X2AbilityTemplate Template)
-{
-	Template.bIsPassive = true;
-
-	Template.eAbilityIconBehaviorHUD = EAbilityIconBehavior_NeverShow;
-	Template.bDisplayInUITacticalText = true;
-	Template.bDisplayInUITooltip = true;
-	Template.bDontDisplayInAbilitySummary = false;
-
-	Template.AbilityToHitCalc = default.DeadEye;
-	Template.AbilityTargetStyle = default.SelfTarget;
-	Template.AbilityTriggers.AddItem(default.UnitPostBeginPlayTrigger);
-
-	Template.Hostility = eHostility_Neutral;
-	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;
 }
 
 static function X2AbilityTemplate HiddenPurePassive(name TemplateName, optional string TemplateIconImage="img:///UILibrary_PerkIcons.UIPerk_standard", optional bool bCrossClassEligible=false, optional Name AbilitySourceName='eAbilitySource_Perk', optional bool bDisplayInUI=true)

@@ -4,35 +4,16 @@ class X2DownloadableContentInfo_WOTCRescueDenmother extends X2DownloadableConten
 //	TODO: make her cosmetics not appear for randomly generated soldiers
 //	straighten out her torso cosmetics, check that optionals are added properly and then comment them out
 //	give her scar and eyepatch when she's added as a soldier
+//	 TODO: Check if the sweep objective was completed if she's still alive even if XCOM loses?
+//	align left hand socket better. firing animation, projectiles, sounds
+//	TODO: add a mission check into UISL
 //	custom class:
-/*
-Squaddie: Combat Presence
 
-1) Auto Hunker Down if you didn't attack
-2) Bonus Aim on Hunker Down
-3) Steady Aim
-4) Ambush (+extra overwatch shots)
-5) Cool Under Pressure?
-6) Marauder?
-
-Good eye perk?
-
-
-GTS unlock allows to train other soldiers like that in GTS?
-*/
+// GTS unlock allows to train other soldiers like that in GTS?
 
 //	Denmother rescued or not
 //	XCOM killed all enemies or not
 //	Enough civs were saved or not
-
-/*
-XComArmsContent'Iridar_Denmother_GD.ARC_Arms_Denmother'
-XComLegsContent'Iridar_Denmother_GD.ARC_Legs_Denmother'
-XComHelmetContent'Iridar_Denmother_GD.ARC_Props_Helmets_Denmother_Beanie'
-XComBodyPartContent'Iridar_Denmother_GD.ARC_Props_Torso_Denmother_Backpack'
-XComBodyPartContent'Iridar_Denmother_GD.ARC_Props_Torso_Denmother_Gear_Deco'
-XComTorsoContent'Iridar_Denmother_GD.ARC_Torso_Denmother'
-*/
 
 /// <summary>
 /// Called just before the player launches into a tactical a mission while this DLC / Mod is installed.
@@ -154,6 +135,9 @@ static event OnPostMission()
 				`LOG("On Post Mission: Civilians were NOT rescued, setting bad backstory",, 'IRITEST');
 				UnitState.SetBackground(class'Denmother'.default.strDenmotherBadBackground);
 			}
+
+			class'Denmother'.static.GiveOneGoodEyeAbility(UnitState);
+			class'Denmother'.static.EquipMarksmanCarbine(UnitState, NewGameState);
 		}
 		else `LOG("On Post Mission: no denmother in avenger crew.",, 'IRITEST');
 

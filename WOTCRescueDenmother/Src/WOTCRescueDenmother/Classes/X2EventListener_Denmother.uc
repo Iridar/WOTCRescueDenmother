@@ -5,7 +5,6 @@ static function array<X2DataTemplate> CreateTemplates()
 	local array<X2DataTemplate> Templates;
 
 	Templates.AddItem(Create_TacticalListenerTemplate());
-	Templates.AddItem(Create_StrategyListenerTemplate());
 
 	return Templates;
 }
@@ -153,52 +152,4 @@ private static function AddStrategyUnitToBoard(XComGameState_Unit Unit, XComGame
 	AbilityTemplateManager = class'X2AbilityTemplateManager'.static.GetAbilityTemplateManager();
     AbilityTemplate = AbilityTemplateManager.FindAbilityTemplate('IRI_KnockoutAndBleedoutSelf');
 	class'X2TacticalGameRuleset'.static.InitAbilityForUnit(AbilityTemplate, Unit, NewGameState);
-}
-
-static function CHEventListenerTemplate Create_StrategyListenerTemplate()
-{
-	local CHEventListenerTemplate Template;
-
-	`CREATE_X2TEMPLATE(class'CHEventListenerTemplate', Template, 'IRI_X2EventListener_Denmother');
-
-	Template.RegisterInTactical = false;
-	Template.RegisterInStrategy = true;
-
-	Template.AddCHEvent('PreCompleteStrategyFromTacticalTransfer', TacticalTransfer_ListenerEventFunction, ELD_Immediate);
-
-	return Template;
-}
-
-
-static function EventListenerReturn TacticalTransfer_ListenerEventFunction(Object EventData, Object EventSource, XComGameState GameState, Name Event, Object CallbackData)
-{
-	local XComGameState_Unit	UnitState; 
-	local XComGameState			NewGameState;
-
-	`LOG("TacticalTransfer_ListenerEventFunction triggered",, 'IRITEST');
-
-	//	Returns none
-	UnitState = class'Denmother'.static.GetDenmotherTacticalUnitState();
-
-	if (UnitState != none)
-	{
-
-		NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Updating Denmother Objective");
-		UnitState = XComGameState_Unit(NewGameState.ModifyStateObject(class'XComGameState_Unit', UnitState.ObjectID));
-
-		if (UnitState.IsAlive())
-		{
-			`LOG("TacticalTransfer_ListenerEventFunction: Denmother is alive, marking objective complete, adding her to squad.",, 'IRITEST');
-
-			class'Denmother'.static.SucceedDenmotherObjective(UnitState, NewGameState);		
-		}
-		else
-		{
-			`LOG("TacticalTransfer_ListenerEventFunction: Denmother is dead, marking objective as failed.",, 'IRITEST');
-			class'Denmother'.static.FailDenmotherObjective(NewGameState);		
-		}	
-
-		`XCOMGAME.GameRuleset.SubmitGameState(NewGameState);
-	}
-	return ELR_NoInterrupt;
 }

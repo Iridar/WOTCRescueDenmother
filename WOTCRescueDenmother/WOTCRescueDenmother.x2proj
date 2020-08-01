@@ -17,10 +17,16 @@
     <Folder Include="Src\WOTCRescueDenmother\Classes\" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Config\XComClassData.ini">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Config\XComContent.ini">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Config\XComDenmotherRifle.ini">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Config\XComGameData.ini">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Content\Iridar_Denmother_Assets.upk">
