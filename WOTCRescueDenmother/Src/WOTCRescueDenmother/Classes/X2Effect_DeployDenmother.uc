@@ -1,6 +1,8 @@
 class X2Effect_DeployDenmother extends X2Effect_PersistentStatChange;
 
-//	This effect will remain on Denmother until the mission is over or an XCOM unit activates an ability on her
+//	This effect will remain on Denmother until the mission is over or an XCOM unit activates an ability on her.
+//	Removing the effect will move her to the XCOM Team, meaning the player will be able to control her, if she's revived,
+//	and she will activate enemy pods if they see her, even unconscious.
 
 function RegisterForEvents(XComGameState_Effect EffectGameState)
 {
@@ -18,6 +20,7 @@ function RegisterForEvents(XComGameState_Effect EffectGameState)
 	super.RegisterForEvents(EffectGameState);
 }
 
+//	Probably not necessary
 static function EventListenerReturn UnitRemovedFromPlay_Listener(Object EventData, Object EventSource, XComGameState NewGameState, name InEventID, Object CallbackData)
 {
     local XComGameState_Unit            UnitState;
@@ -26,11 +29,11 @@ static function EventListenerReturn UnitRemovedFromPlay_Listener(Object EventDat
 	EffectState = XComGameState_Effect(CallbackData);
 	UnitState = XComGameState_Unit(EventData);
 
-	`LOG("UnitRemovedFromPlay_Listener running for unit:" @ UnitState.GetFullName(),, 'IRITEST');
+	`LOG("X2Effect_DeployDenmother: UnitRemovedFromPlay_Listener running for unit:" @ UnitState.GetFullName(),, 'IRITEST');
 
 	if (EffectState != none)
 	{
-		`LOG("UnitRemovedFromPlay_Listener: Removing the effect",, 'IRITEST');
+		`LOG("X2Effect_DeployDenmother: UnitRemovedFromPlay_Listener: Removing the effect",, 'IRITEST');
 		EffectState.RemoveEffect(NewGameState, NewGameState, true);
 	}
 	
@@ -52,6 +55,8 @@ static function EventListenerReturn AbilityActivated_Listener(Object EventData, 
 	if (UnitState.GetTeam() != eTeam_XCom)
 		return ELR_NoInterrupt;
 
+	//	Remove the effect if any XCOM soldier uses an ability on Denmother
+
 	AbilityContext = XComGameStateContext_Ability(GameState.GetContext());
 	AbilityState = XComGameState_Ability(EventData);
 	EffectState = XComGameState_Effect(CallbackData);
@@ -61,13 +66,8 @@ static function EventListenerReturn AbilityActivated_Listener(Object EventData, 
 		if (AbilityContext.InputContext.PrimaryTarget == EffectState.ApplyEffectParameters.TargetStateObjectRef)
 		{
 			NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Setting XCOM team for Denmother");
-			UnitState = XComGameState_Unit(NewGameState.ModifyStateObject(class'XComGameState_Unit', EffectState.ApplyEffectParameters.TargetStateObjectRef.ObjectID));
-
-			class'Denmother'.static.SetGroupAndPlayer(UnitState, eTeam_XCom, NewGameState);
-
 			EffectState.RemoveEffect(NewGameState, NewGameState, true);
-
-			 `XCOMGAME.GameRuleset.SubmitGameState(NewGameState);
+			`XCOMGAME.GameRuleset.SubmitGameState(NewGameState);
 		}
 	}
 	
@@ -85,36 +85,26 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 		UnitState.ActionPoints.Length = 0;
 
 		//	tell the game that the new unit is part of your squad so the mission wont just end if others retreat -LEB
+		//	(in case Denmother is revived, and is last to evac, or the squad dies)
 		UnitState.bSpawnedFromAvenger = true;	
 	}
 	super.OnEffectAdded(ApplyEffectParameters, kNewTargetState, NewGameState, NewEffectState);
 }
-/*
+
 simulated function OnEffectRemoved(const out EffectAppliedData ApplyEffectParameters, XComGameState NewGameState, bool bCleansed, XComGameState_Effect RemovedEffectState)
 {
 	local XComGameState_Unit			UnitState;
 	
 	UnitState = XComGameState_Unit(NewGameState.GetGameStateForObjectID(ApplyEffectParameters.TargetStateObjectRef.ObjectID));
 
-	`LOG("Removing Objective Tracker effect from:" @ UnitState.GetFullName(),, 'IRITEST');
+	`LOG("Removing Deploy Denmother effect from:" @ UnitState.GetFullName(),, 'IRITEST');
 
-	//	Add Denmother to squad if she's alive when she exists tactical play so that she can walk off the Skyranger
-	if (UnitState.IsAlive())
-	{
-		`LOG("Denmother is alive, marking objective complete, adding her to squad.",, 'IRITEST');
-
-		class'Denmother'.static.SucceedDenmotherObjective(UnitState, NewGameState);		
-	}
-	else
-	{
-		`LOG("Denmother is dead, marking objective as failed.",, 'IRITEST');
-		class'Denmother'.static.FailDenmotherObjective(NewGameState);		
-	}	
+	class'Denmother'.static.SetGroupAndPlayer(UnitState, eTeam_XCom, NewGameState);
 
 	super.OnEffectRemoved(ApplyEffectParameters,NewGameState, bCleansed, RemovedEffectState);
 }
 
-*/
+
 defaultproperties
 {
 	EffectName = "IRI_DeployDenmother_Effect"

@@ -92,11 +92,10 @@ static function FailDenmotherObjective(XComGameState NewGameState)
 	}
 }
 
-static function SucceedDenmotherObjective(XComGameState_Unit UnitState, XComGameState NewGameState)
+static function SucceedDenmotherObjective(XComGameState NewGameState)
 {
 	local XComGameStateHistory			History;
 	local XComGameState_ObjectivesList	ObjectiveList;
-	local XComGameState_BattleData		BattleData;
 	local int i;
 
 	foreach NewGameState.IterateByClassType(class'XComGameState_ObjectivesList', ObjectiveList)
@@ -122,14 +121,6 @@ static function SucceedDenmotherObjective(XComGameState_Unit UnitState, XComGame
 			break;
 		}
 	}
-
-	//	Will let Denmother walk off Skyranger and transition from tactical to strategy
-	AddUnitToSquadAndCrew(UnitState, NewGameState);
-
-	// This will display Denmother on the mission end screen
-	BattleData = XComGameState_BattleData(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_BattleData'));
-	BattleData = XComGameState_BattleData(NewGameState.ModifyStateObject(class'XComGameState_BattleData', BattleData.ObjectID));
-	BattleData.RewardUnits.AddItem(UnitState.GetReference());
 }
 
 static function XComGameState_Objective GetDenmotherObjective()
@@ -181,16 +172,22 @@ static function bool WereCiviliansRescued(const XComGameState_BattleData BattleD
 	}
 	return false;
 }
-static function bool IsSweepObjectiveComplete(const XComGameState_BattleData BattleData)
+static function bool IsSweepObjectiveComplete()
 {
+	local XComGameState_BattleData BattleData;
 	local int idx;
 
-	for(idx = 0; idx < BattleData.MapData.ActiveMission.MissionObjectives.Length; idx++)
+	BattleData = XComGameState_BattleData(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_BattleData'));
+
+	if (BattleData != none)
 	{
-		`LOG("IsSweepObjectiveComplete:" @ BattleData.MapData.ActiveMission.MissionObjectives[idx].ObjectiveName @ BattleData.MapData.ActiveMission.MissionObjectives[idx].bCompleted,, 'IRITEST');
-		if (BattleData.MapData.ActiveMission.MissionObjectives[idx].ObjectiveName == 'Sweep')
+		for(idx = 0; idx < BattleData.MapData.ActiveMission.MissionObjectives.Length; idx++)
 		{
-			return BattleData.MapData.ActiveMission.MissionObjectives[idx].bCompleted;
+			`LOG("IsSweepObjectiveComplete:" @ BattleData.MapData.ActiveMission.MissionObjectives[idx].ObjectiveName @ BattleData.MapData.ActiveMission.MissionObjectives[idx].bCompleted,, 'IRITEST');
+			if (BattleData.MapData.ActiveMission.MissionObjectives[idx].ObjectiveName == 'Sweep')
+			{
+				return BattleData.MapData.ActiveMission.MissionObjectives[idx].bCompleted;
+			}
 		}
 	}
 	return false;
@@ -202,23 +199,14 @@ static function bool IsSweepObjectiveComplete(const XComGameState_BattleData Bat
 [0110.21] IRITEST: Found objective: 3 name: Rescue_T3
 */
 
-static function bool WasDenmotherRescued(const XComGameState_BattleData BattleData)
-{
-	local XComGameState_Unit UnitState;
-
-	UnitState = GetDenmotherTacticalUnitState();
-
-	//	 TODO: Check if the sweep objective was completed if she's still alive even if XCOM loses?
-	
-	return UnitState != none && UnitState.IsAlive();
-}
-
-static function GiveOneGoodEyeAbility(XComGameState_Unit UnitState)
+static function GiveOneGoodEyeAbility(XComGameState_Unit UnitState, XComGameState NewGameState)
 {	
 	local SoldierClassAbilityType AbilityStruct;
 
 	AbilityStruct.AbilityName = 'IRI_OneGoodEye_Passive';
 	UnitState.AbilityTree[0].Abilities.AddItem(AbilityStruct);
+
+	UnitState.BuySoldierProgressionAbility(NewGameState, 0, 2);
 }
 
 static function FinalizeDenmotherUnitForCrew()
@@ -234,7 +222,7 @@ static function FinalizeDenmotherUnitForCrew()
 		UnitState = XComGameState_Unit(NewGameState.ModifyStateObject(class'XComGameState_Unit', UnitState.ObjectID));
 		UnitState.ClearUnitValue('IRI_ThisUnitIsDenmother_Value');
 
-		class'Denmother'.static.GiveOneGoodEyeAbility(UnitState);
+		class'Denmother'.static.GiveOneGoodEyeAbility(UnitState, NewGameState);
 
 		UnitState.SetCharacterName(class'Denmother'.default.strDenmotherFirstName, class'Denmother'.default.strDenmotherLastName, class'Denmother'.default.strDenmotherNickName);
 		UnitState.kAppearance.nmFacePropUpper = 'Eyepatch_F';

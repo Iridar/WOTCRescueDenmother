@@ -13,14 +13,32 @@ class X2DownloadableContentInfo_WOTCRescueDenmother extends X2DownloadableConten
 //		same, but if she's killed, and XCOM evacuates her body
 
 //	Make sure that all listeners and hooks are relevant only for the first terror mission
-//	One Good Eye ability
+//	One Good Eye ability - test it
 //	none checks and log warnings
 
 // GTS unlock allows to train other soldiers like that in GTS? IRIDenmotherUI.GTS_KeeperTraining
 
-//	Denmother rescued or not
-//	XCOM killed all enemies or not
-//	Enough civs were saved or not
+/*
+Denmother lore:
+- Official facts:
+-- Callsign "Denmother"
+-- Leader of the resistance haven Delta 7, located in Chile (based on the shot of the geoscape in the cinematic)
+-- Was gravely injured in the ADVENT retaliation attack on the haven. 
+-- Whether she is canon dead or alive is up for debate. A person that looks almost identical to her appears in the end cinematic, but it has a different face, which can be potentially caused by a face bug, and Firaxis did not notice that.
+- New facts:
+-- New name TBD
+-- Is Argentian(closest thing to Chile in vanilla X2 countries list)
+-- Has a husband and a young daughter living with her in the haven (almost official lore based on unused production voice lines)
+-- Depending on XCOM's success in rescuing civilians on the retalliation mission, her familiy either:
+--- survives, and Denmother joins XCOM as she realizes she can't sit this one out if she wants her family to be safe.
+--- is dead, and Denmother joins the crew to avenge them.
+-- Very good with an assault rifle, one of the best in the Resistance.
+-- Injuries sustained in the ADVENT retaliation attack cause her to lose her left eye, reducing her skills to that of an average XCOM operative. She gets a flavor passive perk that reflects that.
+-- Carries a custom made Marksman Carbine - a burst fire variant of an assault rifle, with bullshit gun lingo explanation of why it deals mag-tier damage. Upgraded into regular Beam Rifle once XCOM unlocks that tech.
+-- Has a custom "Keeper" class, focused on Overwatch and squad fire support. Uses an assault rifle and a pistol. 
+-- Purchasing a GTS Unlock allows the player to train more soldiers of that class from rookies.
+*/
+
 
 static event OnPostMission()
 {
