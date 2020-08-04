@@ -17,7 +17,7 @@ static function X2DataTemplate Create_DenmotherObjective()
 
 	Template.bMainObjective = true;
 	Template.TacticalCompletion = true;
-	Template.CompleteObjectiveFn = DenmotherObjectiveComplete;
+	//Template.CompleteObjectiveFn = DenmotherObjectiveComplete;
 
 	//Template.CompletionEvent = 'IRI_RescuedDenmother_Event';	
 
@@ -25,7 +25,7 @@ static function X2DataTemplate Create_DenmotherObjective()
 
 	return Template;
 }
-
+/*
 static function DenmotherObjectiveComplete(XComGameState NewGameState, XComGameState_Objective ObjectiveState)
 {
 		//local XComGameStateHistory			History;
@@ -36,4 +36,4 @@ static function DenmotherObjectiveComplete(XComGameState NewGameState, XComGameS
 		//	Will let Denmother walk off Skyranger and actually transition from tactical to strategy
 		//AddUnitToSquadAndCrew(UnitState, NewGameState);
 		`LOG("Denmother objective is complete",, 'IRITEST');
-}
+}*/

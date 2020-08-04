@@ -113,20 +113,23 @@ simulated function OnEffectRemoved(const out EffectAppliedData ApplyEffectParame
 {
 	local XComGameState_Unit		UnitState;
 	local XComGameState_BattleData	BattleData;
+	local bool bSweepObjectiveComplete, bEvacuated, bAlive;
 	
 	UnitState = XComGameState_Unit(NewGameState.GetGameStateForObjectID(ApplyEffectParameters.TargetStateObjectRef.ObjectID));
 	if (UnitState == none)
 		return;
 
-	`LOG("Removing Objective Tracker effect from:" @ UnitState.GetFullName() @ "unit alive:" @ UnitState.IsAlive() @ "|| bleeding out:" @ UnitState.IsBleedingOut() @ "|| evacuated:" @ WasDenmotherEvacuated(UnitState) @ "|| Sweep objective complete:" @ class'Denmother'.static.IsSweepObjectiveComplete(),, 'IRITEST');
 	//	if this is false, then the unit was NOT evacuated when the tactical game ended. Then it means if it shows up as true only when the unit WAS evacuated, we can use it to add her to squad when she's evacuated even if she's dead
 
 	//	Denmother is added to the crew if:
 	//	1) If XCOM has killed all enemies, then we don't care if she's alive or not, her body is recovered even if she's dead.
 	//	2) If she was evacuated. Then we don't care if all enemies were killed or not, and we don't care if she's alive or not, her body is recovered either way.
 
+	bSweepObjectiveComplete = class'Denmother'.static.IsSweepObjectiveComplete();
+	bEvacuated = WasDenmotherEvacuated(UnitState);
+	`LOG("Removing Objective Tracker effect from:" @ UnitState.GetFullName() @ "unit alive:" @ UnitState.IsAlive() @ "|| bleeding out:" @ UnitState.IsBleedingOut() @ "|| evacuated:" @ bEvacuated @ "|| Sweep objective complete:" @ bSweepObjectiveComplete,, 'IRITEST');
 	//	UnitState.IsAlive() cannot be used by itself here, because she will still report as alive even if XCOM evacuated, leaving her bleeding out and surrounded by enemies
-	if (class'Denmother'.static.IsSweepObjectiveComplete() || WasDenmotherEvacuated(UnitState))
+	if (bSweepObjectiveComplete || bEvacuated)
 	{
 		`LOG("Denmother is alive or evacuated, marking objective complete, adding her to squad.",, 'IRITEST');		
 
@@ -136,7 +139,26 @@ simulated function OnEffectRemoved(const out EffectAppliedData ApplyEffectParame
 		// This will display Denmother on the mission end screen
 		BattleData = XComGameState_BattleData(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_BattleData'));
 		BattleData = XComGameState_BattleData(NewGameState.ModifyStateObject(class'XComGameState_BattleData', BattleData.ObjectID));
-		BattleData.RewardUnits.AddItem(UnitState.GetReference());
+		BattleData.RewardUnits.AddItem(UnitState.GetReference());		
+	}
+
+	//	Is she alive by the time the mission ends?
+	bAlive = UnitState.IsAlive();
+
+	//	If so, check if she was bleeding out
+	if (bAlive && UnitState.IsBleedingOut())
+	{
+		//	 If she was, then she will actually survive only if she was evacuated, or XCOM killed all enemies
+		bAlive = bEvacuated || bSweepObjectiveComplete;
+	}
+
+	if (bAlive)
+	{
+		class'Denmother'.static.SucceedDenmotherObjective(NewGameState);
+	}
+	else
+	{
+		class'Denmother'.static.FailDenmotherObjective(NewGameState);
 	}
 
 	super.OnEffectRemoved(ApplyEffectParameters, NewGameState, bCleansed, RemovedEffectState);

@@ -90,6 +90,8 @@ static function FailDenmotherObjective(XComGameState NewGameState)
 			break;
 		}
 	}
+
+	AddItemToHQInventory('IRI_Denmother_ObjectiveDummyItem_1', NewGameState);
 }
 
 static function SucceedDenmotherObjective(XComGameState NewGameState)
@@ -119,6 +121,66 @@ static function SucceedDenmotherObjective(XComGameState NewGameState)
 		{
 			ObjectiveList.ObjectiveDisplayInfos[i].ShowCompleted = true;
 			break;
+		}
+	}
+}
+
+static function HideDenmotherObjective(XComGameState NewGameState)
+{
+	local XComGameStateHistory			History;
+	local XComGameState_ObjectivesList	ObjectiveList;
+	local int i;
+
+	foreach NewGameState.IterateByClassType(class'XComGameState_ObjectivesList', ObjectiveList)
+	{
+		break;
+	}
+	if (ObjectiveList == none)
+	{
+		History = `XCOMHISTORY;
+		foreach History.IterateByClassType(class'XComGameState_ObjectivesList', ObjectiveList)
+		{
+			break;
+		}
+		ObjectiveList = XComGameState_ObjectivesList(NewGameState.ModifyStateObject(class'XComGameState_ObjectivesList', ObjectiveList != none ? ObjectiveList.ObjectID : -1));
+	}
+
+	for (i = 0; i < ObjectiveList.ObjectiveDisplayInfos.Length; i++)
+	{
+		if (ObjectiveList.ObjectiveDisplayInfos[i].ObjectiveTemplateName == 'IRI_Rescue_Denmother_Objective')
+		{
+			ObjectiveList.ObjectiveDisplayInfos.Remove(i, 1);
+			break;
+		}
+	}
+}
+
+static function AddItemToHQInventory(name TemplateName, XComGameState NewGameState)
+{
+	local XComGameState_HeadquartersXCom	XComHQ;
+	local X2ItemTemplate					ItemTemplate;
+	local XComGameState_Item				ItemState;
+	local X2ItemTemplateManager				ItemTemplateMgr;
+
+	ItemTemplateMgr = class'X2ItemTemplateManager'.static.GetItemTemplateManager();
+
+	foreach NewGameState.IterateByClassType(class'XComGameState_HeadquartersXCom', XComHQ)
+	{
+		break;
+	}
+	if (XComHQ == none)
+	{
+		XComHQ = `XCOMHQ;
+		XComHQ = XComGameState_HeadquartersXCom(NewGameState.ModifyStateObject(class'XComGameState_HeadquartersXCom', XComHQ.ObjectID));
+	}
+
+	ItemTemplate = ItemTemplateMgr.FindItemTemplate(TemplateName);
+	if (ItemTemplate != none)
+	{
+		ItemState = ItemTemplate.CreateInstanceFromTemplate(NewGameState);
+		if (XComHQ.PutItemInInventory(NewGameState, ItemState))
+		{
+			`LOG("Adding" @ TemplateName @ "to HQ ivnentory",, 'IRITEST');
 		}
 	}
 }

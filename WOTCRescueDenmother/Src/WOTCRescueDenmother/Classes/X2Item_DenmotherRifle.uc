@@ -36,12 +36,17 @@ static function array<X2DataTemplate> CreateTemplates()
 {
 	local array<X2DataTemplate> Templates;
 
-	Templates.AddItem(Create_Item());
+	Templates.AddItem(Create_DenmotherRifle());
+
+	//	Dummy items, added to HQ inventory to unlock Denmother's dossier
+	Templates.AddItem(Create_ObjectiveDummyItem_1());
+	Templates.AddItem(Create_ObjectiveDummyItem_2());
+	Templates.AddItem(Create_ObjectiveDummyItem_3());
 
 	return Templates;
 }
 
-static function X2DataTemplate Create_Item()
+static function X2DataTemplate Create_DenmotherRifle()
 {
 	local X2WeaponTemplate Template;
 	local ArtifactCost Resources;
@@ -122,6 +127,45 @@ static function X2DataTemplate Create_Item()
 	Template.PointsToComplete = 0;
 	Template.CreatorTemplateName = default.CREATOR_TEMPLATE_NAME; // The schematic which creates this item
 	Template.BaseItem = default.BASE_ITEM; // Which item this will be upgraded from
+	
+	return Template;
+}
+
+static function X2DataTemplate Create_ObjectiveDummyItem_1()
+{
+	local X2ItemTemplate Template;
+	
+	`CREATE_X2TEMPLATE(class'X2ItemTemplate', Template, 'IRI_Denmother_ObjectiveDummyItem_1');
+	
+	Template.StartingItem = false;
+	Template.bInfiniteItem = false;
+	Template.HideInInventory = true;
+	
+	return Template;
+}
+
+static function X2DataTemplate Create_ObjectiveDummyItem_2()
+{
+	local X2ItemTemplate Template;
+	
+	`CREATE_X2TEMPLATE(class'X2ItemTemplate', Template, 'IRI_Denmother_ObjectiveDummyItem_2');
+	
+	Template.StartingItem = false;
+	Template.bInfiniteItem = false;
+	Template.HideInInventory = true;
+	
+	return Template;
+}
+
+static function X2DataTemplate Create_ObjectiveDummyItem_3()
+{
+	local X2ItemTemplate Template;
+	
+	`CREATE_X2TEMPLATE(class'X2ItemTemplate', Template, 'IRI_Denmother_ObjectiveDummyItem_3');
+	
+	Template.StartingItem = false;
+	Template.bInfiniteItem = false;
+	Template.HideInInventory = true;
 	
 	return Template;
 }

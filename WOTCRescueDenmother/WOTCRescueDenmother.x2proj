@@ -10,6 +10,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Folder Include="Config\" />
+    <Folder Include="Config\Compatibility" />
     <Folder Include="Localization\" />
     <Folder Include="Content" />
     <Folder Include="Src\" />
@@ -17,6 +18,9 @@
     <Folder Include="Src\WOTCRescueDenmother\Classes\" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Config\Compatibility\XComUnderbarrel.ini">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Config\XComClassData.ini">
       <SubType>Content</SubType>
     </Content>
@@ -24,6 +28,9 @@
       <SubType>Content</SubType>
     </Content>
     <Content Include="Config\XComDenmotherRifle.ini">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Config\XComEncyclopedia.ini">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Config\XComGameData.ini">

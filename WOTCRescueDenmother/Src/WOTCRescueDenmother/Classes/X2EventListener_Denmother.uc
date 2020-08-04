@@ -80,6 +80,7 @@ static private function vector GetDenmotherSpawnPosition()
 	local XComGameState_Unit	UnitState;
 	local XComWorldData			World;
 	local XComGameStateHistory	History;
+	//local TTile					Tile;
 
 	World = `XWORLD;
 	History = `XCOMHISTORY;
@@ -97,14 +98,27 @@ static private function vector GetDenmotherSpawnPosition()
 
 	`LOG("Found this many civilians in the Game State:" @ i - 1,, 'IRITEST');
 	Position /= i;
+	
+	`LOG("Average civvies :" @ Position,, 'IRITEST');
+	//	At this point in time, Position will hold coordinates of a center point between all civvies
 
-	`LOG("Initial position:" @ Position,, 'IRITEST');
-
-	Position = World.GetValidSpawnLocation(Position);
-
+	Position = World.FindClosestValidLocation(Position,/*bool bAllowFlying*/ false,/*bool bPrioritizeZLevel*/ false,/*bool bAvoidNoSpawnZones=false*/true); 
+	
 	`LOG("Valid spawn posi:" @ Position,, 'IRITEST');
 
 	return Position;
+
+	//	Doesn't appear to do anything
+	//Position = World.GetValidSpawnLocation(Position);
+
+	//Tile = World.GetTileCoordinatesFromPosition(Position);
+	
+
+	//return World.GetPositionFromTileCoordinates(Tile);
+}
+
+static private function TTile SeekValidFloorPosition(const TTile Tile)
+{
 }
 
 static private function AddStrategyUnitToBoard(XComGameState_Unit Unit, XComGameState NewGameState)
