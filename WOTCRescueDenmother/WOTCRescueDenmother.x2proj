@@ -11,6 +11,7 @@
   <ItemGroup>
     <Folder Include="Config\" />
     <Folder Include="Config\Compatibility" />
+    <Folder Include="Config\Base" />
     <Folder Include="Localization\" />
     <Folder Include="Content" />
     <Folder Include="Src\" />
@@ -18,6 +19,15 @@
     <Folder Include="Src\WOTCRescueDenmother\Classes\" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Config\Base\XComEditor.ini">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Config\Base\XComEngine.ini">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Config\Base\XComGame.ini">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Config\Compatibility\XComUnderbarrel.ini">
       <SubType>Content</SubType>
     </Content>
@@ -53,9 +63,6 @@
     </Content>
     <Content Include="ReadMe.txt" />
     <Content Include="ModPreview.jpg" />
-    <Content Include="Config\XComEditor.ini" />
-    <Content Include="Config\XComEngine.ini" />
-    <Content Include="Config\XComGame.ini" />
     <Content Include="Localization\XComGame.int" />
     <Content Include="Src\WOTCRescueDenmother\Classes\Denmother.uc">
       <SubType>Content</SubType>

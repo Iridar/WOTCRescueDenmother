@@ -2,11 +2,11 @@ class X2DownloadableContentInfo_WOTCRescueDenmother extends X2DownloadableConten
 
 //	TODO: better denmother positioning in mission
 //	TODO: make her cosmetics not appear for randomly generated soldiers
-//	todo: recover denmother's weapon if she's killed on the mission, but the mission is success
-//		same, but if she's killed, and XCOM evacuates her body
-//	One Good Eye ability - test it
+//	One Good Eye ability - test it - adds 3x bonus on 3rd shot
 //	none checks and log warnings
-
+// remove casings from the gun
+// mag straek for the projectile
+// fix her healing project
 // GTS unlock allows to train other soldiers like that in GTS? IRIDenmotherUI.GTS_KeeperTraining
 
 

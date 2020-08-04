@@ -155,14 +155,9 @@ static function HideDenmotherObjective(XComGameState NewGameState)
 	}
 }
 
-static function AddItemToHQInventory(name TemplateName, XComGameState NewGameState)
+static function XComGameState_HeadquartersXCom PrepAndGetXComHQ(XComGameState NewGameState)
 {
 	local XComGameState_HeadquartersXCom	XComHQ;
-	local X2ItemTemplate					ItemTemplate;
-	local XComGameState_Item				ItemState;
-	local X2ItemTemplateManager				ItemTemplateMgr;
-
-	ItemTemplateMgr = class'X2ItemTemplateManager'.static.GetItemTemplateManager();
 
 	foreach NewGameState.IterateByClassType(class'XComGameState_HeadquartersXCom', XComHQ)
 	{
@@ -173,6 +168,20 @@ static function AddItemToHQInventory(name TemplateName, XComGameState NewGameSta
 		XComHQ = `XCOMHQ;
 		XComHQ = XComGameState_HeadquartersXCom(NewGameState.ModifyStateObject(class'XComGameState_HeadquartersXCom', XComHQ.ObjectID));
 	}
+
+	return XComHQ;
+}
+
+static function AddItemToHQInventory(name TemplateName, XComGameState NewGameState)
+{
+	local XComGameState_HeadquartersXCom	XComHQ;
+	local X2ItemTemplate					ItemTemplate;
+	local XComGameState_Item				ItemState;
+	local X2ItemTemplateManager				ItemTemplateMgr;
+
+	ItemTemplateMgr = class'X2ItemTemplateManager'.static.GetItemTemplateManager();
+
+	XComHQ = PrepAndGetXComHQ(NewGameState);
 
 	ItemTemplate = ItemTemplateMgr.FindItemTemplate(TemplateName);
 	if (ItemTemplate != none)
@@ -205,15 +214,8 @@ static function AddUnitToSquadAndCrew(XComGameState_Unit UnitState, XComGameStat
 {	
 	local XComGameState_HeadquartersXCom XComHQ;
 
-	foreach NewGameState.IterateByClassType(class'XComGameState_HeadquartersXCom', XComHQ)
-	{
-		break;
-	}
-	if (XComHQ == none)
-	{
-		XComHQ = `XCOMHQ;
-		XComHQ = XComGameState_HeadquartersXCom(NewGameState.ModifyStateObject(class'XComGameState_HeadquartersXCom', XComHQ.ObjectID));
-	}
+	XComHQ = PrepAndGetXComHQ(NewGameState);
+
 	XComHQ.Squad.AddItem(UnitState.GetReference());
 	XComHQ.AddToCrew(NewGameState, UnitState);
 
@@ -425,7 +427,6 @@ static private function SetDenmotherAppearance(XComGameState_Unit UnitState, opt
 	UnitState.kAppearance.nmTattoo_LeftArm = 'Tattoo_Arms_BLANK';
 	UnitState.kAppearance.nmTattoo_RightArm = 'Tattoo_Arms_BLANK';
 	UnitState.kAppearance.nmTeeth = 'DefaultTeeth';
-	UnitState.kAppearance.iWeaponTint = 5;
 	UnitState.kAppearance.nmWeaponPattern = 'Pat_Nothing';
 	UnitState.kAppearance.nmVoice = 'FemaleVoice1_English_US';
 
@@ -464,6 +465,7 @@ static private function SetDenmotherAppearance(XComGameState_Unit UnitState, opt
 	
 	UnitState.kAppearance.iArmorTint = 0;	//	drab green
 	UnitState.kAppearance.iArmorTintSecondary = 29;	//	dark drab green
+	UnitState.kAppearance.iWeaponTint = 75; // dark orange
 
 	UnitState.StoreAppearance(); 
 }

@@ -32,6 +32,8 @@ var config array<name> BUILD_COST_TYPE;
 var config array<int> BUILD_COST_QUANTITY;
 var config int BLACKMARKET_VALUE;
 
+var config name UpgradesInto;
+
 static function array<X2DataTemplate> CreateTemplates()
 {
 	local array<X2DataTemplate> Templates;
@@ -54,6 +56,9 @@ static function X2DataTemplate Create_DenmotherRifle()
 	
 	`CREATE_X2TEMPLATE(class'X2WeaponTemplate', Template, 'IRI_DenmotherRifle');
 	
+	Template.HideInLootRecovered = false;
+	Template.UpgradeItem = UpgradesInto;
+
 	Template.WeaponPanelImage = "_ConventionalRifle";
 	Template.UIArmoryCameraPointTag = 'UIPawnLocation_WeaponUpgrade_AssaultRifle';
 	switch (default.WEAPON_TECH)
@@ -68,7 +73,7 @@ static function X2DataTemplate Create_DenmotherRifle()
 			Template.EquipSound = "Beam_Weapon_Equip";
 			break;
 	}
-
+	
 	Template.ItemCat = default.ITEM_CATEGORY;
 	Template.WeaponCat = default.WEAPON_CATEGORY;
 	Template.InventorySlot = default.INVENTORY_SLOT;
@@ -81,7 +86,16 @@ static function X2DataTemplate Create_DenmotherRifle()
 	
 	Template.Tier = default.SORTING_TIER;
 
-	Template.RangeAccuracy = default.RANGE;
+	if (default.RANGE.Length > 0)
+	{
+		Template.RangeAccuracy = default.RANGE;
+	}
+	else 
+	{
+		Template.RangeAccuracy = class'X2Item_DefaultWeapons'.default.MEDIUM_MAGNETIC_RANGE;
+	}
+
+
 	Template.BaseDamage = default.DAMAGE;
 	Template.ExtraDamage = default.EXTRA_DAMAGE;
 	Template.Aim = default.AIM;

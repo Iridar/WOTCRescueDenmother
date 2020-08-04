@@ -6,15 +6,20 @@ function RegisterForEvents(XComGameState_Effect EffectGameState)
 {
 	local X2EventManager		EventMgr;
 	local Object				EffectObj;
+	local XComGameState_Unit	UnitState;
 
 	EventMgr = `XEVENTMGR;
 	EffectObj = EffectGameState;
 
-	//	Using ELD State Submitted for removed from play listener so that it runs after Unit Evacuated.
-	//	Unit is removed from play if they are killed too ? Probably the effect is removed when they are killed
-	EventMgr.RegisterForEvent(EffectObj, 'UnitRemovedFromPlay', UnitRemovedFromPlay_Listener, ELD_OnStateSubmitted,,,, EffectObj);	
+	UnitState = XComGameState_Unit(`XCOMHISTORY.GetGameStateForObjectID(EffectGameState.ApplyEffectParameters.TargetStateObjectRef.ObjectID));
+
+	//EventMgr.UnRegisterFromEvent(EffectObj, 'UnitDied');
+	EventMgr.RegisterForEvent(EffectObj, 'UnitDied', UnitDied_Listener, ELD_Immediate,, UnitState,, EffectObj);	
+
+	//	Using ELD State Submitted for removed from play listener so that it runs *after* Unit Evacuated listener.
+	EventMgr.RegisterForEvent(EffectObj, 'UnitRemovedFromPlay', UnitRemovedFromPlay_Listener, ELD_OnStateSubmitted,, UnitState,, EffectObj);	
 	EventMgr.RegisterForEvent(EffectObj, 'CleanupTacticalMission', TacticalGameEnd_Listener, ELD_Immediate,,,, EffectObj);	
-	EventMgr.RegisterForEvent(EffectObj, 'UnitEvacuated', UnitEvacuated_Listener, ELD_Immediate,,,, EffectObj);	
+	EventMgr.RegisterForEvent(EffectObj, 'UnitEvacuated', UnitEvacuated_Listener, ELD_Immediate,, UnitState,, EffectObj);	
 	
 	/*
 	the 'OnMissionObjectiveComplete' event is so worthless.
@@ -27,6 +32,27 @@ function RegisterForEvents(XComGameState_Effect EffectGameState)
 	//EventMgr.RegisterForEvent(EffectObj, 'ObjectiveCompleted', ObjectiveComplete_Listener, ELD_Immediate,,,, EffectObj);	
 	
 	super.RegisterForEvents(EffectGameState);
+}
+
+static function EventListenerReturn UnitDied_Listener(Object EventData, Object EventSource, XComGameState NewGameState, name InEventID, Object CallbackData)
+{
+    local XComGameState_Unit    UnitState;
+	local XComGameState_Effect	EffectState;
+
+	UnitState = XComGameState_Unit(EventData);
+	if (UnitState == none)
+		return ELR_NoInterrupt;
+
+	UnitState = XComGameState_Unit(NewGameState.GetGameStateForObjectID(UnitState.ObjectID));
+	EffectState = XComGameState_Effect(CallbackData);
+
+	if (EffectState != none && UnitState != none && UnitState.ObjectID == EffectState.ApplyEffectParameters.TargetStateObjectRef.ObjectID)
+	{
+		`LOG("Denmother is dead, marking objective as failed.",, 'IRITEST');
+		class'Denmother'.static.FailDenmotherObjective(NewGameState);	
+	}
+	
+    return ELR_NoInterrupt;
 }
 
 static function EventListenerReturn UnitEvacuated_Listener(Object EventData, Object EventSource, XComGameState NewGameState, name InEventID, Object CallbackData)
@@ -54,7 +80,7 @@ static function EventListenerReturn UnitEvacuated_Listener(Object EventData, Obj
     return ELR_NoInterrupt;
 }
 
-static function bool WasDenmotherEvacuated(XComGameState_Unit UnitState)
+static private function bool WasDenmotherEvacuated(XComGameState_Unit UnitState)
 {
 	local UnitValue UV;
 
@@ -111,9 +137,11 @@ static function EventListenerReturn TacticalGameEnd_Listener(Object EventData, O
 
 simulated function OnEffectRemoved(const out EffectAppliedData ApplyEffectParameters, XComGameState NewGameState, bool bCleansed, XComGameState_Effect RemovedEffectState)
 {
-	local XComGameState_Unit		UnitState;
-	local XComGameState_BattleData	BattleData;
-	local bool bSweepObjectiveComplete, bEvacuated, bAlive;
+	local XComGameState_Unit				UnitState;
+	local XComGameState_BattleData			BattleData;
+	local bool								bSweepObjectiveComplete, bEvacuated, bAlive;
+	local XComGameState_HeadquartersXCom	XComHQ;
+	local XComGameState_Item				ItemState;
 	
 	UnitState = XComGameState_Unit(NewGameState.GetGameStateForObjectID(ApplyEffectParameters.TargetStateObjectRef.ObjectID));
 	if (UnitState == none)
@@ -128,19 +156,7 @@ simulated function OnEffectRemoved(const out EffectAppliedData ApplyEffectParame
 	bSweepObjectiveComplete = class'Denmother'.static.IsSweepObjectiveComplete();
 	bEvacuated = WasDenmotherEvacuated(UnitState);
 	`LOG("Removing Objective Tracker effect from:" @ UnitState.GetFullName() @ "unit alive:" @ UnitState.IsAlive() @ "|| bleeding out:" @ UnitState.IsBleedingOut() @ "|| evacuated:" @ bEvacuated @ "|| Sweep objective complete:" @ bSweepObjectiveComplete,, 'IRITEST');
-	//	UnitState.IsAlive() cannot be used by itself here, because she will still report as alive even if XCOM evacuated, leaving her bleeding out and surrounded by enemies
-	if (bSweepObjectiveComplete || bEvacuated)
-	{
-		`LOG("Denmother is alive or evacuated, marking objective complete, adding her to squad.",, 'IRITEST');		
 
-		//	Will let Denmother walk off Skyranger and transition from tactical to strategy
-		class'Denmother'.static.AddUnitToSquadAndCrew(UnitState, NewGameState);
-
-		// This will display Denmother on the mission end screen
-		BattleData = XComGameState_BattleData(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_BattleData'));
-		BattleData = XComGameState_BattleData(NewGameState.ModifyStateObject(class'XComGameState_BattleData', BattleData.ObjectID));
-		BattleData.RewardUnits.AddItem(UnitState.GetReference());		
-	}
 
 	//	Is she alive by the time the mission ends?
 	bAlive = UnitState.IsAlive();
@@ -161,17 +177,49 @@ simulated function OnEffectRemoved(const out EffectAppliedData ApplyEffectParame
 		class'Denmother'.static.FailDenmotherObjective(NewGameState);
 	}
 
+
+	//	UnitState.IsAlive() cannot be used by itself here, because she will still report as alive even if XCOM evacuated, leaving her bleeding out and surrounded by enemies
+	if (bSweepObjectiveComplete || bEvacuated)
+	{
+		`LOG("Denmother is alive or body recovered, marking objective complete, adding her to squad.",, 'IRITEST');		
+
+		//	Will let Denmother walk off Skyranger and transition from tactical to strategy
+		class'Denmother'.static.AddUnitToSquadAndCrew(UnitState, NewGameState);
+
+		// This will display Denmother on the mission end screen
+		BattleData = XComGameState_BattleData(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_BattleData'));
+		BattleData = XComGameState_BattleData(NewGameState.ModifyStateObject(class'XComGameState_BattleData', BattleData.ObjectID));
+		BattleData.RewardUnits.AddItem(UnitState.GetReference());	
+		
+		if (!bAlive)
+		{
+			//	If Denmother is dead, but her body was recovered, add her rifle into mission loot.
+			
+			//	This is enough to add the rifle into HQ inventory
+			BattleData.CarriedOutLootBucket.AddItem('IRI_DenmotherRifle');
+
+			//	This is required to make it show up on the post mission screen
+			ItemState = UnitState.GetItemInSlot(eInvSlot_PrimaryWeapon);
+			if (ItemState != none)
+			{
+				`LOG("Adding her rifle to XCOM HQ Loot Recovered.",, 'IRITEST');		
+				XComHQ = class'Denmother'.static.PrepAndGetXComHQ(NewGameState);
+				XComHQ.LootRecovered.AddItem(ItemState.GetReference());
+			}
+		}
+	}
+
 	super.OnEffectRemoved(ApplyEffectParameters, NewGameState, bCleansed, RemovedEffectState);
 }
 
 //	Sweep Objective complete
 //		Alive? Add to crew
-//		Dead? Add to crew
+//		Dead? Add to crew - handled
 
 //	Sweep Objective NOT complete
 //		Alive (= evacuated)? Add to crew --handled
 //		Dead? Do not add to crew -- handled.
-//		Denmother evacced, but rest of the squad is dead? -- expected behavior: you have denmother walk out of skyranger, and she's on the reward screen.
+//		Denmother evacced, but rest of the squad is dead? -- expected behavior: you have denmother walk out of skyranger, and she's on the reward screen. --handled
 //		Denmother is not evacced, and the squad is dead? --expected behavior: no denmother, end screen mentions her as VIP lost --handled
 
 /*

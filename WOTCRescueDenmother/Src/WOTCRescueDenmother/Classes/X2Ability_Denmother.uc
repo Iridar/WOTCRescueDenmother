@@ -43,8 +43,10 @@ static function X2AbilityTemplate Create_KnockoutAndBleedoutSelf()
 	Template.AddTargetEffect(Effect);
 
 	ObjectiveTrackerEffect = new class'X2Effect_ObjectiveTracker';
-	ObjectiveTrackerEffect.BuildPersistentEffect(1, true);
+	ObjectiveTrackerEffect.BuildPersistentEffect(1, true, false);
 	ObjectiveTrackerEffect.VisualizationFn = class'X2StatusEffects'.static.BleedingOutVisualizationTicked;
+	ObjectiveTrackerEffect.bRemoveWhenSourceDies = false;
+	ObjectiveTrackerEffect.bRemoveWhenTargetDies = false;
 	Template.AddTargetEffect(ObjectiveTrackerEffect);
 
 	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState; // just adds the unconscious status effect
@@ -56,7 +58,7 @@ static function X2AbilityTemplate Create_KnockoutAndBleedoutSelf()
 static function X2AbilityTemplate Create_OneGoodEye_Passive()
 {
 	local X2AbilityTemplate		Template;
-	local X2Effect_Persistent	SabotAmmo;
+	local X2Effect_OneGoodEye	Effect;
 	
 	`CREATE_X2ABILITY_TEMPLATE(Template, 'IRI_OneGoodEye_Passive');
 
@@ -64,10 +66,10 @@ static function X2AbilityTemplate Create_OneGoodEye_Passive()
 	Template.IconImage = "img:///IRIDenmotherUI.UIPerk_OneGoodEye";
 	Template.AbilitySourceName = 'eAbilitySource_Perk';
 
-	SabotAmmo = new class'X2Effect_Persistent';
-	SabotAmmo.BuildPersistentEffect(1, true);
-	SabotAmmo.SetDisplayInfo(ePerkBuff_Passive, Template.LocFriendlyName, Template.LocLongDescription, Template.IconImage, true,, Template.AbilitySourceName);
-	Template.AddTargetEffect(SabotAmmo);
+	Effect = new class'X2Effect_OneGoodEye';
+	Effect.BuildPersistentEffect(1, true);
+	Effect.SetDisplayInfo(ePerkBuff_Passive, Template.LocFriendlyName, Template.LocLongDescription, Template.IconImage, true,, Template.AbilitySourceName);
+	Template.AddTargetEffect(Effect);
 
 	return Template;
 }
