@@ -2,65 +2,33 @@ class X2DownloadableContentInfo_WOTCRescueDenmother extends X2DownloadableConten
 
 //	TODO: better denmother positioning in mission
 //	TODO: make her cosmetics not appear for randomly generated soldiers
-//	One Good Eye ability - test it - adds 3x bonus on 3rd shot
-//	none checks and log warnings
-// remove casings from the gun
-// mag straek for the projectile
-// fix her healing project
-// GTS unlock allows to train other soldiers like that in GTS? IRIDenmotherUI.GTS_KeeperTraining
+//	Check how many civilians need to be rescued to get the "good" story: minimal amount.
 
+// make initial appearance configurable
+//	Figure out the vision problem
+//	fix her healing project
 
 static event OnPostMission()
 {
-	local XComGameState_BattleData	BattleData;
-	local XComGameStateHistory		History;
 	local XComGameState				NewGameState;
 	local XComGameState_Objective	ObjectiveState;
-	local XComGameState_Unit		UnitState;
-
-	`LOG("On Post Mission",, 'IRITEST');
 
 	if (!class'Denmother'.static.IsMissionFirstRetaliation('OnPostMission'))
 		return;
 
-	History = `XCOMHISTORY;
-	BattleData = XComGameState_BattleData(History.GetSingleGameStateObjectForClass(class'XComGameState_BattleData'));
+	`LOG("On Post Mission", class'Denmother'.default.bLog, 'IRIDENMOTHER');
 
-	NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Generate Denmother Reward");
+	NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Remove Denmother Objective");
 
 	//	Hide the objective so it doesn't appear on the Geoscape anymore
-	ObjectiveState = class'Denmother'.static.GetDenmotherObjective();
+	ObjectiveState = class'Denmother'.static.GetDenmotherObjectiveState();
 	if (ObjectiveState != none)
 	{
-		`LOG("On Post Mission: Hiding denmother objective. Current status:" @ ObjectiveState.ObjState,, 'IRITEST');
+		`LOG("On Post Mission: Hiding denmother objective. Current status:" @ ObjectiveState.ObjState, class'Denmother'.default.bLog, 'IRIDENMOTHER');
 		ObjectiveState.CompleteObjective(NewGameState);
 		NewGameState.RemoveStateObject(ObjectiveState.ObjectID);
 	}
 	class'Denmother'.static.HideDenmotherObjective(NewGameState);
-
-	UnitState = class'Denmother'.static.GetDenmotherCrewUnitState();
-	if (UnitState != none && UnitState.IsAlive())
-	{
-		`LOG("On Post Mission: found Denmother in avenger crew.",, 'IRITEST');
-
-		UnitState = XComGameState_Unit(NewGameState.ModifyStateObject(class'XComGameState_Unit', UnitState.ObjectID));
-		if (class'Denmother'.static.WereCiviliansRescued(BattleData))
-		{
-			`LOG("On Post Mission: Civilians were rescued, setting good backstory",, 'IRITEST');
-			UnitState.SetBackground(class'Denmother'.default.strDenmotherGoodBackground);
-
-			//	This will unlock a resistance archive entry
-			class'Denmother'.static.AddItemToHQInventory('IRI_Denmother_ObjectiveDummyItem_3', NewGameState);
-		}
-		else
-		{	
-			`LOG("On Post Mission: Civilians were NOT rescued, setting bad backstory",, 'IRITEST');
-			UnitState.SetBackground(class'Denmother'.default.strDenmotherBadBackground);
-
-			class'Denmother'.static.AddItemToHQInventory('IRI_Denmother_ObjectiveDummyItem_2', NewGameState);
-		}
-	}
-	else `LOG("On Post Mission: no denmother in avenger crew.",, 'IRITEST');
 
 	if (NewGameState.GetNumGameStateObjects() > 0)
 	{
@@ -68,13 +36,8 @@ static event OnPostMission()
 	}
 	else
 	{
-		History.CleanupPendingGameState(NewGameState);
+		`XCOMHISTORY.CleanupPendingGameState(NewGameState);
 	}
-	//}
-	//else
-	//{
-	//	`LOG("Objective is complete or doesn't exist, doing nothing",, 'IRITEST');
-	//}
 }
 
 /// <summary>
@@ -87,8 +50,6 @@ static event OnExitPostMissionSequence()
 		class'Denmother'.static.FinalizeDenmotherUnitForCrew();
 	}
 }
-
-
 
 static function OnPostTemplatesCreated()
 {

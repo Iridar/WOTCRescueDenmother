@@ -32,7 +32,7 @@ var config array<name> BUILD_COST_TYPE;
 var config array<int> BUILD_COST_QUANTITY;
 var config int BLACKMARKET_VALUE;
 
-var config name UpgradesInto;
+var config name UPGRADES_INTO;
 
 static function array<X2DataTemplate> CreateTemplates()
 {
@@ -57,7 +57,7 @@ static function X2DataTemplate Create_DenmotherRifle()
 	`CREATE_X2TEMPLATE(class'X2WeaponTemplate', Template, 'IRI_DenmotherRifle');
 	
 	Template.HideInLootRecovered = false;
-	Template.UpgradeItem = UpgradesInto;
+	Template.UpgradeItem = default.UPGRADES_INTO;
 
 	Template.WeaponPanelImage = "_ConventionalRifle";
 	Template.UIArmoryCameraPointTag = 'UIPawnLocation_WeaponUpgrade_AssaultRifle';
@@ -149,7 +149,7 @@ static function X2DataTemplate Create_ObjectiveDummyItem_1()
 {
 	local X2ItemTemplate Template;
 	
-	`CREATE_X2TEMPLATE(class'X2ItemTemplate', Template, 'IRI_Denmother_ObjectiveDummyItem_1');
+	`CREATE_X2TEMPLATE(class'X2ItemTemplate', Template, 'IRI_Denmother_ObjectiveDummyItem_Good');
 	
 	Template.StartingItem = false;
 	Template.bInfiniteItem = false;
@@ -162,7 +162,7 @@ static function X2DataTemplate Create_ObjectiveDummyItem_2()
 {
 	local X2ItemTemplate Template;
 	
-	`CREATE_X2TEMPLATE(class'X2ItemTemplate', Template, 'IRI_Denmother_ObjectiveDummyItem_2');
+	`CREATE_X2TEMPLATE(class'X2ItemTemplate', Template, 'IRI_Denmother_ObjectiveDummyItem_Bad');
 	
 	Template.StartingItem = false;
 	Template.bInfiniteItem = false;
@@ -175,7 +175,7 @@ static function X2DataTemplate Create_ObjectiveDummyItem_3()
 {
 	local X2ItemTemplate Template;
 	
-	`CREATE_X2TEMPLATE(class'X2ItemTemplate', Template, 'IRI_Denmother_ObjectiveDummyItem_3');
+	`CREATE_X2TEMPLATE(class'X2ItemTemplate', Template, 'IRI_Denmother_ObjectiveDummyItem_Dead');
 	
 	Template.StartingItem = false;
 	Template.bInfiniteItem = false;

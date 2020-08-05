@@ -5,6 +5,7 @@ static function array<X2DataTemplate> CreateTemplates()
 	local array<X2DataTemplate> Templates;
 
 	Templates.AddItem(Create_TacticalListenerTemplate());
+	Templates.AddItem(Create_StrategyListenerTemplate());
 
 	return Templates;
 }
@@ -32,7 +33,7 @@ static function EventListenerReturn ListenerEventFunction_Immediate(Object Event
 	local XComGameState_Unit				UnitState;
 	local vector							Position;
 
-	`LOG("Post Aliens Spawned ListenerEventFunction triggered",, 'IRITEST');
+	`LOG("Post Aliens Spawned ListenerEventFunction triggered", class'Denmother'.default.bLog, 'IRIDENMOTHER');
 	//	=================================================================
 	//	INITIAL CHECKS -> Make sure this is the first retaliation in the campaign, exit otherwise.
 
@@ -41,17 +42,16 @@ static function EventListenerReturn ListenerEventFunction_Immediate(Object Event
 		//	=================================================================
 		//	CREATE AND DEPLOY DENMOTHER 
 
-		`LOG("This is First retaliation, creating soldier.",, 'IRITEST');
+		`LOG("This is First retaliation, creating soldier.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
 
 		//	Generate unit
 		UnitState = class'Denmother'.static.CreateDenmotherUnit(NewGameState, false);
 
 		UnitState.SetCurrentStat(eStat_SightRadius, 3);
-		UnitState.TacticalTag = 'IRI_DenmotherReward_Tag';
 
-		`LOG("Old position:" @ `XWORLD.GetPositionFromTileCoordinates(UnitState.TileLocation),, 'IRITEST');
+		`LOG("Old position:" @ `XWORLD.GetPositionFromTileCoordinates(UnitState.TileLocation), class'Denmother'.default.bLog, 'IRIDENMOTHER');
 		Position = GetDenmotherSpawnPosition();
-		`LOG("New position:" @ Position,, 'IRITEST');
+		`LOG("New position:" @ Position, class'Denmother'.default.bLog, 'IRIDENMOTHER');
 
 		//	Teleport the unit
 		UnitState.SetVisibilityLocationFromVector(Position);
@@ -80,7 +80,7 @@ static private function vector GetDenmotherSpawnPosition()
 	local XComGameState_Unit	UnitState;
 	local XComWorldData			World;
 	local XComGameStateHistory	History;
-	//local TTile					Tile;
+	local TTile					Tile;
 
 	World = `XWORLD;
 	History = `XCOMHISTORY;
@@ -96,15 +96,20 @@ static private function vector GetDenmotherSpawnPosition()
 		}
 	}
 
-	`LOG("Found this many civilians in the Game State:" @ i - 1,, 'IRITEST');
+	`LOG("Found this many civilians in the Game State:" @ i - 1, class'Denmother'.default.bLog, 'IRIDENMOTHER');
 	Position /= i;
 	
-	`LOG("Average civvies :" @ Position,, 'IRITEST');
+	`LOG("Average civvies :" @ Position, class'Denmother'.default.bLog, 'IRIDENMOTHER');
 	//	At this point in time, Position will hold coordinates of a center point between all civvies
 
 	Position = World.FindClosestValidLocation(Position,/*bool bAllowFlying*/ false,/*bool bPrioritizeZLevel*/ false,/*bool bAvoidNoSpawnZones=false*/true); 
 	
-	`LOG("Valid spawn posi:" @ Position,, 'IRITEST');
+	`LOG("Valid spawn posi:" @ Position, class'Denmother'.default.bLog, 'IRIDENMOTHER');
+
+	World.GetFloorTileForPosition(Position, Tile);
+	Position = World.GetPositionFromTileCoordinates(Tile);
+
+	`LOG("Floor tile posit:" @ Position, class'Denmother'.default.bLog, 'IRIDENMOTHER');
 
 	return Position;
 
@@ -125,8 +130,8 @@ static private function AddStrategyUnitToBoard(XComGameState_Unit Unit, XComGame
 {
 	local StateObjectReference			ItemReference;
 	local XComGameState_Item			ItemState;
-	local X2AbilityTemplate         AbilityTemplate;
-    local X2AbilityTemplateManager  AbilityTemplateManager;	
+	local X2AbilityTemplate				AbilityTemplate;
+    local X2AbilityTemplateManager		AbilityTemplateManager;	
 
 	class'Denmother'.static.SetGroupAndPlayer(Unit, eTeam_Neutral, NewGameState);
 
@@ -148,4 +153,58 @@ static private function AddStrategyUnitToBoard(XComGameState_Unit Unit, XComGame
 	AbilityTemplateManager = class'X2AbilityTemplateManager'.static.GetAbilityTemplateManager();
     AbilityTemplate = AbilityTemplateManager.FindAbilityTemplate('IRI_KnockoutAndBleedoutSelf');
 	class'X2TacticalGameRuleset'.static.InitAbilityForUnit(AbilityTemplate, Unit, NewGameState);
+}
+
+static function CHEventListenerTemplate Create_StrategyListenerTemplate()
+{
+	local CHEventListenerTemplate Template;
+
+	`CREATE_X2TEMPLATE(class'CHEventListenerTemplate', Template, 'IRI_X2EventListener_Denmother_Strategy');
+
+	Template.RegisterInTactical = false;
+	Template.RegisterInStrategy = true;
+
+	Template.AddCHEvent('ValidateGTSClassTraining', ELR_GTS, ELD_Immediate);
+
+	return Template;
+}
+
+static function EventListenerReturn ELR_GTS(Object EventData, Object EventSource, XComGameState NewGameState, Name Event, Object CallbackData)
+{
+	local XComLWTuple				OverrideTuple;
+	local X2SoldierClassTemplate	SoldierClassTemplate;
+
+	OverrideTuple = XComLWTuple(EventData);
+
+	if (OverrideTuple != none)
+	{
+
+		SoldierClassTemplate = X2SoldierClassTemplate(OverrideTuple.Data[1].o);
+		if (SoldierClassTemplate != none && SoldierClassTemplate.DataName == 'Keeper')
+		{
+			`LOG("Running GTS check for Keeper class" @ OverrideTuple.Data[0].b, class'Denmother'.default.bLog, 'IRIDENMOTHER');
+			if (IsSoldierUnlockTemplatePurchased('IRI_Keeper_GTS_Unlock'))
+			{
+				OverrideTuple.Data[0].b = true;
+			}
+		}
+	}
+	return ELR_NoInterrupt;
+}
+
+static private function bool IsSoldierUnlockTemplatePurchased(const name SoldierUnlockTemplateName)
+{
+	local XComGameState_HeadquartersXCom XComHQ;
+	local name TemplateName;
+
+	XComHQ = `XCOMHQ;
+
+	foreach XComHQ.SoldierUnlockTemplates(TemplateName)
+	{
+		if (TemplateName == SoldierUnlockTemplateName)
+		{
+			return true;
+		}
+	}
+	return false;
 }

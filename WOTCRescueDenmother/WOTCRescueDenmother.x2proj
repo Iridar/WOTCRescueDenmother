@@ -37,6 +37,9 @@
     <Content Include="Config\XComContent.ini">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Config\XComDenmother.ini">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Config\XComDenmotherRifle.ini">
       <SubType>Content</SubType>
     </Content>
