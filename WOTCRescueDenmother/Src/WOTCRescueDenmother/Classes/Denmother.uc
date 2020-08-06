@@ -12,6 +12,12 @@ var config name DenmotherSoldierClass;
 var config int	DenmotherStartingRank;
 var config bool bLog;
 
+var config TAppearance MissionAppearance;
+var config TAppearance AvengerAppearance;
+var config name AlienHuntersScar;
+var config name VanillaScar;
+var config name Country;
+
 //	====================================================================
 //			INTERFACE FUNCTIONS FOR THE OBJECTIVE SYSTEM
 //	====================================================================
@@ -303,7 +309,8 @@ static function FinalizeDenmotherUnitForCrew()
 		GiveOneGoodEyeAbility(UnitState, NewGameState);
 
 		UnitState.SetCharacterName(class'Denmother'.default.strDenmotherFirstName, class'Denmother'.default.strDenmotherLastName, class'Denmother'.default.strDenmotherNickName);
-		UnitState.kAppearance.nmFacePropUpper = 'Eyepatch_F';
+
+		UnitState.kAppearance = default.AvengerAppearance;
 		UnitState.StoreAppearance(); 
 
 		BattleData = XComGameState_BattleData(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_BattleData'));
@@ -340,7 +347,7 @@ static function FinalizeDenmotherUnitForCrew()
 //	====================================================================
 //	bAsSoldier = true when generating her as a soldier reward you get for completing the mission.
 //	= false when generating a unit state that will be bleeding out on the mission itself.
-static function XComGameState_Unit CreateDenmotherUnit(XComGameState NewGameState, optional bool bAsSoldier)
+static function XComGameState_Unit CreateDenmotherUnit(XComGameState NewGameState)
 {
 	local XComGameState_Unit		NewUnitState;
 	local XComGameState_Analytics	Analytics;
@@ -349,7 +356,7 @@ static function XComGameState_Unit CreateDenmotherUnit(XComGameState NewGameStat
 	NewUnitState = CreateSoldier(NewGameState);
 	NewUnitState.RandomizeStats();
 
-	SetDenmotherAppearance(NewUnitState, bAsSoldier);
+	SetDenmotherAppearance(NewUnitState);
 
 	NewUnitState.SetXPForRank(default.DenmotherStartingRank);
 	NewUnitState.StartingRank = default.DenmotherStartingRank;
@@ -422,70 +429,21 @@ static private function XComGameState_Unit CreateSoldier(XComGameState NewGameSt
 	return SoldierState;
 }
 
-static private function SetDenmotherAppearance(XComGameState_Unit UnitState, optional bool bAsSoldier)
+static private function SetDenmotherAppearance(XComGameState_Unit UnitState)
 {
-	UnitState.kAppearance.nmPawn = 'XCom_Soldier_F';
-	UnitState.kAppearance.iGender = eGender_Female; //2;
-	UnitState.kAppearance.iRace = 0; 
-	UnitState.kAppearance.iSkinColor = 0;
-	UnitState.kAppearance.iEyeColor = 21;	//	black
-	UnitState.kAppearance.iHairColor = 0; // dark brown
-	UnitState.kAppearance.iAttitude = 2;	//	normal
-	UnitState.kAppearance.nmBeard = '';
-	UnitState.kAppearance.nmArms_Underlay = 'CnvUnderlay_Std_Arms_A_M';
-	UnitState.kAppearance.nmLeftArmDeco = '';
-	UnitState.kAppearance.nmRightArmDeco = '';
-	UnitState.kAppearance.nmEye = 'DefaultEyes';
-	UnitState.kAppearance.nmFacePropUpper = '';
-	UnitState.kAppearance.nmFacePropLower = '';
-	UnitState.kAppearance.nmPatterns = 'Pat_Nothing';
-	UnitState.kAppearance.nmLeftForearm = '';
-	UnitState.kAppearance.nmRightForearm = '';
-	UnitState.kAppearance.nmThighs = '';
-	UnitState.kAppearance.nmShins = '';
-	UnitState.kAppearance.nmTattoo_LeftArm = 'Tattoo_Arms_BLANK';
-	UnitState.kAppearance.nmTattoo_RightArm = 'Tattoo_Arms_BLANK';
-	UnitState.kAppearance.nmTeeth = 'DefaultTeeth';
-	UnitState.kAppearance.nmWeaponPattern = 'Pat_Nothing';
-	UnitState.kAppearance.nmVoice = 'FemaleVoice1_English_US';
+	UnitState.kAppearance = default.MissionAppearance;
 
-	UnitState.kAppearance.nmHelmet = 'WOTCRescueDenmother_Helmets_F';	//	custom hat
-	UnitState.kAppearance.nmArms = 'WOTCRescueDenmother_Arms_KV_F';	//	custom arms
-	UnitState.kAppearance.nmLeftArm = '';
-	UnitState.kAppearance.nmRightArm = '';
-	UnitState.kAppearance.nmTorso = 'WOTCRescueDenmother_TorsoWithGear_KV_F';	//	custom torso
-	UnitState.kAppearance.nmTorsoDeco = 'WOTCRescueDenmother_TorsoDeco_Backpack_KV_F';	//	custom torso deco
-	UnitState.kAppearance.nmTorso_Underlay = 'CnvUnderlay_Std_A_F';
-	UnitState.kAppearance.nmLegs = 'WOTCRescueDenmother_Legs_KV_F';	//	custom legs
-	UnitState.kAppearance.nmLegs_Underlay = 'CnvUnderlay_Std_A_F';
-	UnitState.kAppearance.nmHaircut = 'FemHair_M'; // Bob haircut
-	UnitState.kAppearance.nmHead = 'CaucFem_A';
-
+	UnitState.SetCountry(default.Country);
+	UnitState.SetCharacterName("", default.strDenmotherNickName, "");
 	if (DLCLoaded('DLC_2'))
 	{
-		UnitState.kAppearance.nmScars = 'DLC_60_Scar_D';
+		UnitState.kAppearance.nmScars = default.AlienHuntersScar;
 	}
 	else
 	{
-		UnitState.kAppearance.nmScars = 'Scars_01_Burn';
-	}
-
-	UnitState.SetCountry('Country_Argentina');
-	if (bAsSoldier)
-	{
-		UnitState.SetCharacterName(default.strDenmotherFirstName, default.strDenmotherLastName, default.strDenmotherNickName);
-		UnitState.kAppearance.nmFacePropUpper = 'Eyepatch_F';
-	}
-	else
-	{
-		//	"Blood McBloodyface is still bleeding out" popups don't mention unit's nickname, so using it as last name so the soldier understand who the hell the popup is talking about
-		UnitState.SetCharacterName("", default.strDenmotherNickName, "");
+		UnitState.kAppearance.nmScars = default.VanillaScar;
 	}
 	
-	UnitState.kAppearance.iArmorTint = 0;	//	drab green
-	UnitState.kAppearance.iArmorTintSecondary = 29;	//	dark drab green
-	UnitState.kAppearance.iWeaponTint = 75; // dark orange
-
 	UnitState.StoreAppearance(); 
 }
 

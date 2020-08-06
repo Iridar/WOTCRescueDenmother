@@ -45,9 +45,9 @@ static function EventListenerReturn ListenerEventFunction_Immediate(Object Event
 		`LOG("This is First retaliation, creating soldier.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
 
 		//	Generate unit
-		UnitState = class'Denmother'.static.CreateDenmotherUnit(NewGameState, false);
+		UnitState = class'Denmother'.static.CreateDenmotherUnit(NewGameState);
 
-		UnitState.SetCurrentStat(eStat_SightRadius, 3);
+		//UnitState.SetCurrentStat(eStat_SightRadius, 3);
 
 		`LOG("Old position:" @ `XWORLD.GetPositionFromTileCoordinates(UnitState.TileLocation), class'Denmother'.default.bLog, 'IRIDENMOTHER');
 		Position = GetDenmotherSpawnPosition();
@@ -134,6 +134,7 @@ static private function AddStrategyUnitToBoard(XComGameState_Unit Unit, XComGame
     local X2AbilityTemplateManager		AbilityTemplateManager;	
 
 	class'Denmother'.static.SetGroupAndPlayer(Unit, eTeam_Neutral, NewGameState);
+	//class'Denmother'.static.SetGroupAndPlayer(Unit, eTeam_XCom, NewGameState);
 
 	// add item states. This needs to be done so that the visualizer sync picks up the IDs and creates their visualizers -LEB
 	foreach Unit.InventoryItems(ItemReference)

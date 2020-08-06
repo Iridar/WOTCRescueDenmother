@@ -4,9 +4,7 @@ class X2DownloadableContentInfo_WOTCRescueDenmother extends X2DownloadableConten
 //	TODO: make her cosmetics not appear for randomly generated soldiers
 //	Check how many civilians need to be rescued to get the "good" story: minimal amount.
 
-// make initial appearance configurable
 //	Figure out the vision problem
-//	fix her healing project
 
 static event OnPostMission()
 {

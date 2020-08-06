@@ -83,7 +83,7 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 		UnitState.bSpawnedFromAvenger = true;	
 
 		//	Damage and bleedout the unit.
-		UnitState.TakeEffectDamage(self, UnitState.GetCurrentStat(eStat_HP) + UnitState.GetCurrentStat(eStat_ShieldHP), 0, 0, ApplyEffectParameters, NewGameState, true, true);
+		//UnitState.TakeEffectDamage(self, UnitState.GetCurrentStat(eStat_HP) + UnitState.GetCurrentStat(eStat_ShieldHP), 0, 0, ApplyEffectParameters, NewGameState, true, true);
 
 		//UnitState.SetCurrentStat(eStat_SightRadius, 3);
 	}
@@ -102,9 +102,38 @@ simulated function OnEffectRemoved(const out EffectAppliedData ApplyEffectParame
 		class'Denmother'.static.SetGroupAndPlayer(UnitState, eTeam_XCom, NewGameState);
 
 		//UnitState.SetCurrentStat(eStat_SightRadius, UnitState.GetBaseStat(eStat_SightRadius));	
+		//UnitState.SetVisibilityLocation(UnitState.TileLocation);
+		//UnitState.bRequiresVisibilityUpdate = true;		
 	}
-	super.OnEffectRemoved(ApplyEffectParameters,NewGameState, bCleansed, RemovedEffectState);
+	super.OnEffectRemoved(ApplyEffectParameters, NewGameState, bCleansed, RemovedEffectState);
 }
+
+/*simulated function AddX2ActionsForVisualization(XComGameState VisualizeGameState, out VisualizationActionMetadata ActionMetadata, name EffectApplyResult)
+{
+	class'X2Action_ExitCover'.static.AddToVisualizationTree(ActionMetadata, VisualizeGameState.GetContext(), false, ActionMetadata.LastActionAdded);
+	class'X2Action_Knockout'.static.AddToVisualizationTree(ActionMetadata, VisualizeGameState.GetContext(), false, ActionMetadata.LastActionAdded);
+	//class'X2Action_Death'.static.AddToVisualizationTree(ActionMetadata, VisualizeGameState.GetContext(), false, ActionMetadata.LastActionAdded);
+	class'X2Action_EnterCover'.static.AddToVisualizationTree(ActionMetadata, VisualizeGameState.GetContext(), false, ActionMetadata.LastActionAdded);
+
+	super.AddX2ActionsForVisualization(VisualizeGameState, ActionMetadata, EffectApplyResult);
+}*/
+
+static function bool ApplyEffectToUnit(X2Effect Effect, XComGameState_Unit UnitState, XComGameState NewGameState)
+{
+	local EffectAppliedData ApplyData;
+
+	ApplyData.PlayerStateObjectRef = UnitState.ControllingPlayer;
+	ApplyData.SourceStateObjectRef = UnitState.GetReference();
+	ApplyData.TargetStateObjectRef = UnitState.GetReference();
+	ApplyData.EffectRef.LookupType = TELT_WeaponEffects;
+
+	return Effect.ApplyEffect(ApplyData, UnitState, NewGameState) == 'AA_Success';	
+}
+
+static function bool ApplyDamageEffectToUnit(XComGameState_Unit UnitState, XComGameState NewGameState)
+{
+}
+
 
 defaultproperties
 {
