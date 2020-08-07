@@ -1,10 +1,7 @@
 class X2DownloadableContentInfo_WOTCRescueDenmother extends X2DownloadableContentInfo;
 
 //	TODO: better denmother positioning in mission
-//	TODO: make her cosmetics not appear for randomly generated soldiers
 //	Check how many civilians need to be rescued to get the "good" story: minimal amount.
-
-//	Figure out the vision problem
 
 static event OnPostMission()
 {
@@ -155,6 +152,30 @@ static function AddFreeKillUpgrade(X2ItemTemplateManager ItemTemplateManager, Na
 	Template = X2WeaponUpgradeTemplate(ItemTemplateManager.FindItemTemplate(TemplateName));
 
 	Template.AddUpgradeAttachment('SOCKET_SuppressorHIGH', 'UIPawnLocation_WeaponUpgrade_AssaultRifle_Suppressor', "IRIDenmotherRifle.Meshes.SM_Suppressor", "", 'IRI_DenmotherRifle', , "", "img:///IRIDenmotherRifle.UI.Inv_DenmotherRifle_Suppressor", "img:///UILibrary_StrategyImages.X2InventoryIcons.Inv_weaponIcon_barrel");	
+}
+
+static event InstallNewCampaign(XComGameState StartState)
+{
+	if (class'Denmother'.default.NoDenmotherCosmeticsOnRandomlyGeneratedSoldiers)
+	{
+		RemoveCosmeticsFromThisModFromRandomGeneration();
+	}
+}
+
+//	Removes the possibility of randomly generated soldiers having cosmetic parts from this mod, hopefully.
+static function RemoveCosmeticsFromThisModFromRandomGeneration()
+{
+	local XComOnlineProfileSettings		ProfileSettings;
+	local int Index;
+
+	ProfileSettings = `XPROFILESETTINGS;
+	for(Index = 0; Index < ProfileSettings.Data.PartPackPresets.Length; ++Index)
+	{
+		if(ProfileSettings.Data.PartPackPresets[Index].PartPackName == name(default.DLCIdentifier))
+		{
+			ProfileSettings.Data.PartPackPresets[Index].ChanceToSelect = 0;
+		}
+	}
 }
 
 

@@ -47,7 +47,7 @@ static function EventListenerReturn ListenerEventFunction_Immediate(Object Event
 		//	Generate unit
 		UnitState = class'Denmother'.static.CreateDenmotherUnit(NewGameState);
 
-		//UnitState.SetCurrentStat(eStat_SightRadius, 3);
+		UnitState.SetCurrentStat(eStat_SightRadius, 3);
 
 		`LOG("Old position:" @ `XWORLD.GetPositionFromTileCoordinates(UnitState.TileLocation), class'Denmother'.default.bLog, 'IRIDENMOTHER');
 		Position = GetDenmotherSpawnPosition();

@@ -1,6 +1,7 @@
 class X2Effect_ObjectiveTracker extends X2Effect_Persistent;
 
-//	This effect remains on Denmother until the mission is over
+//	This effect is responsible for tracking Denmother throughout the mission and adjusting the displayed objective status in the UI.
+//	The effect also handles handling Denmother herself, and adding her to 
 
 function RegisterForEvents(XComGameState_Effect EffectGameState)
 {
@@ -18,8 +19,11 @@ function RegisterForEvents(XComGameState_Effect EffectGameState)
 
 	//	Using ELD State Submitted for removed from play listener so that it runs *after* Unit Evacuated listener.
 	EventMgr.RegisterForEvent(EffectObj, 'UnitRemovedFromPlay', UnitRemovedFromPlay_Listener, ELD_OnStateSubmitted,, UnitState,, EffectObj);	
-	EventMgr.RegisterForEvent(EffectObj, 'CleanupTacticalMission', TacticalGameEnd_Listener, ELD_Immediate,,,, EffectObj);	
 	EventMgr.RegisterForEvent(EffectObj, 'UnitEvacuated', UnitEvacuated_Listener, ELD_Immediate,, UnitState,, EffectObj);	
+
+	EventMgr.RegisterForEvent(EffectObj, 'UnitChangedTeam', UnitChangedTeam_Listener, ELD_OnStateSubmitted,, UnitState,, EffectObj);	
+
+	EventMgr.RegisterForEvent(EffectObj, 'CleanupTacticalMission', TacticalGameEnd_Listener, ELD_Immediate,,,, EffectObj);	
 	
 	/*
 	the 'OnMissionObjectiveComplete' event is so worthless.
@@ -33,6 +37,36 @@ function RegisterForEvents(XComGameState_Effect EffectGameState)
 	
 	super.RegisterForEvents(EffectGameState);
 }
+
+//	This will "reset" Denmother's field of view. It basically mimicks the "ttc" console command.
+static function EventListenerReturn UnitChangedTeam_Listener(Object EventData, Object EventSource, XComGameState GameState, name InEventID, Object CallbackData)
+{
+    local XComGameState_Unit    UnitState;
+	local XComGameState_Effect	EffectState;
+	local XComGameState			TeleportGameState;
+
+	UnitState = XComGameState_Unit(EventData);
+
+	EffectState = XComGameState_Effect(CallbackData);
+
+	if (EffectState != none && UnitState != none && UnitState.GetTeam() == eTeam_XCom)
+	{
+		`LOG("X2Effect_ObjectiveTracker: UnitChangedTeam_Listener: Denmother is now on XCOM team, resetting vision.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+
+		TeleportGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Restore Denmother's Vision");
+		XComGameStateContext_ChangeContainer( TeleportGameState.GetContext() ).BuildVisualizationFn = class'XComCheatManager'.static.CheatTeleport_BuildVisualization;
+
+		UnitState = XComGameState_Unit(TeleportGameState.ModifyStateObject(class'XComGameState_Unit', UnitState.ObjectID));
+		UnitState.bRequiresVisibilityUpdate = true;
+
+		UnitState.SetCurrentStat(eStat_SightRadius, UnitState.GetBaseStat(eStat_SightRadius));
+
+		`TACTICALRULES.SubmitGameState(TeleportGameState);
+	}
+	
+    return ELR_NoInterrupt;
+}
+
 
 static function EventListenerReturn UnitDied_Listener(Object EventData, Object EventSource, XComGameState NewGameState, name InEventID, Object CallbackData)
 {
@@ -157,7 +191,6 @@ simulated function OnEffectRemoved(const out EffectAppliedData ApplyEffectParame
 	bEvacuated = WasDenmotherEvacuated(UnitState);
 	`LOG("Removing Objective Tracker effect from:" @ UnitState.GetFullName() @ "unit alive:" @ UnitState.IsAlive() @ "|| bleeding out:" @ UnitState.IsBleedingOut() @ "|| evacuated:" @ bEvacuated @ "|| Sweep objective complete:" @ bSweepObjectiveComplete, class'Denmother'.default.bLog, 'IRIDENMOTHER');
 
-
 	//	Is she alive by the time the mission ends?
 	bAlive = UnitState.IsAlive();
 
@@ -194,15 +227,14 @@ simulated function OnEffectRemoved(const out EffectAppliedData ApplyEffectParame
 		if (!bAlive)
 		{
 			//	If Denmother is dead, but her body was recovered, add her rifle into mission loot.
-			
-			//	This is enough to add the rifle into HQ inventory
-			BattleData.CarriedOutLootBucket.AddItem('IRI_DenmotherRifle');
-
-			//	This is required to make it show up on the post mission screen
 			ItemState = UnitState.GetItemInSlot(eInvSlot_PrimaryWeapon);
 			if (ItemState != none)
 			{
-				`LOG("Adding her rifle to XCOM HQ Loot Recovered.", class'Denmother'.default.bLog, 'IRIDENMOTHER');		
+				//	This is enough to add the rifle into HQ inventory
+				BattleData.CarriedOutLootBucket.AddItem(ItemState.GetMyTemplateName());
+
+				//	This is required to make it show up on the post mission screen
+				`LOG("Adding Denmother's rifle to XCOM HQ Loot Recovered:" @ ItemState.GetMyTemplateName(), class'Denmother'.default.bLog, 'IRIDENMOTHER');		
 				XComHQ = class'Denmother'.static.GetAndPrepXComHQ(NewGameState);
 				XComHQ.LootRecovered.AddItem(ItemState.GetReference());
 			}

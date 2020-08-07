@@ -44,7 +44,7 @@ event OnInit(UIScreen Screen)
 			"", ResistanceHQ.VIPRewardsString);
 	}
 
-	if (IsInStrategy())
+	if (IsInStrategy() && IsKeeperInCrew())
 	{
 		AddSoldierUnlockTemplate('OfficerTrainingSchool', 'IRI_Keeper_GTS_Unlock');
 	}
@@ -64,6 +64,27 @@ static private function AddSoldierUnlockTemplate(name FacilityName, name UnlockG
 
 	// Update the GTS template with the specified soldier unlock
 	FacilityTemplate.SoldierUnlockTemplates.AddItem(UnlockGTSName);
+}
+
+static private function bool IsKeeperInCrew()
+{
+	local XComGameStateHistory				History;
+	local XComGameState_HeadquartersXCom	XComHQ;
+	local StateObjectReference				UnitRef;
+	local XComGameState_Unit				UnitState;
+
+	History = `XCOMHISTORY;
+	XComHQ = `XCOMHQ;
+
+	foreach XComHQ.Crew(UnitRef)
+	{
+		UnitState = XComGameState_Unit(History.GetGameStateForObjectID(UnitRef.ObjectID));
+		if (UnitState.GetSoldierClassTemplateName() == 'Keeper')
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 static private function bool IsInStrategy()

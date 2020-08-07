@@ -17,6 +17,9 @@ var config TAppearance AvengerAppearance;
 var config name AlienHuntersScar;
 var config name VanillaScar;
 var config name Country;
+var config int DenmotherRecoveryDays;
+
+var config bool NoDenmotherCosmeticsOnRandomlyGeneratedSoldiers;
 
 //	====================================================================
 //			INTERFACE FUNCTIONS FOR THE OBJECTIVE SYSTEM
@@ -277,6 +280,9 @@ static function CreateDenmotherHealingProject(XComGameState_Unit UnitState, XCom
 		XComHQ = class'Denmother'.static.GetAndPrepXComHQ(NewGameState);
 		HealingProject = XComGameState_HeadquartersProjectHealSoldier(NewGameState.CreateNewStateObject(class'XComGameState_HeadquartersProjectHealSoldier'));
 		HealingProject.SetProjectFocus(UnitState.GetReference(), NewGameState);
+		HealingProject.BlockPointsRemaining = 0;
+		HealingProject.ProjectPointsRemaining = 0;
+		HealingProject.AddRecoveryDays(default.DenmotherRecoveryDays);
 		XComHQ.Projects.AddItem(HealingProject.GetReference());
 	}
 }
@@ -311,6 +317,14 @@ static function FinalizeDenmotherUnitForCrew()
 		UnitState.SetCharacterName(class'Denmother'.default.strDenmotherFirstName, class'Denmother'.default.strDenmotherLastName, class'Denmother'.default.strDenmotherNickName);
 
 		UnitState.kAppearance = default.AvengerAppearance;
+		if (DLCLoaded('DLC_2'))
+		{
+			UnitState.kAppearance.nmScars = default.AlienHuntersScar;
+		}
+		else
+		{
+			UnitState.kAppearance.nmScars = default.VanillaScar;
+		}
 		UnitState.StoreAppearance(); 
 
 		BattleData = XComGameState_BattleData(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_BattleData'));

@@ -16,10 +16,10 @@ static function X2AbilityTemplate Create_KnockoutAndBleedoutSelf()
 {
 	local X2AbilityTemplate	Template;
 	local X2Effect_DeployDenmother	Effect;
-	//local X2Effect_Persistent		BleedingOut;
+	local X2Effect_Persistent		BleedingOut;
 	local X2Effect_ObjectiveTracker	ObjectiveTrackerEffect;
-	local X2Effect_ApplyWeaponDamage	DamageEffect;
-	local X2Effect_Persistent		GuaranteeBleedout;
+	//local X2Effect_ApplyWeaponDamage	DamageEffect;
+	//local X2Effect_Persistent		GuaranteeBleedout;
 	
 	`CREATE_X2ABILITY_TEMPLATE(Template, 'IRI_KnockoutAndBleedoutSelf');
 
@@ -35,11 +35,13 @@ static function X2AbilityTemplate Create_KnockoutAndBleedoutSelf()
 	Template.AbilityTargetStyle = default.SelfTarget;
 	Template.AbilityTriggers.AddItem(default.UnitPostBeginPlayTrigger);
 
-	//Template.AddTargetEffect(class'X2StatusEffects'.static.CreateUnconsciousStatusEffect());
+	Template.AddTargetEffect(class'X2StatusEffects'.static.CreateUnconsciousStatusEffect());
 
-	//BleedingOut = class'X2StatusEffects'.static.CreateBleedingOutStatusEffect();
-	//BleedingOut.iNumTurns = default.DenmotherBleedoutTurns;
-	//Template.AddTargetEffect(BleedingOut);
+	BleedingOut = class'X2StatusEffects'.static.CreateBleedingOutStatusEffect();
+	BleedingOut.iNumTurns = default.DenmotherBleedoutTurns;
+	Template.AddTargetEffect(BleedingOut);
+	
+	/*
 	GuaranteeBleedout = new class'X2Effect_Persistent';
 	GuaranteeBleedout.BuildPersistentEffect(1, false, true, false, eGameRule_PlayerTurnEnd);
 	GuaranteeBleedout.bEffectForcesBleedout = true;
@@ -48,7 +50,7 @@ static function X2AbilityTemplate Create_KnockoutAndBleedoutSelf()
 	DamageEffect = new class'X2Effect_ApplyWeaponDamage';
 	DamageEffect.bIgnoreBaseDamage = true;
 	DamageEffect.EffectDamageValue.Damage = 100;
-	Template.AddTargetEffect(DamageEffect);
+	Template.AddTargetEffect(DamageEffect);*/
 
 	Effect = new class'X2Effect_DeployDenmother';
 	Effect.BuildPersistentEffect(1, true);
@@ -58,18 +60,19 @@ static function X2AbilityTemplate Create_KnockoutAndBleedoutSelf()
 
 	ObjectiveTrackerEffect = new class'X2Effect_ObjectiveTracker';
 	ObjectiveTrackerEffect.BuildPersistentEffect(1, true, false);
-	//ObjectiveTrackerEffect.VisualizationFn = class'X2StatusEffects'.static.BleedingOutVisualizationTicked;
+	ObjectiveTrackerEffect.VisualizationFn = class'X2StatusEffects'.static.BleedingOutVisualizationTicked;
 	ObjectiveTrackerEffect.bRemoveWhenSourceDies = false;
 	ObjectiveTrackerEffect.bRemoveWhenTargetDies = false;
 	Template.AddTargetEffect(ObjectiveTrackerEffect);
 
+	/*
 	Template.FrameAbilityCameraType = eCameraFraming_Never;
 	Template.bFrameEvenWhenUnitIsHidden = false;
 	Template.bShowActivation = false;
 	Template.bUsesFiringCamera = false;
-	Template.bSkipFireAction = true;
+	Template.bSkipFireAction = true;*/
 	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState; 
-	Template.BuildVisualizationFn = TypicalAbility_BuildVisualization; // class'X2Ability_DefaultAbilitySet'.static.Knockout_BuildVisualization;
+	Template.BuildVisualizationFn = class'X2Ability_DefaultAbilitySet'.static.Knockout_BuildVisualization; //TypicalAbility_BuildVisualization;
 
 	return Template;
 }

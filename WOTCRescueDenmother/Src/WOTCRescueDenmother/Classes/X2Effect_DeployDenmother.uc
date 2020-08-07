@@ -1,8 +1,7 @@
 class X2Effect_DeployDenmother extends X2Effect_Persistent;
 
-//	This effect will remain on Denmother until the mission is over or an XCOM unit activates an ability on her.
-//	Removing the effect will move her to the XCOM Team, meaning the player will be able to control her, if she's revived,
-//	and she will activate enemy pods if they see her, even unconscious.
+//	Denmother is first spawned on the neutral team to prevent activating enemy pods. When this effect is removed, she'll be moved to the XCOM team.
+//	The effect is removed when any XCOM units activates any ability on her.
 
 function RegisterForEvents(XComGameState_Effect EffectGameState)
 {
@@ -21,6 +20,7 @@ function RegisterForEvents(XComGameState_Effect EffectGameState)
 }
 
 //	Probably not necessary
+/*
 static function EventListenerReturn UnitRemovedFromPlay_Listener(Object EventData, Object EventSource, XComGameState NewGameState, name InEventID, Object CallbackData)
 {
 	local XComGameState_Effect			EffectState;
@@ -33,7 +33,7 @@ static function EventListenerReturn UnitRemovedFromPlay_Listener(Object EventDat
 	}
 	
     return ELR_NoInterrupt;
-}
+}*/
 
 static function EventListenerReturn AbilityActivated_Listener(Object EventData, Object EventSource, XComGameState GameState, name InEventID, Object CallbackData)
 {
@@ -99,41 +99,10 @@ simulated function OnEffectRemoved(const out EffectAppliedData ApplyEffectParame
 	{
 		`LOG("Removing Deploy Denmother effect from:" @ UnitState.GetFullName(), class'Denmother'.default.bLog, 'IRIDENMOTHER');
 
-		class'Denmother'.static.SetGroupAndPlayer(UnitState, eTeam_XCom, NewGameState);
-
-		//UnitState.SetCurrentStat(eStat_SightRadius, UnitState.GetBaseStat(eStat_SightRadius));	
-		//UnitState.SetVisibilityLocation(UnitState.TileLocation);
-		//UnitState.bRequiresVisibilityUpdate = true;		
+		class'Denmother'.static.SetGroupAndPlayer(UnitState, eTeam_XCom, NewGameState);		
 	}
 	super.OnEffectRemoved(ApplyEffectParameters, NewGameState, bCleansed, RemovedEffectState);
 }
-
-/*simulated function AddX2ActionsForVisualization(XComGameState VisualizeGameState, out VisualizationActionMetadata ActionMetadata, name EffectApplyResult)
-{
-	class'X2Action_ExitCover'.static.AddToVisualizationTree(ActionMetadata, VisualizeGameState.GetContext(), false, ActionMetadata.LastActionAdded);
-	class'X2Action_Knockout'.static.AddToVisualizationTree(ActionMetadata, VisualizeGameState.GetContext(), false, ActionMetadata.LastActionAdded);
-	//class'X2Action_Death'.static.AddToVisualizationTree(ActionMetadata, VisualizeGameState.GetContext(), false, ActionMetadata.LastActionAdded);
-	class'X2Action_EnterCover'.static.AddToVisualizationTree(ActionMetadata, VisualizeGameState.GetContext(), false, ActionMetadata.LastActionAdded);
-
-	super.AddX2ActionsForVisualization(VisualizeGameState, ActionMetadata, EffectApplyResult);
-}*/
-
-static function bool ApplyEffectToUnit(X2Effect Effect, XComGameState_Unit UnitState, XComGameState NewGameState)
-{
-	local EffectAppliedData ApplyData;
-
-	ApplyData.PlayerStateObjectRef = UnitState.ControllingPlayer;
-	ApplyData.SourceStateObjectRef = UnitState.GetReference();
-	ApplyData.TargetStateObjectRef = UnitState.GetReference();
-	ApplyData.EffectRef.LookupType = TELT_WeaponEffects;
-
-	return Effect.ApplyEffect(ApplyData, UnitState, NewGameState) == 'AA_Success';	
-}
-
-static function bool ApplyDamageEffectToUnit(XComGameState_Unit UnitState, XComGameState NewGameState)
-{
-}
-
 
 defaultproperties
 {
