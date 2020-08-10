@@ -344,7 +344,7 @@ static function FinalizeDenmotherUnitForCrew()
 		}
 		else
 		{	
-			`LOG("FinalizeDenmotherUnitForCrew: Civilians were rescued, setting bad backstory.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+			`LOG("FinalizeDenmotherUnitForCrew: Civilians were NOT rescued, setting bad backstory.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
 			UnitState.SetBackground(class'Denmother'.default.strDenmother_Background_Bad);
 			AddItemToHQInventory('IRI_Denmother_ObjectiveDummyItem_Bad', NewGameState);
 		}
