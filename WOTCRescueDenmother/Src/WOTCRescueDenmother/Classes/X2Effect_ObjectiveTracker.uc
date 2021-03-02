@@ -216,8 +216,11 @@ simulated function OnEffectRemoved(const out EffectAppliedData ApplyEffectParame
 	{
 		`LOG("Denmother is alive or body recovered, marking objective complete, adding her to squad.", class'Denmother'.default.bLog, 'IRIDENMOTHER');		
 
-		//	Will let Denmother walk off Skyranger and transition from tactical to strategy
-		class'Denmother'.static.AddUnitToSquadAndCrew(UnitState, NewGameState);
+		//	Will let Denmother participate in Skyranger walk-off and transition from tactical to strategy, dead or alive.
+		XComHQ = class'Denmother'.static.GetAndPrepXComHQ(NewGameState);
+		XComHQ.Squad.AddItem(UnitState.GetReference());
+		// This will help find Denmother in Strategy
+		UnitState.SetUnitFloatValue('IRI_ThisUnitIsDenmother_Value', 1, eCleanup_BeginTactical);
 
 		// This will display Denmother on the mission end screen
 		BattleData = XComGameState_BattleData(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_BattleData'));
@@ -235,7 +238,7 @@ simulated function OnEffectRemoved(const out EffectAppliedData ApplyEffectParame
 
 				//	This is required to make it show up on the post mission screen
 				`LOG("Adding Denmother's rifle to XCOM HQ Loot Recovered:" @ ItemState.GetMyTemplateName(), class'Denmother'.default.bLog, 'IRIDENMOTHER');		
-				XComHQ = class'Denmother'.static.GetAndPrepXComHQ(NewGameState);
+				//XComHQ = class'Denmother'.static.GetAndPrepXComHQ(NewGameState);
 				XComHQ.LootRecovered.AddItem(ItemState.GetReference());
 			}
 		}

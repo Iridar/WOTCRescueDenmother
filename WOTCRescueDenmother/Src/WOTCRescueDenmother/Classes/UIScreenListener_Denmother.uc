@@ -12,7 +12,7 @@ event OnInit(UIScreen Screen)
 	LootRecovered = UIInventory_LootRecovered(Screen);
 	if (LootRecovered != none && class'Denmother'.static.IsMissionFirstRetaliation('UISL'))
 	{
-		UnitState = class'Denmother'.static.GetDenmotherCrewUnitState();
+		UnitState = class'Denmother'.static.GetDenmotherHistoryUnitState();
 
 		if (LootRecovered.VIPPanel == none)
 		{
@@ -34,7 +34,7 @@ event OnInit(UIScreen Screen)
 			`LOG("UIScreenListener_Denmother: Denmother is dead or doesn't exist, marking VIP dead", class'Denmother'.default.bLog, 'IRIDENMOTHER');
 			StatusLabel = LootRecovered.VIPPanel.m_strVIPStatus[eVIPStatus_Killed];
 			VIPState = eUIState_Bad;
-			DisplayText = class'Denmother'.default.strDenmotherNickName;
+			DisplayText = class'Denmother'.default.strDenmotherLastName;
 		}
 
 		ResistanceHQ = class'UIUtilities_Strategy'.static.GetResistanceHQ();

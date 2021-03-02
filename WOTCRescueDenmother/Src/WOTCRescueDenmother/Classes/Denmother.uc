@@ -17,7 +17,9 @@ var config TAppearance AvengerAppearance;
 var config name AlienHuntersScar;
 var config name VanillaScar;
 var config name Country;
-var config int DenmotherRecoveryDays;
+
+var config bool bAccelerateDenmotherHealing;
+var config float bHealthMultiplier;
 
 var config bool NoDenmotherCosmeticsOnRandomlyGeneratedSoldiers;
 
@@ -103,38 +105,23 @@ static function XComGameState_Unit GetDenmotherTacticalUnitState()
 	return none;
 }
 
-static function XComGameState_Unit GetDenmotherCrewUnitState()
+static function XComGameState_Unit GetDenmotherHistoryUnitState()
 {	
 	local XComGameStateHistory				History;
 	local XComGameState_Unit				UnitState;
-	local XComGameState_HeadquartersXCom	XComHQ;
-	local StateObjectReference				UnitRef;
 	local UnitValue							UV;
 
 	History = `XCOMHISTORY;
-	XComHQ = `XCOMHQ;
 
-	foreach XComHQ.Crew(UnitRef)
+	foreach History.IterateByClassType(class'XComGameState_Unit', UnitState)
 	{
-		UnitState = XComGameState_Unit(History.GetGameStateForObjectID(UnitRef.ObjectID));
-		if (UnitState != none && UnitState.GetUnitValue('IRI_ThisUnitIsDenmother_Value', UV))
+		if (UnitState.GetUnitValue('IRI_ThisUnitIsDenmother_Value', UV))
 		{
-			`LOG("GetDenmotherCrewUnitState: found Denmother Unit State in Avenger Crew.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
-			return UnitState;
-		}
-	}	
-
-	foreach XComHQ.DeadCrew(UnitRef)
-	{
-		UnitState = XComGameState_Unit(History.GetGameStateForObjectID(UnitRef.ObjectID));
-		if (UnitState != none && UnitState.GetUnitValue('IRI_ThisUnitIsDenmother_Value', UV))
-		{
-			`LOG("GetDenmotherCrewUnitState: found Denmother Unit State in Dead Crew.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+			`LOG("GetDenmotherHistoryUnitState: found Denmother Unit State.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
 			return UnitState;
 		}
 	}
-
-	`LOG("GetDenmotherCrewUnitState: did not find Denmother Unit State in Avenger Crew.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+	`LOG("GetDenmotherHistoryUnitState: did not find Denmother Unit State.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
 	return none;
 }
 
@@ -244,71 +231,34 @@ static function bool IsSweepObjectiveComplete()
 	return false;
 }
 
-static function AddUnitToSquadAndCrew(XComGameState_Unit UnitState, XComGameState NewGameState)
-{	
-	local XComGameState_HeadquartersXCom	XComHQ;
-
-	XComHQ = GetAndPrepXComHQ(NewGameState);
-
-	XComHQ.Squad.AddItem(UnitState.GetReference());
-
-	//	Need to gate behind Alive check or the unit would end up in Dead Crew twice
-	if (UnitState.IsAlive())
-	{
-		`LOG("Added Denmother to Avenger crew", class'Denmother'.default.bLog, 'IRIDENMOTHER');
-		XComHQ.AddToCrew(NewGameState, UnitState);
-	}
-
-	//	Unnecessary, handled automatically when transitioning from tactical to strategy by moving dead units from squad to dead crew
-	//else
-	//{
-	//	XComHQ.DeadCrew.AddItem(UnitState.GetReference());
-	//}
-
-	//	This will help find the Denmother unit in avenger crew
-	UnitState.SetUnitFloatValue('IRI_ThisUnitIsDenmother_Value', 1, eCleanup_BeginTactical);
-}
-
-static function CreateDenmotherHealingProject(XComGameState_Unit UnitState, XComGameState NewGameState)
-{
-	local XComGameState_HeadquartersXCom				XComHQ;
-	local XComGameState_HeadquartersProjectHealSoldier	HealingProject;
-
-	if (UnitState != none && UnitState.IsAlive())
-	{
-		`LOG("Creating a healing project for Denmother", class'Denmother'.default.bLog, 'IRIDENMOTHER');
-		XComHQ = class'Denmother'.static.GetAndPrepXComHQ(NewGameState);
-		HealingProject = XComGameState_HeadquartersProjectHealSoldier(NewGameState.CreateNewStateObject(class'XComGameState_HeadquartersProjectHealSoldier'));
-		HealingProject.SetProjectFocus(UnitState.GetReference(), NewGameState);
-		HealingProject.BlockPointsRemaining = 0;
-		HealingProject.ProjectPointsRemaining = 0;
-		HealingProject.AddRecoveryDays(default.DenmotherRecoveryDays);
-		XComHQ.Projects.AddItem(HealingProject.GetReference());
-	}
-}
-
 static private function GiveOneGoodEyeAbility(XComGameState_Unit UnitState, XComGameState NewGameState)
 {	
 	local SoldierClassAbilityType AbilityStruct;
+	local int Index;
 
 	AbilityStruct.AbilityName = 'IRI_OneGoodEye_Passive';
 	UnitState.AbilityTree[0].Abilities.AddItem(AbilityStruct);
 
-	UnitState.BuySoldierProgressionAbility(NewGameState, 0, 2);
+	Index = UnitState.AbilityTree[0].Abilities.Length - 1;
+
+	UnitState.BuySoldierProgressionAbility(NewGameState, 0, Index);
 }
 
 static function FinalizeDenmotherUnitForCrew()
 {
-	local XComGameState_Unit		UnitState;
-	local XComGameState				NewGameState;
-	local XComGameState_BattleData	BattleData;	
+	local XComGameState_Unit				UnitState;
+	local XComGameState						NewGameState;
+	local XComGameState_BattleData			BattleData;	
+	local XComGameState_HeadquartersXCom	XComHQ;
 
-	UnitState = GetDenmotherCrewUnitState();
+	UnitState = GetDenmotherHistoryUnitState();
 	if (UnitState != none)
 	{
 		NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Finalizing Denmother Unit");
 
 		UnitState = XComGameState_Unit(NewGameState.ModifyStateObject(class'XComGameState_Unit', UnitState.ObjectID));
+
+		UnitState.SetCurrentStat(eStat_SightRadius, UnitState.GetBaseStat(eStat_SightRadius));
 
 		UnitState.ClearUnitValue('IRI_ThisUnitIsDenmother_Value');		
 
@@ -349,7 +299,15 @@ static function FinalizeDenmotherUnitForCrew()
 			AddItemToHQInventory('IRI_Denmother_ObjectiveDummyItem_Bad', NewGameState);
 		}
 
-		CreateDenmotherHealingProject(UnitState, NewGameState);
+		if (UnitState.IsAlive())
+		{
+			XComHQ = class'Denmother'.static.GetAndPrepXComHQ(NewGameState);
+			XComHQ.AddToCrew(NewGameState, UnitState);
+		}
+		//else // Unnecessary, handled by the game automatically by moving dead units from squad. 
+		//{
+		//	XComHQ.DeadCrew.AddItem(UnitState.GetReference());
+		//}		
 
 		`XCOMGAME.GameRuleset.SubmitGameState(NewGameState);
 		`HQPRES.UINewStaffAvailable(UnitState.GetReference());

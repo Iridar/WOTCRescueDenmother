@@ -7,33 +7,14 @@ function RegisterForEvents(XComGameState_Effect EffectGameState)
 {
 	local X2EventManager		EventMgr;
 	local Object				EffectObj;
-	//local XComGameState_Unit	UnitState;
 
 	EventMgr = `XEVENTMGR;
 	EffectObj = EffectGameState;
-	//UnitState = XComGameState_Unit(`XCOMHISTORY.GetGameStateForObjectID(EffectGameState.ApplyEffectParameters.TargetStateObjectRef.ObjectID));
-	
+
 	EventMgr.RegisterForEvent(EffectObj, 'AbilityActivated', AbilityActivated_Listener, ELD_OnStateSubmitted,,,, EffectObj);	
-	//EventMgr.RegisterForEvent(EffectObj, 'UnitRemovedFromPlay', UnitRemovedFromPlay_Listener, ELD_Immediate,, UnitState,, EffectObj);	
 
 	super.RegisterForEvents(EffectGameState);
 }
-
-//	Probably not necessary
-/*
-static function EventListenerReturn UnitRemovedFromPlay_Listener(Object EventData, Object EventSource, XComGameState NewGameState, name InEventID, Object CallbackData)
-{
-	local XComGameState_Effect			EffectState;
-
-	EffectState = XComGameState_Effect(CallbackData);
-	if (EffectState != none)
-	{
-		`LOG("X2Effect_DeployDenmother: UnitRemovedFromPlay_Listener: Removing the effect.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
-		EffectState.RemoveEffect(NewGameState, NewGameState, true);
-	}
-	
-    return ELR_NoInterrupt;
-}*/
 
 static function EventListenerReturn AbilityActivated_Listener(Object EventData, Object EventSource, XComGameState GameState, name InEventID, Object CallbackData)
 {

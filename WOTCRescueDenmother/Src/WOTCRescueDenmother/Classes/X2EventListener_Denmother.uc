@@ -20,7 +20,7 @@ static function CHEventListenerTemplate Create_TacticalListenerTemplate()
 	Template.RegisterInStrategy = false;
 
 	Template.AddCHEvent('PostAliensSpawned', ListenerEventFunction_Immediate, ELD_Immediate);
-
+	
 	return Template;
 }
 
@@ -166,8 +166,34 @@ static function CHEventListenerTemplate Create_StrategyListenerTemplate()
 	Template.RegisterInStrategy = true;
 
 	Template.AddCHEvent('ValidateGTSClassTraining', ELR_GTS, ELD_Immediate);
+	if (class'Denmother'.default.bAccelerateDenmotherHealing)
+	{
+		Template.AddCHEvent('PostMissionUpdateSoldierHealing', ListenerEventFunction_Healing, ELD_Immediate);
+	}
 
 	return Template;
+}
+
+static function EventListenerReturn ListenerEventFunction_Healing(Object EventData, Object EventSource, XComGameState NewGameState, Name Event, Object CallbackData)
+{
+	local XComGameState_Unit UnitState;
+	local UnitValue			 UV;
+
+	`LOG("PostMissionUpdateSoldierHealing ListenerEventFunction triggered", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+
+	if (class'Denmother'.static.IsMissionFirstRetaliation('PostMissionUpdateSoldierHealing'))
+	{
+		UnitState = XComGameState_Unit(EventSource);
+		UnitState = XComGameState_Unit(NewGameState.GetGameStateForObjectID(UnitState.ObjectID));
+
+		if (UnitState.GetUnitValue('IRI_ThisUnitIsDenmother_Value', UV))
+		{
+			UnitState.LowestHP = UnitState.GetBaseStat(eStat_HP) * class'Denmother'.default.bHealthMultiplier;
+			UnitState.SetCurrentStat(eStat_HP, UnitState.LowestHP);
+			`LOG("Set current HP to:" @ UnitState.LowestHP, class'Denmother'.default.bLog, 'IRIDENMOTHER');
+		}
+	}
+	return ELR_NoInterrupt;
 }
 
 static function EventListenerReturn ELR_GTS(Object EventData, Object EventSource, XComGameState NewGameState, Name Event, Object CallbackData)
@@ -179,7 +205,6 @@ static function EventListenerReturn ELR_GTS(Object EventData, Object EventSource
 
 	if (OverrideTuple != none)
 	{
-
 		SoldierClassTemplate = X2SoldierClassTemplate(OverrideTuple.Data[1].o);
 		if (SoldierClassTemplate != none && SoldierClassTemplate.DataName == 'Keeper')
 		{
