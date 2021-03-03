@@ -427,35 +427,34 @@ static function SetGroupAndPlayer(XComGameState_Unit UnitState, ETeam SetTeam, X
 
 	History = `XCOMHISTORY;
 
-	// assign the new unit to the human team -LEB
-	foreach History.IterateByClassType(class'XComGameState_Player', PlayerState)
-	{
-		if(PlayerState.GetTeam() == SetTeam)
-		{
-			`LOG("Assigned player" @ SetTeam, class'Denmother'.default.bLog, 'IRIDENMOTHER');
-			UnitState.SetControllingPlayer(PlayerState.GetReference());
-			break;
-		}
-	}
 	//	set AI Group for the new unit so it can be controlled by the player properly
 	foreach History.IterateByClassType(class'XComGameState_AIGroup', Group)
 	{
 		if (Group.TeamName == SetTeam)
 		{
-			`LOG("Found group", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+			PreviousGroupState = UnitState.GetGroupMembership(NewGameState);
+			if (PreviousGroupState != none) 
+			{
+				`LOG("Removing Denmother from group:" @ PreviousGroupState.TeamName, class'Denmother'.default.bLog, 'IRIDENMOTHER');
+				PreviousGroupState.RemoveUnitFromGroup(UnitState.ObjectID, NewGameState);
+			}
+
+			`LOG("Assigned group to Denmother:" @ Group.TeamName, class'Denmother'.default.bLog, 'IRIDENMOTHER');
+			Group = XComGameState_AIGroup(NewGameState.ModifyStateObject(class'XComGameState_AIGroup', Group.ObjectID));
+			Group.AddUnitToGroup(UnitState.ObjectID, NewGameState);
 			break;
 		}
 	}
 
-	if( UnitState != none && Group != none )
+	// assign the new unit to the human team -LEB
+	foreach History.IterateByClassType(class'XComGameState_Player', PlayerState)
 	{
-		PreviousGroupState = UnitState.GetGroupMembership(NewGameState);
-
-		if( PreviousGroupState != none ) PreviousGroupState.RemoveUnitFromGroup(UnitState.ObjectID, NewGameState);
-
-		`LOG("Assigned group" @ SetTeam, class'Denmother'.default.bLog, 'IRIDENMOTHER');
-		Group = XComGameState_AIGroup(NewGameState.ModifyStateObject(class'XComGameState_AIGroup', Group.ObjectID));
-		Group.AddUnitToGroup(UnitState.ObjectID, NewGameState);
+		if (PlayerState.GetTeam() == SetTeam)
+		{
+			`LOG("Assigned player to Denmother:" @ PlayerState.GetTeam(), class'Denmother'.default.bLog, 'IRIDENMOTHER');
+			UnitState.SetControllingPlayer(PlayerState.GetReference());
+			break;
+		}
 	}
 }
 
