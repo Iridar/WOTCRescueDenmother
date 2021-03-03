@@ -43,9 +43,11 @@ static function EventListenerReturn UnitChangedTeam_Listener(Object EventData, O
 {
     local XComGameState_Unit    UnitState;
 	local XComGameState_Effect	EffectState;
-	local XComGameState			TeleportGameState;
+	local XComGameState			NewGameState;
 
+	// Have to get the Unit State from the Game State directly, because otherwise the unit's team will not have been updated yet. ConfusedJackie.jpg
 	UnitState = XComGameState_Unit(EventData);
+	UnitState = XComGameState_Unit(GameState.GetGameStateForObjectID(UnitState.ObjectID));
 
 	EffectState = XComGameState_Effect(CallbackData);
 
@@ -53,15 +55,15 @@ static function EventListenerReturn UnitChangedTeam_Listener(Object EventData, O
 	{
 		`LOG("X2Effect_ObjectiveTracker: UnitChangedTeam_Listener: Denmother is now on XCOM team, resetting vision.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
 
-		TeleportGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Restore Denmother's Vision");
-		XComGameStateContext_ChangeContainer( TeleportGameState.GetContext() ).BuildVisualizationFn = class'XComCheatManager'.static.CheatTeleport_BuildVisualization;
+		NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Restore Denmother's Vision");
 
-		UnitState = XComGameState_Unit(TeleportGameState.ModifyStateObject(class'XComGameState_Unit', UnitState.ObjectID));
+		XComGameStateContext_ChangeContainer(NewGameState.GetContext()).BuildVisualizationFn = class'XComCheatManager'.static.CheatTeleport_BuildVisualization;
+
+		UnitState = XComGameState_Unit(NewGameState.ModifyStateObject(class'XComGameState_Unit', UnitState.ObjectID));
+		UnitState.SetCurrentStat(eStat_SightRadius, UnitState.GetBaseStat(eStat_SightRadius));
 		UnitState.bRequiresVisibilityUpdate = true;
 
-		UnitState.SetCurrentStat(eStat_SightRadius, UnitState.GetBaseStat(eStat_SightRadius));
-
-		`TACTICALRULES.SubmitGameState(TeleportGameState);
+		`TACTICALRULES.SubmitGameState(NewGameState);
 	}
 	
     return ELR_NoInterrupt;
@@ -103,7 +105,7 @@ static function EventListenerReturn UnitEvacuated_Listener(Object EventData, Obj
 
 	//`LOG("X2Effect_ObjectiveTracker: UnitEvacuated_Listener running for unit:" @ UnitState.GetFullName() @ "on event:" @ InEventID, class'Denmother'.default.bLog, 'IRIDENMOTHER');
 
-	if (EffectState != none && UnitState != none)
+	if (EffectState != none && !EffectState.bRemoved && UnitState != none)
 	{
 		UnitState.SetUnitFloatValue('IRI_Denmother_Evacuated_Value', 1, eCleanup_BeginTactical);
 
@@ -132,7 +134,7 @@ static function EventListenerReturn UnitRemovedFromPlay_Listener(Object EventDat
 
 	`LOG("X2Effect_ObjectiveTracker: UnitRemovedFromPlay_Listener running for unit:" @ UnitState.GetFullName() @ "on event:" @ InEventID, class'Denmother'.default.bLog, 'IRIDENMOTHER');
 
-	if (EffectState != none && UnitState != none && UnitState.ObjectID == EffectState.ApplyEffectParameters.TargetStateObjectRef.ObjectID)
+	if (EffectState != none && !EffectState.bRemoved && UnitState != none && UnitState.ObjectID == EffectState.ApplyEffectParameters.TargetStateObjectRef.ObjectID)
 	{
 		NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Updating Denmother Objective");
 
@@ -157,11 +159,11 @@ static function EventListenerReturn UnitRemovedFromPlay_Listener(Object EventDat
 
 static function EventListenerReturn TacticalGameEnd_Listener(Object EventData, Object EventSource, XComGameState NewGameState, name InEventID, Object CallbackData)
 {
-	local XComGameState_Effect			EffectState;
+	local XComGameState_Effect EffectState;
 
 	EffectState = XComGameState_Effect(CallbackData);
 	
-	if (EffectState != none)
+	if (EffectState != none && !EffectState.bRemoved)
 	{
 		`LOG("TacticalGameEnd_Listener: Removing Objective Tracker effect due to Tactical Game End", class'Denmother'.default.bLog, 'IRIDENMOTHER');
 		EffectState.RemoveEffect(NewGameState, NewGameState, true);
