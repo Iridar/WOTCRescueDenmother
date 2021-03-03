@@ -154,6 +154,7 @@ static function X2DataTemplate Create_ObjectiveDummyItem_1()
 	Template.StartingItem = false;
 	Template.bInfiniteItem = false;
 	Template.HideInInventory = true;
+	Template.ItemCat = 'quest';
 	
 	return Template;
 }
@@ -167,6 +168,7 @@ static function X2DataTemplate Create_ObjectiveDummyItem_2()
 	Template.StartingItem = false;
 	Template.bInfiniteItem = false;
 	Template.HideInInventory = true;
+	Template.ItemCat = 'quest';
 	
 	return Template;
 }
@@ -180,6 +182,7 @@ static function X2DataTemplate Create_ObjectiveDummyItem_3()
 	Template.StartingItem = false;
 	Template.bInfiniteItem = false;
 	Template.HideInInventory = true;
+	Template.ItemCat = 'quest';
 	
 	return Template;
 }
