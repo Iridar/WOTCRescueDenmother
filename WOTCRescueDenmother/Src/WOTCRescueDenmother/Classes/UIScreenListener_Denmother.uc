@@ -27,14 +27,14 @@ event OnInit(UIScreen Screen)
 
 			StatusLabel = LootRecovered.VIPPanel.m_strVIPStatus[eVIPStatus_Awarded];
 			VIPState = eUIState_Good;
-			DisplayText = UnitState.GetName(eNameType_FullNick);
+			DisplayText = class'Denmother'.default.strDenmotherFirstName @ "\"" $ class'Denmother'.default.strDenmotherNickName $ "\"" @ class'Denmother'.default.strDenmotherLastName;
 		}
 		else	// If she was dead by the end of the mission, she gets cleaned up and doesn't exist anymore.
 		{
 			`LOG("UIScreenListener_Denmother: Denmother is dead or doesn't exist, marking VIP dead", class'Denmother'.default.bLog, 'IRIDENMOTHER');
 			StatusLabel = LootRecovered.VIPPanel.m_strVIPStatus[eVIPStatus_Killed];
 			VIPState = eUIState_Bad;
-			DisplayText = class'Denmother'.default.strDenmotherLastName;
+			DisplayText = class'Denmother'.default.strDenmotherFirstName @ "\"" $ class'Denmother'.default.strDenmotherNickName $ "\"" @ class'Denmother'.default.strDenmotherLastName;
 		}
 
 		ResistanceHQ = class'UIUtilities_Strategy'.static.GetResistanceHQ();

@@ -21,9 +21,9 @@ function RegisterForEvents(XComGameState_Effect EffectGameState)
 	EventMgr.RegisterForEvent(EffectObj, 'UnitRemovedFromPlay', UnitRemovedFromPlay_Listener, ELD_OnStateSubmitted,, UnitState,, EffectObj);	
 	EventMgr.RegisterForEvent(EffectObj, 'UnitEvacuated', UnitEvacuated_Listener, ELD_Immediate,, UnitState,, EffectObj);	
 
-	EventMgr.RegisterForEvent(EffectObj, 'UnitChangedTeam', UnitChangedTeam_Listener, ELD_OnStateSubmitted,, UnitState,, EffectObj);	
-
 	EventMgr.RegisterForEvent(EffectObj, 'CleanupTacticalMission', TacticalGameEnd_Listener, ELD_Immediate,,,, EffectObj);	
+
+	EventMgr.RegisterForEvent(EffectObj, 'AbilityActivated', AbilityActivated_Listener, ELD_OnStateSubmitted,, ,, EffectObj);	
 	
 	/*
 	the 'OnMissionObjectiveComplete' event is so worthless.
@@ -38,37 +38,53 @@ function RegisterForEvents(XComGameState_Effect EffectGameState)
 	super.RegisterForEvents(EffectGameState);
 }
 
-//	This will "reset" Denmother's field of view. It basically mimicks the "ttc" console command.
-static function EventListenerReturn UnitChangedTeam_Listener(Object EventData, Object EventSource, XComGameState GameState, name InEventID, Object CallbackData)
+static function EventListenerReturn AbilityActivated_Listener(Object EventData, Object EventSource, XComGameState GameState, Name EventID, Object CallbackData)
 {
-    local XComGameState_Unit    UnitState;
-	local XComGameState_Effect	EffectState;
-	local XComGameState			NewGameState;
+    local XComGameStateContext_Ability	AbilityContext;
+    local XComGameState_Unit            SourceUnit;
+	local XComGameState_Unit            UnitState;
+	local XComGameState_Effect			EffectState;
+	local XComGameState					NewGameState;
+	local StateObjectReference			TargetRef;
+	local bool							bDenmotherMultiTarget;
 
-	// Have to get the Unit State from the Game State directly, because otherwise the unit's team will not have been updated yet. ConfusedJackie.jpg
-	UnitState = XComGameState_Unit(EventData);
-	UnitState = XComGameState_Unit(GameState.GetGameStateForObjectID(UnitState.ObjectID));
+    AbilityContext = XComGameStateContext_Ability(GameState.GetContext());
+    if (AbilityContext == none || AbilityContext.InterruptionStatus == eInterruptionStatus_Interrupt)
+        return ELR_NoInterrupt;
+
+
+    SourceUnit = XComGameState_Unit(EventSource);
+    if (SourceUnit == none || SourceUnit.GetTeam() != eTeam_XCOM)
+        return ELR_NoInterrupt;
 
 	EffectState = XComGameState_Effect(CallbackData);
+		return ELR_NoInterrupt;
 
-	if (EffectState != none && UnitState != none && UnitState.GetTeam() == eTeam_XCom)
+	// Don't trigger for "abilities" Denmother activates herself.
+	if (AbilityContext.InputContext.SourceObject == EffectState.ApplyEffectParameters.TargetStateObjectRef)
+		return ELR_NoInterrupt;
+
+	// Break Denmother's concealment the moment she's targeted by an XCOM Ability.
+
+	foreach AbilityContext.InputContext.MultiTargets(TargetRef)
 	{
-		`LOG("X2Effect_ObjectiveTracker: UnitChangedTeam_Listener: Denmother is now on XCOM team, resetting vision.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
-
-		NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Restore Denmother's Vision");
-
-		XComGameStateContext_ChangeContainer(NewGameState.GetContext()).BuildVisualizationFn = class'XComCheatManager'.static.CheatTeleport_BuildVisualization;
-
-		UnitState = XComGameState_Unit(NewGameState.ModifyStateObject(class'XComGameState_Unit', UnitState.ObjectID));
-		UnitState.SetCurrentStat(eStat_SightRadius, UnitState.GetBaseStat(eStat_SightRadius));
-		UnitState.bRequiresVisibilityUpdate = true;
-
-		`TACTICALRULES.SubmitGameState(NewGameState);
+		if (TargetRef == EffectState.ApplyEffectParameters.TargetStateObjectRef)
+		{
+			bDenmotherMultiTarget = true;
+			break;
+		}
 	}
-	
+
+	if (bDenmotherMultiTarget || AbilityContext.InputContext.PrimaryTarget == EffectState.ApplyEffectParameters.TargetStateObjectRef)
+	{
+		`LOG("X2Effect_ObjectiveTracker:AbilityActivated_Listener: breking Denmother's concealment.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+		NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Breaking Denmother Concealment");
+		UnitState = XComGameState_Unit(NewGameState.ModifyStateObject(class'XComGameState_Unit', EffectState.ApplyEffectParameters.TargetStateObjectRef.ObjectID));
+		UnitState.SetIndividualConcealment(false, NewGameState);
+		`GAMERULES.SubmitGameState(NewGameState);
+	}
     return ELR_NoInterrupt;
 }
-
 
 static function EventListenerReturn UnitDied_Listener(Object EventData, Object EventSource, XComGameState NewGameState, name InEventID, Object CallbackData)
 {
@@ -218,11 +234,9 @@ simulated function OnEffectRemoved(const out EffectAppliedData ApplyEffectParame
 	{
 		`LOG("Denmother is alive or body recovered, marking objective complete, adding her to squad.", class'Denmother'.default.bLog, 'IRIDENMOTHER');		
 
-		//	Will let Denmother participate in Skyranger walk-off and transition from tactical to strategy, dead or alive.
+		// Adding her to squad only if her body was recovered or if she's alive. If XCOM left her to die / for dead in a place swarming with ADVENT they don't deserve even a memorial entry.
 		XComHQ = class'Denmother'.static.GetAndPrepXComHQ(NewGameState);
 		XComHQ.Squad.AddItem(UnitState.GetReference());
-		// This will help find Denmother in Strategy
-		UnitState.SetUnitFloatValue('IRI_ThisUnitIsDenmother_Value', 1, eCleanup_BeginTactical);
 
 		// This will display Denmother on the mission end screen
 		BattleData = XComGameState_BattleData(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_BattleData'));
@@ -243,6 +257,13 @@ simulated function OnEffectRemoved(const out EffectAppliedData ApplyEffectParame
 				//XComHQ = class'Denmother'.static.GetAndPrepXComHQ(NewGameState);
 				XComHQ.LootRecovered.AddItem(ItemState.GetReference());
 			}
+		}
+		else
+		{
+			//	If Denmother is dead and her body wasn't recovered then move her to resistance team.
+			//-- Pointless, she still counts as XCOM soldier killed on the mission end screen.
+			//`LOG("Denmother is dead and her body was not recovered, moving her to the neutral team.", class'Denmother'.default.bLog, 'IRIDENMOTHER');		
+			//class'Denmother'.static.SetGroupAndPlayer(UnitState, eTeam_Resistance, NewGameState);
 		}
 	}
 

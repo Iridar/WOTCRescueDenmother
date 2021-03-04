@@ -1,5 +1,26 @@
 class X2DownloadableContentInfo_WOTCRescueDenmother extends X2DownloadableContentInfo;
 
+/*
+GetDenmotherFromHistory() fails to find her if she was killed and evacced (if not evacced too? Does it even matter?
+
+Ammo Belt as secondary weapon. Confers Resupply ability that reloads the weapon of a nearby soldier. Can pass on special Ammo effects? Requires perk? Ability is turn ending by default?
+Can be used at range by default?
+
+Polish camera movement, right it now has three (!) camera pans.
+Evaccing her corpse adds her to the crew?!
+Break Denmother's concealment only once. Track with unit value, probably.
+
+Changelog:
+Keeper Training unlock in Guerilla Tactics School will now cost 150 supplies on Legendary difficulty, more in line with other GTS unlocks.
+Denmother will now correctly work on new-style Haven Assaults. 
+First Aid ability from the eponymous mod will now work on Denmother during Haven defense.
+Added "GiveDenmother" command that will add Denmother to your crew, regardless of your campaign status.
+
+Tests:
+
+
+*/
+
 //	TODO: better denmother positioning in mission
 //	Check how many civilians need to be rescued to get the "good" story: minimal amount.
 
@@ -44,6 +65,42 @@ static event OnExitPostMissionSequence()
 	{
 		class'Denmother'.static.FinalizeDenmotherUnitForCrew();
 	}
+}
+
+exec function GiveDenmother()
+{
+	local XComGameState_Unit				UnitState;
+	local XComGameState						NewGameState;
+	local XComGameState_HeadquartersXCom	XComHQ;
+
+	NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Give Denmother");
+
+	UnitState = class'Denmother'.static.CreateDenmotherUnit(NewGameState);
+	UnitState.ClearUnitValue('IRI_ThisUnitIsDenmother_Value');	
+
+	class'Denmother'.static.GiveOneGoodEyeAbility(UnitState, NewGameState);
+
+	UnitState.SetCharacterName(class'Denmother'.default.strDenmotherFirstName, class'Denmother'.default.strDenmotherLastName, class'Denmother'.default.strDenmotherNickName);
+
+	UnitState.kAppearance = class'Denmother'.default.AvengerAppearance;
+	if (class'Denmother'.static.DLCLoaded('DLC_2'))
+	{
+		UnitState.kAppearance.nmScars = class'Denmother'.default.AlienHuntersScar;
+	}
+	else
+	{
+		UnitState.kAppearance.nmScars = class'Denmother'.default.VanillaScar;
+	}
+	UnitState.StoreAppearance(); 
+
+	UnitState.SetBackground(class'Denmother'.default.strDenmother_Background_Good);
+	
+	class'Denmother'.static.AddItemToHQInventory('IRI_Denmother_ObjectiveDummyItem_Good', NewGameState);
+
+	XComHQ = class'Denmother'.static.GetAndPrepXComHQ(NewGameState);
+	XComHQ.AddToCrew(NewGameState, UnitState);
+
+	`GAMERULES.SubmitGameState(NewGameState);
 }
 
 static function OnPostTemplatesCreated()

@@ -51,6 +51,9 @@ tags= war of the chosen, soldier class, soldier customization, weapon</Descripti
     <Content Include="Config\XComGameData.ini">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Config\XComStrategyTuning.ini">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Content\Iridar_Denmother_Assets.upk">
       <SubType>Content</SubType>
     </Content>
@@ -79,9 +82,6 @@ tags= war of the chosen, soldier class, soldier customization, weapon</Descripti
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\WOTCRescueDenmother\Classes\X2DownloadableContentInfo_WOTCRescueDenmother.uc" />
-    <Content Include="Src\WOTCRescueDenmother\Classes\X2Effect_DeployDenmother.uc">
-      <SubType>Content</SubType>
-    </Content>
     <Content Include="Src\WOTCRescueDenmother\Classes\X2Effect_ObjectiveTracker.uc">
       <SubType>Content</SubType>
     </Content>

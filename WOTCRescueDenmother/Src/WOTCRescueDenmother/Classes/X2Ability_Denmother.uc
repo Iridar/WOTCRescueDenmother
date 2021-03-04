@@ -14,10 +14,10 @@ static function array<X2DataTemplate> CreateTemplates()
 
 static function X2AbilityTemplate Create_KnockoutAndBleedoutSelf()
 {
-	local X2AbilityTemplate			Template;
-	local X2Effect_DeployDenmother	Effect;
-	local X2Effect_Persistent		BleedingOut;
-	local X2Effect_ObjectiveTracker	ObjectiveTrackerEffect;
+	local X2AbilityTemplate				Template;
+	local X2Effect_Persistent			BleedingOut;
+	local X2Effect_ObjectiveTracker		ObjectiveTrackerEffect;
+	local X2Effect_PersistentStatChange	PersistentStatChangeEffect;
 	
 	`CREATE_X2ABILITY_TEMPLATE(Template, 'IRI_KnockoutAndBleedoutSelf');
 
@@ -39,9 +39,13 @@ static function X2AbilityTemplate Create_KnockoutAndBleedoutSelf()
 	BleedingOut.iNumTurns = default.DenmotherBleedoutTurns;
 	Template.AddTargetEffect(BleedingOut);
 
-	Effect = new class'X2Effect_DeployDenmother';
-	Effect.BuildPersistentEffect(1, true);
-	Template.AddTargetEffect(Effect);
+	// Give Denmother 0 tile detection range.
+	PersistentStatChangeEffect = new class'X2Effect_PersistentStatChange';
+	PersistentStatChangeEffect.BuildPersistentEffect(1, true, false, false);
+	PersistentStatChangeEffect.AddPersistentStatChange(eStat_DetectionModifier, 1);
+	PersistentStatChangeEffect.bRemoveWhenTargetConcealmentBroken = true;
+	PersistentStatChangeEffect.SetDisplayInfo(ePerkBuff_Bonus, "", "", Template.IconImage, true,,Template.AbilitySourceName);
+	Template.AddTargetEffect(PersistentStatChangeEffect);
 
 	ObjectiveTrackerEffect = new class'X2Effect_ObjectiveTracker';
 	ObjectiveTrackerEffect.BuildPersistentEffect(1, true, false);

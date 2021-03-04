@@ -200,9 +200,10 @@ static function bool WereCiviliansRescued(const XComGameState_BattleData BattleD
 {
 	local int idx;
 
-	for(idx = 0; idx < BattleData.MapData.ActiveMission.MissionObjectives.Length; idx++)
+	for (idx = 0; idx < BattleData.MapData.ActiveMission.MissionObjectives.Length; idx++)
 	{
-		if (BattleData.MapData.ActiveMission.MissionObjectives[idx].ObjectiveName == 'Rescue_T1')
+		// Old style and new style haven assaults respectively.
+		if (BattleData.MapData.ActiveMission.MissionObjectives[idx].ObjectiveName == 'Rescue_T1' || BattleData.MapData.ActiveMission.MissionObjectives[idx].ObjectiveName == 'SaveCivilians')
 		{
 			return BattleData.MapData.ActiveMission.MissionObjectives[idx].bCompleted;
 		}
@@ -231,7 +232,7 @@ static function bool IsSweepObjectiveComplete()
 	return false;
 }
 
-static private function GiveOneGoodEyeAbility(XComGameState_Unit UnitState, XComGameState NewGameState)
+static function GiveOneGoodEyeAbility(XComGameState_Unit UnitState, XComGameState NewGameState)
 {	
 	local SoldierClassAbilityType AbilityStruct;
 	local int Index;
@@ -258,7 +259,7 @@ static function FinalizeDenmotherUnitForCrew()
 
 		UnitState = XComGameState_Unit(NewGameState.ModifyStateObject(class'XComGameState_Unit', UnitState.ObjectID));
 
-		UnitState.SetCurrentStat(eStat_SightRadius, UnitState.GetBaseStat(eStat_SightRadius));
+		UnitState.SetCurrentStat(eStat_DetectionModifier, UnitState.GetBaseStat(eStat_DetectionModifier));
 
 		UnitState.ClearUnitValue('IRI_ThisUnitIsDenmother_Value');		
 
@@ -303,6 +304,7 @@ static function FinalizeDenmotherUnitForCrew()
 		{
 			XComHQ = class'Denmother'.static.GetAndPrepXComHQ(NewGameState);
 			XComHQ.AddToCrew(NewGameState, UnitState);
+			`HQPRES.UINewStaffAvailable(UnitState.GetReference());
 		}
 		//else // Unnecessary, handled by the game automatically by moving dead units from squad. 
 		//{
@@ -310,7 +312,6 @@ static function FinalizeDenmotherUnitForCrew()
 		//}		
 
 		`XCOMGAME.GameRuleset.SubmitGameState(NewGameState);
-		`HQPRES.UINewStaffAvailable(UnitState.GetReference());
 	}
 }
 
@@ -327,6 +328,9 @@ static function XComGameState_Unit CreateDenmotherUnit(XComGameState NewGameStat
 
 	NewUnitState = CreateSoldier(NewGameState);
 	NewUnitState.RandomizeStats();
+
+	//	Cleaned up manually in FinalizeDenmother
+	NewUnitState.SetUnitFloatValue('IRI_ThisUnitIsDenmother_Value', 1, eCleanup_Never);
 
 	SetDenmotherAppearance(NewUnitState);
 
@@ -458,7 +462,7 @@ static function SetGroupAndPlayer(XComGameState_Unit UnitState, ETeam SetTeam, X
 	}
 }
 
-static private function bool DLCLoaded(name DLCName)
+static function bool DLCLoaded(name DLCName)
 {
 	local XComOnlineEventMgr	EventManager;
 	local int					Index;

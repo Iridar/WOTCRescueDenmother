@@ -47,11 +47,13 @@ static function EventListenerReturn ListenerEventFunction_Immediate(Object Event
 		//	Generate unit
 		UnitState = class'Denmother'.static.CreateDenmotherUnit(NewGameState);
 
-		UnitState.SetCurrentStat(eStat_SightRadius, 3);
-
 		`LOG("Old position:" @ `XWORLD.GetPositionFromTileCoordinates(UnitState.TileLocation), class'Denmother'.default.bLog, 'IRIDENMOTHER');
 		Position = GetDenmotherSpawnPosition();
 		`LOG("New position:" @ Position, class'Denmother'.default.bLog, 'IRIDENMOTHER');
+
+		// Denmother starts concealed with 0 tile detection radius to prevent enemies from reacting to her.
+		//UnitState.SetCurrentStat(eStat_DetectionModifier, 1);
+		UnitState.SetIndividualConcealment(true, NewGameState);
 
 		//	Teleport the unit
 		UnitState.SetVisibilityLocationFromVector(Position);
@@ -133,8 +135,7 @@ static private function AddStrategyUnitToBoard(XComGameState_Unit Unit, XComGame
 	local X2AbilityTemplate				AbilityTemplate;
     local X2AbilityTemplateManager		AbilityTemplateManager;	
 
-	class'Denmother'.static.SetGroupAndPlayer(Unit, eTeam_Neutral, NewGameState);
-	//class'Denmother'.static.SetGroupAndPlayer(Unit, eTeam_XCom, NewGameState);
+	class'Denmother'.static.SetGroupAndPlayer(Unit, eTeam_XCom, NewGameState);
 
 	// add item states. This needs to be done so that the visualizer sync picks up the IDs and creates their visualizers -LEB
 	foreach Unit.InventoryItems(ItemReference)
@@ -152,7 +153,7 @@ static private function AddStrategyUnitToBoard(XComGameState_Unit Unit, XComGame
 
 	//	Just this once, give Denmother autoactivating self-target ability that will knock her out and apply bleedout
 	AbilityTemplateManager = class'X2AbilityTemplateManager'.static.GetAbilityTemplateManager();
-    AbilityTemplate = AbilityTemplateManager.FindAbilityTemplate('IRI_KnockoutAndBleedoutSelf');
+	AbilityTemplate = AbilityTemplateManager.FindAbilityTemplate('IRI_KnockoutAndBleedoutSelf');
 	class'X2TacticalGameRuleset'.static.InitAbilityForUnit(AbilityTemplate, Unit, NewGameState);
 }
 
@@ -186,7 +187,7 @@ static function EventListenerReturn ListenerEventFunction_Healing(Object EventDa
 		UnitState = XComGameState_Unit(EventSource);
 		UnitState = XComGameState_Unit(NewGameState.GetGameStateForObjectID(UnitState.ObjectID));
 
-		if (UnitState.GetUnitValue('IRI_ThisUnitIsDenmother_Value', UV))
+		if (UnitState.GetUnitValue('IRI_ThisUnitIsDenmother_Value', UV) && UnitState.IsAlive())
 		{
 			UnitState.LowestHP = UnitState.GetBaseStat(eStat_HP) * class'Denmother'.default.bHealthMultiplier;
 			UnitState.SetCurrentStat(eStat_HP, UnitState.LowestHP);
