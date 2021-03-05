@@ -259,9 +259,8 @@ static function FinalizeDenmotherUnitForCrew()
 
 		UnitState = XComGameState_Unit(NewGameState.ModifyStateObject(class'XComGameState_Unit', UnitState.ObjectID));
 
-		UnitState.SetCurrentStat(eStat_DetectionModifier, UnitState.GetBaseStat(eStat_DetectionModifier));
-
-		UnitState.ClearUnitValue('IRI_ThisUnitIsDenmother_Value');		
+		UnitState.ClearUnitValue('IRI_ThisUnitIsDenmother_Value');	
+		UnitState.ClearUnitValue('IRI_Denmother_Evacuated_Value');				
 
 		GiveOneGoodEyeAbility(UnitState, NewGameState);
 
@@ -318,19 +317,26 @@ static function FinalizeDenmotherUnitForCrew()
 //	====================================================================
 //			CREATE DENMOTHER UNIT STATE AND CUSTOMIZE APPEARANCE
 //	====================================================================
-//	bAsSoldier = true when generating her as a soldier reward you get for completing the mission.
-//	= false when generating a unit state that will be bleeding out on the mission itself.
-static function XComGameState_Unit CreateDenmotherUnit(XComGameState NewGameState)
+
+static function XComGameState_Unit CreateDenmotherUnit(XComGameState NewGameState, optional bool bDebug = false)
 {
-	local XComGameState_Unit		NewUnitState;
-	local XComGameState_Analytics	Analytics;
-	local int						idx, StartingIdx;
+	local XComGameState_Unit				NewUnitState;
+	local XComGameState_Analytics			Analytics;
+	local XComGameState_HeadquartersXCom	XComHQ;
+	local int								idx, StartingIdx;
 
 	NewUnitState = CreateSoldier(NewGameState);
 	NewUnitState.RandomizeStats();
 
-	//	Cleaned up manually in FinalizeDenmother
-	NewUnitState.SetUnitFloatValue('IRI_ThisUnitIsDenmother_Value', 1, eCleanup_Never);
+	if (!bDebug)
+	{
+		//	Cleaned up manually in FinalizeDenmother
+		NewUnitState.SetUnitFloatValue('IRI_ThisUnitIsDenmother_Value', 1, eCleanup_Never);
+
+		// Add her to squad immediately so she doesn't get cleaned up by the game if she's evacuated as a corpse.
+		XComHQ = class'Denmother'.static.GetAndPrepXComHQ(NewGameState);
+		XComHQ.Squad.AddItem(NewUnitState.GetReference());
+	}
 
 	SetDenmotherAppearance(NewUnitState);
 

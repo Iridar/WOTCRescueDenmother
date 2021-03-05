@@ -82,6 +82,9 @@ tags= war of the chosen, soldier class, soldier customization, weapon</Descripti
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\WOTCRescueDenmother\Classes\X2DownloadableContentInfo_WOTCRescueDenmother.uc" />
+    <Content Include="Src\WOTCRescueDenmother\Classes\X2Effect_BreakConcealmentListener.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\WOTCRescueDenmother\Classes\X2Effect_ObjectiveTracker.uc">
       <SubType>Content</SubType>
     </Content>

@@ -23,8 +23,6 @@ function RegisterForEvents(XComGameState_Effect EffectGameState)
 
 	EventMgr.RegisterForEvent(EffectObj, 'CleanupTacticalMission', TacticalGameEnd_Listener, ELD_Immediate,,,, EffectObj);	
 
-	EventMgr.RegisterForEvent(EffectObj, 'AbilityActivated', AbilityActivated_Listener, ELD_OnStateSubmitted,, ,, EffectObj);	
-	
 	/*
 	the 'OnMissionObjectiveComplete' event is so worthless.
 	If you get BattleData from history, then the objective is not complete yet, so you don't know which objective was completed.
@@ -36,54 +34,6 @@ function RegisterForEvents(XComGameState_Effect EffectGameState)
 	//EventMgr.RegisterForEvent(EffectObj, 'ObjectiveCompleted', ObjectiveComplete_Listener, ELD_Immediate,,,, EffectObj);	
 	
 	super.RegisterForEvents(EffectGameState);
-}
-
-static function EventListenerReturn AbilityActivated_Listener(Object EventData, Object EventSource, XComGameState GameState, Name EventID, Object CallbackData)
-{
-    local XComGameStateContext_Ability	AbilityContext;
-    local XComGameState_Unit            SourceUnit;
-	local XComGameState_Unit            UnitState;
-	local XComGameState_Effect			EffectState;
-	local XComGameState					NewGameState;
-	local StateObjectReference			TargetRef;
-	local bool							bDenmotherMultiTarget;
-
-    AbilityContext = XComGameStateContext_Ability(GameState.GetContext());
-    if (AbilityContext == none || AbilityContext.InterruptionStatus == eInterruptionStatus_Interrupt)
-        return ELR_NoInterrupt;
-
-
-    SourceUnit = XComGameState_Unit(EventSource);
-    if (SourceUnit == none || SourceUnit.GetTeam() != eTeam_XCOM)
-        return ELR_NoInterrupt;
-
-	EffectState = XComGameState_Effect(CallbackData);
-		return ELR_NoInterrupt;
-
-	// Don't trigger for "abilities" Denmother activates herself.
-	if (AbilityContext.InputContext.SourceObject == EffectState.ApplyEffectParameters.TargetStateObjectRef)
-		return ELR_NoInterrupt;
-
-	// Break Denmother's concealment the moment she's targeted by an XCOM Ability.
-
-	foreach AbilityContext.InputContext.MultiTargets(TargetRef)
-	{
-		if (TargetRef == EffectState.ApplyEffectParameters.TargetStateObjectRef)
-		{
-			bDenmotherMultiTarget = true;
-			break;
-		}
-	}
-
-	if (bDenmotherMultiTarget || AbilityContext.InputContext.PrimaryTarget == EffectState.ApplyEffectParameters.TargetStateObjectRef)
-	{
-		`LOG("X2Effect_ObjectiveTracker:AbilityActivated_Listener: breking Denmother's concealment.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
-		NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Breaking Denmother Concealment");
-		UnitState = XComGameState_Unit(NewGameState.ModifyStateObject(class'XComGameState_Unit', EffectState.ApplyEffectParameters.TargetStateObjectRef.ObjectID));
-		UnitState.SetIndividualConcealment(false, NewGameState);
-		`GAMERULES.SubmitGameState(NewGameState);
-	}
-    return ELR_NoInterrupt;
 }
 
 static function EventListenerReturn UnitDied_Listener(Object EventData, Object EventSource, XComGameState NewGameState, name InEventID, Object CallbackData)
@@ -232,11 +182,7 @@ simulated function OnEffectRemoved(const out EffectAppliedData ApplyEffectParame
 	//	UnitState.IsAlive() cannot be used by itself here, because she will still report as alive even if XCOM evacuated, leaving her bleeding out and surrounded by enemies
 	if (bSweepObjectiveComplete || bEvacuated)
 	{
-		`LOG("Denmother is alive or body recovered, marking objective complete, adding her to squad.", class'Denmother'.default.bLog, 'IRIDENMOTHER');		
-
-		// Adding her to squad only if her body was recovered or if she's alive. If XCOM left her to die / for dead in a place swarming with ADVENT they don't deserve even a memorial entry.
-		XComHQ = class'Denmother'.static.GetAndPrepXComHQ(NewGameState);
-		XComHQ.Squad.AddItem(UnitState.GetReference());
+		`LOG("Denmother is alive or body recovered, adding her to Reward Units.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
 
 		// This will display Denmother on the mission end screen
 		BattleData = XComGameState_BattleData(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_BattleData'));
@@ -254,7 +200,7 @@ simulated function OnEffectRemoved(const out EffectAppliedData ApplyEffectParame
 
 				//	This is required to make it show up on the post mission screen
 				`LOG("Adding Denmother's rifle to XCOM HQ Loot Recovered:" @ ItemState.GetMyTemplateName(), class'Denmother'.default.bLog, 'IRIDENMOTHER');		
-				//XComHQ = class'Denmother'.static.GetAndPrepXComHQ(NewGameState);
+				XComHQ = class'Denmother'.static.GetAndPrepXComHQ(NewGameState);
 				XComHQ.LootRecovered.AddItem(ItemState.GetReference());
 			}
 		}

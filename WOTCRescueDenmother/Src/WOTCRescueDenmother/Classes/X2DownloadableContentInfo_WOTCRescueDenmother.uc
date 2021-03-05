@@ -1,14 +1,13 @@
 class X2DownloadableContentInfo_WOTCRescueDenmother extends X2DownloadableContentInfo;
 
 /*
-GetDenmotherFromHistory() fails to find her if she was killed and evacced (if not evacced too? Does it even matter?
+Ammo Belt as secondary weapon. Confers Resupply Ammo ability that reloads the weapon of a nearby soldier. Can pass on special Ammo effects? Requires perk? Ability is turn ending by default?
+Can be used at range by default? Longer range for bondmates.
+Use magazine model of the target soldier. Will have to use grenade trajectory repurposes for a single target ability.
+Use regular "give" animation at melee range, and grenade underhand animation at other times.
 
-Ammo Belt as secondary weapon. Confers Resupply ability that reloads the weapon of a nearby soldier. Can pass on special Ammo effects? Requires perk? Ability is turn ending by default?
-Can be used at range by default?
 
 Polish camera movement, right it now has three (!) camera pans.
-Evaccing her corpse adds her to the crew?!
-Break Denmother's concealment only once. Track with unit value, probably.
 
 Changelog:
 Keeper Training unlock in Guerilla Tactics School will now cost 150 supplies on Legendary difficulty, more in line with other GTS unlocks.
@@ -75,8 +74,7 @@ exec function GiveDenmother()
 
 	NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Give Denmother");
 
-	UnitState = class'Denmother'.static.CreateDenmotherUnit(NewGameState);
-	UnitState.ClearUnitValue('IRI_ThisUnitIsDenmother_Value');	
+	UnitState = class'Denmother'.static.CreateDenmotherUnit(NewGameState, true);
 
 	class'Denmother'.static.GiveOneGoodEyeAbility(UnitState, NewGameState);
 

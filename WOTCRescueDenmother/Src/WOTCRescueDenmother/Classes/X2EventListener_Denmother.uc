@@ -52,7 +52,6 @@ static function EventListenerReturn ListenerEventFunction_Immediate(Object Event
 		`LOG("New position:" @ Position, class'Denmother'.default.bLog, 'IRIDENMOTHER');
 
 		// Denmother starts concealed with 0 tile detection radius to prevent enemies from reacting to her.
-		//UnitState.SetCurrentStat(eStat_DetectionModifier, 1);
 		UnitState.SetIndividualConcealment(true, NewGameState);
 
 		//	Teleport the unit

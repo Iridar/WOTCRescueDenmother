@@ -17,7 +17,7 @@ static function X2AbilityTemplate Create_KnockoutAndBleedoutSelf()
 	local X2AbilityTemplate				Template;
 	local X2Effect_Persistent			BleedingOut;
 	local X2Effect_ObjectiveTracker		ObjectiveTrackerEffect;
-	local X2Effect_PersistentStatChange	PersistentStatChangeEffect;
+	local X2Effect_BreakConcealmentListener	BreakConcealmentListener;
 	
 	`CREATE_X2ABILITY_TEMPLATE(Template, 'IRI_KnockoutAndBleedoutSelf');
 
@@ -39,13 +39,13 @@ static function X2AbilityTemplate Create_KnockoutAndBleedoutSelf()
 	BleedingOut.iNumTurns = default.DenmotherBleedoutTurns;
 	Template.AddTargetEffect(BleedingOut);
 
-	// Give Denmother 0 tile detection range.
-	PersistentStatChangeEffect = new class'X2Effect_PersistentStatChange';
-	PersistentStatChangeEffect.BuildPersistentEffect(1, true, false, false);
-	PersistentStatChangeEffect.AddPersistentStatChange(eStat_DetectionModifier, 1);
-	PersistentStatChangeEffect.bRemoveWhenTargetConcealmentBroken = true;
-	PersistentStatChangeEffect.SetDisplayInfo(ePerkBuff_Bonus, "", "", Template.IconImage, true,,Template.AbilitySourceName);
-	Template.AddTargetEffect(PersistentStatChangeEffect);
+	// Give Denmother 0 tile detection range and keep her in concealment until targeted by an xcom ability.
+	BreakConcealmentListener = new class'X2Effect_BreakConcealmentListener';
+	BreakConcealmentListener.BuildPersistentEffect(1, true, false, false);
+	BreakConcealmentListener.AddPersistentStatChange(eStat_DetectionModifier, 1);
+	BreakConcealmentListener.bRemoveWhenTargetConcealmentBroken = true;
+	BreakConcealmentListener.SetDisplayInfo( ePerkBuff_Bonus, Template.LocFriendlyName, Template.GetMyHelpText( ), Template.IconImage, true ); // TODO: Remove this after debugging
+	Template.AddTargetEffect(BreakConcealmentListener);
 
 	ObjectiveTrackerEffect = new class'X2Effect_ObjectiveTracker';
 	ObjectiveTrackerEffect.BuildPersistentEffect(1, true, false);
