@@ -7,9 +7,9 @@ Use magazine model of the target soldier. Will have to use grenade trajectory re
 Use regular "give" animation at melee range, and grenade underhand animation at other times.
 
 
-Polish camera movement, right it now has three (!) camera pans.
 
 Changelog:
+Polished camera movement on Denmother mission start.
 Keeper Training unlock in Guerilla Tactics School will now cost 150 supplies on Legendary difficulty, more in line with other GTS unlocks.
 Denmother will now correctly work on new-style Haven Assaults. 
 First Aid ability from the eponymous mod will now work on Denmother during Haven defense.
@@ -22,10 +22,10 @@ Tests:
 //		Dead? Add to crew - h
 
 //	Sweep Objective NOT complete
-//		Alive (= evacuated)? Add to crew --
-//		Dead? Do not add to crew -- 
-//		Denmother evacced, but rest of the squad is dead? -- expected behavior: you have denmother walk out of skyranger, and she's on the reward screen. --
-//		Denmother is not evacced, and the squad is dead? --expected behavior: no denmother, end screen mentions her as VIP lost --
+//		Alive (= evacuated)? Add to crew, got the right portrait, bad backstory. -- CHECKED
+//		Dead? Not in the crew, not in the morgue, no weapon. -- CHECKED, no backstory
+//		Denmother evacced, but rest of the squad is dead? -- expected behavior: you have denmother walk out of skyranger, and she's on the reward screen, bad backstory. -- CHECKED.
+//		Denmother is not evacced, and the squad is dead? --expected behavior: no denmother, end screen mentions her as VIP lost -- CHECK, no backstory
 
 */
 

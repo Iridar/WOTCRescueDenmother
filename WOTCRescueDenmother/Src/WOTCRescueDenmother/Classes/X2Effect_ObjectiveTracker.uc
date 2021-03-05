@@ -164,7 +164,10 @@ simulated function OnEffectRemoved(const out EffectAppliedData ApplyEffectParame
 {
 	local XComGameState_Unit				UnitState;
 	local XComGameState_BattleData			BattleData;
-	local bool								bSweepObjectiveComplete, bEvacuated, bAlive;
+	local bool								bSweepObjectiveComplete;
+	local bool								bEvacuated;
+	local bool								bAlive;
+	local bool								bBodyRecovered;
 	local XComGameState_HeadquartersXCom	XComHQ;
 	local XComGameState_Item				ItemState;
 	
@@ -172,25 +175,20 @@ simulated function OnEffectRemoved(const out EffectAppliedData ApplyEffectParame
 	if (UnitState == none)
 		return;
 
-	//	if this is false, then the unit was NOT evacuated when the tactical game ended. Then it means if it shows up as true only when the unit WAS evacuated, we can use it to add her to squad when she's evacuated even if she's dead
-
-	//	Denmother is added to the crew if:
-	//	1) If XCOM has killed all enemies, then we don't care if she's alive or not, her body is recovered even if she's dead.
-	//	2) If she was evacuated. Then we don't care if all enemies were killed or not, and we don't care if she's alive or not, her body is recovered either way.
-
+	XComHQ = class'Denmother'.static.GetAndPrepXComHQ(NewGameState);
 	bSweepObjectiveComplete = class'Denmother'.static.IsSweepObjectiveComplete();
 	bEvacuated = WasDenmotherEvacuated(UnitState);
-	`LOG("Removing Objective Tracker effect from:" @ UnitState.GetFullName() @ "unit alive:" @ UnitState.IsAlive() @ "|| bleeding out:" @ UnitState.IsBleedingOut() @ "|| evacuated:" @ bEvacuated @ "|| Sweep objective complete:" @ bSweepObjectiveComplete, class'Denmother'.default.bLog, 'IRIDENMOTHER');
-
-	//	Is she alive by the time the mission ends?
-	bAlive = UnitState.IsAlive();
-
-	//	If so, check if she was bleeding out
-	if (bAlive && UnitState.IsBleedingOut())
+	bBodyRecovered = bEvacuated || bSweepObjectiveComplete;
+	bAlive = UnitState.IsAlive() && bBodyRecovered;
+	
+	if (!bAlive && !bBodyRecovered)
 	{
-		//	 If she was, then she will actually survive only if she was evacuated, or XCOM killed all enemies
-		bAlive = bEvacuated || bSweepObjectiveComplete;
+		`LOG("Denmother is dead and her body wasn't recovered, removing her from squad.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+		//	Remove her from squad here, otherwise her corpse will get auto-recovered anyway.
+		XComHQ.Squad.RemoveItem(UnitState.GetReference());
 	}
+
+	`LOG("Removing Objective Tracker effect from:" @ UnitState.GetFullName() @ "unit alive:" @ bAlive @ "|| bleeding out:" @ UnitState.IsBleedingOut() @ "|| evacuated:" @ bEvacuated @ "|| Sweep objective complete:" @ bSweepObjectiveComplete, class'Denmother'.default.bLog, 'IRIDENMOTHER');
 
 	if (bAlive)
 	{
@@ -201,9 +199,8 @@ simulated function OnEffectRemoved(const out EffectAppliedData ApplyEffectParame
 		class'Denmother'.static.FailDenmotherObjective(NewGameState);
 	}
 
-
 	//	UnitState.IsAlive() cannot be used by itself here, because she will still report as alive even if XCOM evacuated, leaving her bleeding out and surrounded by enemies
-	if (bSweepObjectiveComplete || bEvacuated)
+	if (bBodyRecovered)
 	{
 		`LOG("Denmother is alive or body recovered, adding her to Reward Units.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
 
@@ -223,17 +220,17 @@ simulated function OnEffectRemoved(const out EffectAppliedData ApplyEffectParame
 
 				//	This is required to make it show up on the post mission screen
 				`LOG("Adding Denmother's rifle to XCOM HQ Loot Recovered:" @ ItemState.GetMyTemplateName(), class'Denmother'.default.bLog, 'IRIDENMOTHER');		
-				XComHQ = class'Denmother'.static.GetAndPrepXComHQ(NewGameState);
+				
 				XComHQ.LootRecovered.AddItem(ItemState.GetReference());
 			}
 		}
-		else
-		{
+		//else
+		//{
 			//	If Denmother is dead and her body wasn't recovered then move her to resistance team.
 			//-- Pointless, she still counts as XCOM soldier killed on the mission end screen.
 			//`LOG("Denmother is dead and her body was not recovered, moving her to the neutral team.", class'Denmother'.default.bLog, 'IRIDENMOTHER');		
 			//class'Denmother'.static.SetGroupAndPlayer(UnitState, eTeam_Resistance, NewGameState);
-		}
+		//}
 	}
 
 	super.OnEffectRemoved(ApplyEffectParameters, NewGameState, bCleansed, RemovedEffectState);
