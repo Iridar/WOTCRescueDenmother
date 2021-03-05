@@ -42,9 +42,6 @@ tags= war of the chosen, soldier class, soldier customization, weapon</Descripti
     <Content Include="Config\XComDenmother.ini">
       <SubType>Content</SubType>
     </Content>
-    <Content Include="Config\XComDenmotherRifle.ini">
-      <SubType>Content</SubType>
-    </Content>
     <Content Include="Config\XComEncyclopedia.ini">
       <SubType>Content</SubType>
     </Content>
@@ -52,6 +49,12 @@ tags= war of the chosen, soldier class, soldier customization, weapon</Descripti
       <SubType>Content</SubType>
     </Content>
     <Content Include="Config\XComStrategyTuning.ini">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Config\XComTemplateCreator.ini">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Config\XComTemplateEditor.ini">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Content\Iridar_Denmother_Assets.upk">
@@ -92,9 +95,6 @@ tags= war of the chosen, soldier class, soldier customization, weapon</Descripti
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\WOTCRescueDenmother\Classes\X2EventListener_Denmother.uc">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Src\WOTCRescueDenmother\Classes\X2Item_DenmotherRifle.uc">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\WOTCRescueDenmother\Classes\X2StrategyElement_DenmotherReward.uc">

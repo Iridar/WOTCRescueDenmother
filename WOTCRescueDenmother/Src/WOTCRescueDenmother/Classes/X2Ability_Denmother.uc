@@ -48,7 +48,7 @@ static function X2AbilityTemplate Create_KnockoutAndBleedoutSelf()
 	// Give Denmother 0 tile detection range and keep her in concealment until targeted by an xcom ability.
 	BreakConcealmentListener = new class'X2Effect_BreakConcealmentListener';
 	BreakConcealmentListener.BuildPersistentEffect(1, true, false, false);
-	BreakConcealmentListener.AddPersistentStatChange(eStat_DetectionModifier, 1);
+	BreakConcealmentListener.AddPersistentStatChange(eStat_DetectionRadius, 0.0f, MODOP_Multiplication);
 	BreakConcealmentListener.bRemoveWhenTargetConcealmentBroken = true;
 	//BreakConcealmentListener.SetDisplayInfo( ePerkBuff_Bonus, Template.LocFriendlyName, Template.GetMyHelpText( ), Template.IconImage, true );
 	Template.AddTargetEffect(BreakConcealmentListener);
