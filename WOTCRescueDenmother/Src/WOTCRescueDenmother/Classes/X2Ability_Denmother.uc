@@ -20,7 +20,6 @@ static function X2AbilityTemplate Create_KnockoutAndBleedoutSelf()
 	local X2Effect_ObjectiveTracker		ObjectiveTrackerEffect;
 	local X2Effect_BreakConcealmentListener	BreakConcealmentListener;
 
-	
 	`CREATE_X2ABILITY_TEMPLATE(Template, 'IRI_KnockoutAndBleedoutSelf');
 
 	//	Icon Setup
@@ -42,6 +41,8 @@ static function X2AbilityTemplate Create_KnockoutAndBleedoutSelf()
 
 	BleedingOut = class'X2StatusEffects'.static.CreateBleedingOutStatusEffect();
 	BleedingOut.iNumTurns = default.DenmotherBleedoutTurns;
+	BleedingOut.EffectTickedVisualizationFn = Denmother_BleedingOutVisualizationTicked;
+	BleedingOut.EffectTickedFn = Denmother_Bleedout_EffectTicked;
 	Template.AddTargetEffect(BleedingOut);
 
 	// Give Denmother 0 tile detection range and keep her in concealment until targeted by an xcom ability.
@@ -49,12 +50,11 @@ static function X2AbilityTemplate Create_KnockoutAndBleedoutSelf()
 	BreakConcealmentListener.BuildPersistentEffect(1, true, false, false);
 	BreakConcealmentListener.AddPersistentStatChange(eStat_DetectionModifier, 1);
 	BreakConcealmentListener.bRemoveWhenTargetConcealmentBroken = true;
-	BreakConcealmentListener.SetDisplayInfo( ePerkBuff_Bonus, Template.LocFriendlyName, Template.GetMyHelpText( ), Template.IconImage, true ); // TODO: Remove this after debugging
+	//BreakConcealmentListener.SetDisplayInfo( ePerkBuff_Bonus, Template.LocFriendlyName, Template.GetMyHelpText( ), Template.IconImage, true );
 	Template.AddTargetEffect(BreakConcealmentListener);
 
 	ObjectiveTrackerEffect = new class'X2Effect_ObjectiveTracker';
 	ObjectiveTrackerEffect.BuildPersistentEffect(1, true, false);
-	ObjectiveTrackerEffect.VisualizationFn = class'X2StatusEffects'.static.BleedingOutVisualizationTicked;
 	ObjectiveTrackerEffect.bRemoveWhenSourceDies = false;
 	ObjectiveTrackerEffect.bRemoveWhenTargetDies = false;
 	Template.AddTargetEffect(ObjectiveTrackerEffect);
@@ -63,6 +63,47 @@ static function X2AbilityTemplate Create_KnockoutAndBleedoutSelf()
 	Template.BuildVisualizationFn = class'X2Ability_DefaultAbilitySet'.static.Knockout_BuildVisualization;
 
 	return Template;
+}
+
+// The Bleedout effect is applied to Denmother technically before the player's furst turn, so when they see her bleeding out on the mission start, she will have X turns remaining,
+// But once the player actually gets control of the soldiers it will be X-1. To fix this, make the effect autoextend itself by one turn the first time it ticks.
+static function bool Denmother_Bleedout_EffectTicked(X2Effect_Persistent PersistentEffect, const out EffectAppliedData ApplyEffectParameters, XComGameState_Effect kNewEffectState, XComGameState NewGameState, bool FirstApplication)
+{
+	if (kNewEffectState.FullTurnsTicked == 0)
+	{
+		`LOG("Denmother Bleedout ticking for the first time, increasing turns remaining.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+		kNewEffectState.iTurnsRemaining++;
+	}
+	// The effect will continue.
+	return false;
+}
+
+// Do not visualize ticking the first time effect is applied.
+// Otherwise use regular bleedout tick visualization. This removes excessive camera panning on the mission start.
+static function Denmother_BleedingOutVisualizationTicked(XComGameState VisualizeGameState, out VisualizationActionMetadata ActionMetadata, const name EffectApplyResult)
+{
+	local XComGameState_Effect	EffectState;
+	local XComGameState_Unit	UnitState;
+
+	UnitState = XComGameState_Unit(ActionMetadata.StateObject_NewState);
+	if (UnitState == none)
+	{
+		UnitState = XComGameState_Unit(ActionMetadata.StateObject_OldState);
+	}
+	if (UnitState != none)
+	{
+		EffectState = UnitState.GetUnitAffectedByEffectState(class'X2StatusEffects'.default.BleedingOutName);
+		if (EffectState != none)
+		{
+			if (EffectState.FullTurnsTicked == 0)
+			{
+				`LOG("Skipping bleedout visualization tick for the first turn", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+				return;
+			}
+		}
+	}
+	
+	class'X2StatusEffects'.static.BleedingOutVisualizationTicked(VisualizeGameState, ActionMetadata, EffectApplyResult);
 }
 
 static function X2AbilityTemplate Create_OneGoodEye_Passive()
