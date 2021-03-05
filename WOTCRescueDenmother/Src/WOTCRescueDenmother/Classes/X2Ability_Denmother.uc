@@ -30,10 +30,12 @@ static function X2AbilityTemplate Create_ResupplyAmmo()
 	Template.Hostility = eHostility_Neutral;
 
 	//	Targeting and Triggering
+	Template.AbilityTriggers.AddItem(default.PlayerInputTrigger);
 	Template.AbilityToHitCalc = default.DeadEye;
 	Template.AbilityTargetStyle = default.SimpleSingleTarget;
 	Template.TargetingMethod = class'X2TargetingMethod_ResupplyAmmo';
-	Template.AbilityTriggers.AddItem(default.PlayerInputTrigger);
+	Template.SkipRenderOfAOETargetingTiles = true;
+	Template.SkipRenderOfTargetingTemplate = true;	
 
 	Template.AbilityShooterConditions.AddItem(default.LivingShooterProperty);
 	Template.AddShooterEffectExclusions();

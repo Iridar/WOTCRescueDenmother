@@ -25,6 +25,10 @@ simulated function AddX2ActionsForVisualization(XComGameState VisualizeGameState
 
 	if (EffectApplyResult == 'AA_Success')
 	{	
+		//TODO: Catch animation.
+		//PlayAnimation = X2Action_PlayAnimation(class'X2Action_PlayAnimation'.static.AddToVisualizationTree(ActionMetadata, VisualizeGameState.GetContext(), false, ActionMetadata.LastActionAdded));
+		//PlayAnimation.Params.AnimName = 'HL_Reload';
+
 		PlayAnimation = X2Action_PlayAnimation(class'X2Action_PlayAnimation'.static.AddToVisualizationTree(ActionMetadata, VisualizeGameState.GetContext(), false, ActionMetadata.LastActionAdded));
 		PlayAnimation.Params.AnimName = 'HL_Reload';
 
