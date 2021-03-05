@@ -1,5 +1,8 @@
 ﻿Created by Iridar and kexx
 
+
+[WOTC] Rescue Denmother
+
 Allows to rescue Denmother from the first retaliation mission of the campaign and have her join your crew as a soldier. When you deploy on the mission, Denmother will be bleeding out somewhere in the middle of the map, and it's up to you to stabilize, evac her or kill all enemies before she bleeds out. You get 8 turns to do so. 
 
 If you manage to keep her alive, she will join your crew as a regular soldier. She does not have a custom character template, so once you get her, you can customize her however you like.
@@ -104,16 +107,20 @@ Once the first retaliation mission is over, XCOM Archives will be updated with D
 
 [h1]REQUIREMENTS[/h1]
 
-[url=https://steamcommunity.com/sharedfiles/filedetails/?id=1796402257][b][BETA] X2WOTCCommunityHighlander[/b][/url] v1.21 or higher is required.
-[url=https://steamcommunity.com/sharedfiles/filedetails/?id=1127014384][b]Empty WOTC Deco Slots for XCOM Soldiers (+ Some other empty things)[/b][/url] is required, unless you play with [b][url=https://steamcommunity.com/sharedfiles/filedetails/?id=1135440846]Unrestricted Customization - Wotc[/url][/b].
+The mod does not require a new campaign start, but obviously you want it to be active before you deploy on the first retaliation mission.[list]
+[*] [b][url=https://steamcommunity.com/sharedfiles/filedetails/?id=2363075446][WOTC] Iridar's Template Master - Core[/url][/b] is required.
+[*] [url=https://steamcommunity.com/sharedfiles/filedetails/?id=1127014384][b]Empty WOTC Deco Slots for XCOM Soldiers (+ Some other empty things)[/b][/url] is required, unless you play with [b][url=https://steamcommunity.com/sharedfiles/filedetails/?id=1135440846]Unrestricted Customization - Wotc[/url][/b].
+[*] [url=https://steamcommunity.com/workshop/filedetails/?id=1134256495][b]X2WOTCCommunityHighlander[/b][/url] v1.21 or higher is required. [/list]
+The only part of the mod that requires specifically the v1.21 of the Highlander is being able to train additional Keepers in GTS after purchasing their GTS unlock. If you don't care about that, you can use the mod with any Highlander v1.18 or above.
 
-The only part of the mod that requires the BETA Highlander is being able to train additional Keepers in GTS after purchasing their GTS unlock. If you don't care about that, you can use the mod with any Highlander v1.18 or above.
+[h1]INCOMPTABILE MODS[/h1]
 
-[h1]COMPATIBILITY[/h1]
+Appears to be incompatible with [b]LWOTC[/b] - Denmother doesn't appear on the first Haven Defense.
 
-Should be compatible with almost anything. The mod should always respond to the first retaliation mission of the campaign.
+[h1]COMPANION MODS[/h1]
 
-[url=https://steamcommunity.com/sharedfiles/filedetails/?id=1629659010][b][WotC] Infirmaria Ex Mortis[/b][/url] - compatible out of the box. If Denmother dies on the retaliation mission, you should be able to bring her back to life in the Infirmary, as long as you recover her body by evacuating it or killing all enemies on the map.
+[url=https://steamcommunity.com/sharedfiles/filedetails/?id=1629659010][b][WotC] Infirmaria Ex Mortis[/b][/url] - if Denmother dies on the retaliation mission, you should be able to bring her back to life in the Infirmary, as long as you recover her body by evacuating it or killing all enemies on the map.
+
 [url=https://steamcommunity.com/sharedfiles/filedetails/?id=1539942755][b][WOTC] Iridar's Underbarrel Attachments[/b][/url] - the Marksman Carbine has a unique Underbarrel Grenade Launcher model. It will also replace the appearance of all underbarrel attachments, but you're not really meant to be able to equip them on this weapon anyway. 
 
 [h1]CONFIGURATION[/h1]
@@ -121,10 +128,8 @@ Should be compatible with almost anything. The mod should always respond to the 
 The mod is highly configurable through various configuration files in:
 [code]..\steamapps\workshop\content\268500\2189770689\Config\[/code]
 
-[h1]TROUBLESHOOTING[/h1]
-
-If you wish to stay ahead of any potential trouble with this mod, make sure to make a save before deploying on the first retaliation mission, the one you get after a cinematic. Or backup your savegame folder if you're playing on Ironman. 
-If anything looks weird during the mission, enable debug logging in the [i]XComDenmother.ini[/i] config file, load a save before the mission, go on the mission, reproduce the problem and send me your Launch.log file so I can attempt to fix it.
+You can use this console command to add Denmother to your crew at any point during the campaign:
+[code]GiveDenmother[/code]
 
 [h1]CREDITS[/h1]
 

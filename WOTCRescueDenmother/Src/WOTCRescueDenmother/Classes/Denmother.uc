@@ -27,7 +27,7 @@ var config bool NoDenmotherCosmeticsOnRandomlyGeneratedSoldiers;
 //			INTERFACE FUNCTIONS FOR THE OBJECTIVE SYSTEM
 //	====================================================================
 
-static function bool IsMissionFirstRetaliation(name LogName)
+static final function bool IsMissionFirstRetaliation(name LogName)
 {
 	local XComGameState_MissionCalendar		CalendarState;
 	local XComGameStateHistory				History;
@@ -35,6 +35,12 @@ static function bool IsMissionFirstRetaliation(name LogName)
 	local XComGameState_BattleData			BattleData;
 
 	`LOG("IsMissionFirstRetaliation check by:" @ LogName, class'Denmother'.default.bLog, 'IRIDENMOTHER');
+
+	if (LWOTC_IsCurrentMissionIsRetaliation())
+	{
+		`LOG("LWOTC_IsCurrentMissionIsRetaliation check succeeds.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+		return true;
+	}
 
 	History = `XCOMHISTORY;
 	BattleData = XComGameState_BattleData(History.GetSingleGameStateObjectForClass(class'XComGameState_BattleData'));
@@ -72,6 +78,44 @@ static function bool IsMissionFirstRetaliation(name LogName)
 
 	`LOG("IsMissionFirstRetaliation check fails, different mission source:" @ MissionState.Source, class'Denmother'.default.bLog, 'IRIDENMOTHER');
 	return false;
+}
+
+static final function bool LWOTC_IsCurrentMissionIsRetaliation()
+{
+    local String MissionType;
+
+    MissionType = LWOTC_GetCurrentMissionType();
+    return MissionType == "Terror_LW" || MissionType == "Invasion_LW" || MissionType=="Defend_LW";
+}
+
+static private function bool LWOTC_IsFirstDenmotherSpawn()
+{
+	local XComGameState_HeadquartersXCom XComHQ;
+
+	XComHQ = `XCOMHQ;
+
+	return !XComHQ.HasItemByName('IRI_Denmother_ObjectiveDummyItem');
+}
+
+static function string LWOTC_GetCurrentMissionType()
+{
+    local XComGameStateHistory History;
+    local XComGameState_BattleData BattleData;
+    local GeneratedMissionData GeneratedMission;
+    local XComGameState_HeadquartersXCom XComHQ;
+
+    History = `XCOMHISTORY;
+    XComHQ = `XCOMHQ;
+
+    BattleData = XComGameState_BattleData(History.GetSingleGameStateObjectForClass(class'XComGameState_BattleData'));
+    GeneratedMission = XComHQ.GetGeneratedMissionData(BattleData.m_iMissionID);
+    if (GeneratedMission.Mission.sType == "")
+    {
+        // No mission type set. This is probably a tactical quicklaunch.
+        return `TACTICALMISSIONMGR.arrMissions[BattleData.m_iMissionType].sType;
+    }
+
+    return GeneratedMission.Mission.sType;
 }
 
 

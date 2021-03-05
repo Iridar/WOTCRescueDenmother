@@ -1,0 +1,1 @@
+class X2TargetingMethod_ResupplyAmmo extends X2TargetingMethod_Grenade;

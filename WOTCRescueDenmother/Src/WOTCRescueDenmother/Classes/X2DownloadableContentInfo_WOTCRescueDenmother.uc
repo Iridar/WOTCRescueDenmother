@@ -5,15 +5,7 @@ Ammo Belt as secondary weapon. Confers Resupply Ammo ability that reloads the we
 Can be used at range by default? Longer range for bondmates.
 Use magazine model of the target soldier. Will have to use grenade trajectory repurposes for a single target ability.
 Use regular "give" animation at melee range, and grenade underhand animation at other times.
-
-
-
-Changelog:
-Polished camera movement on Denmother mission start.
-Keeper Training unlock in Guerilla Tactics School will now cost 150 supplies on Legendary difficulty, more in line with other GTS unlocks.
-Denmother will now correctly work on new-style Haven Assaults. 
-First Aid ability from the eponymous mod will now work on Denmother during Haven defense.
-Added "GiveDenmother" command that will add Denmother to your crew, regardless of your campaign status.
+LWOTC?
 
 Tests:
 
@@ -69,9 +61,18 @@ static event OnPostMission()
 /// </summary>
 static event OnExitPostMissionSequence()
 {
+	local XComGameState NewGameState;
+
 	if (class'Denmother'.static.IsMissionFirstRetaliation('OnExitPostMissionSequence'))
 	{
 		class'Denmother'.static.FinalizeDenmotherUnitForCrew();
+	}
+
+	if (class'Denmother'.static.LWOTC_IsCurrentMissionIsRetaliation())
+	{
+		NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Denmother: Marking First Retalliation Complete.");
+		class'Denmother'.static.AddItemToHQInventory('IRI_Denmother_ObjectiveDummyItem', NewGameState);
+		`XCOMGAME.GameRuleset.SubmitGameState(NewGameState);
 	}
 }
 
@@ -103,6 +104,7 @@ exec function GiveDenmother()
 	UnitState.SetBackground(class'Denmother'.default.strDenmother_Background_Good);
 	
 	class'Denmother'.static.AddItemToHQInventory('IRI_Denmother_ObjectiveDummyItem_Good', NewGameState);
+	class'Denmother'.static.AddItemToHQInventory('IRI_Keeper_SupplyPack', NewGameState);	
 
 	XComHQ = class'Denmother'.static.GetAndPrepXComHQ(NewGameState);
 	XComHQ.AddToCrew(NewGameState, UnitState);

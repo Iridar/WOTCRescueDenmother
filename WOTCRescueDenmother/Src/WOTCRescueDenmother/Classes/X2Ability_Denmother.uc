@@ -6,10 +6,56 @@ static function array<X2DataTemplate> CreateTemplates()
 {
 	local array<X2DataTemplate> Templates;
 
+	Templates.AddItem(Create_ResupplyAmmo());
+
 	Templates.AddItem(Create_KnockoutAndBleedoutSelf());
 	Templates.AddItem(Create_OneGoodEye_Passive());
 
 	return Templates;
+}
+
+static function X2AbilityTemplate Create_ResupplyAmmo()
+{
+	local X2AbilityTemplate				Template;
+	local X2Effect_ReloadPrimaryWeapon	ReloadEffect;
+	local X2Condition_UnitProperty      TargetCondition;
+
+	`CREATE_X2ABILITY_TEMPLATE(Template, 'IRI_ResupplyAmmo');
+
+	//	Icon Setup
+	Template.IconImage = "img:///IRIKeeperBackpack.UI.UIPerk_ResupplyAmmo";
+	Template.bDontDisplayInAbilitySummary = false;
+	Template.AbilitySourceName = 'eAbilitySource_Perk';
+	Template.eAbilityIconBehaviorHUD = eAbilityIconBehavior_AlwaysShow;
+	Template.Hostility = eHostility_Neutral;
+
+	//	Targeting and Triggering
+	Template.AbilityToHitCalc = default.DeadEye;
+	Template.AbilityTargetStyle = default.SimpleSingleTarget;
+	Template.TargetingMethod = class'X2TargetingMethod_ResupplyAmmo';
+	Template.AbilityTriggers.AddItem(default.PlayerInputTrigger);
+
+	Template.AbilityShooterConditions.AddItem(default.LivingShooterProperty);
+	Template.AddShooterEffectExclusions();
+
+	TargetCondition = new class'X2Condition_UnitProperty';
+	TargetCondition.ExcludeHostileToSource = true;
+	TargetCondition.ExcludeFriendlyToSource = false;
+	TargetCondition.RequireSquadmates = false;
+	TargetCondition.FailOnNonUnits = true;
+	TargetCondition.ExcludeDead = true;
+	TargetCondition.ExcludeRobotic = false;
+	TargetCondition.ExcludeUnableToAct = true;
+	Template.AbilityTargetConditions.AddItem(TargetCondition);
+	Template.AbilityTargetConditions.AddItem(default.GameplayVisibilityCondition);
+
+	ReloadEffect = new class'X2Effect_ReloadPrimaryWeapon';
+	Template.AddTargetEffect(ReloadEffect);
+
+	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState; 
+	Template.BuildVisualizationFn = TypicalAbility_BuildVisualization;
+
+	return Template;
 }
 
 static function X2AbilityTemplate Create_KnockoutAndBleedoutSelf()

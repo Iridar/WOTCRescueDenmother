@@ -69,6 +69,9 @@ tags= war of the chosen, soldier class, soldier customization, weapon</Descripti
     <Content Include="Content\IRIDenmotherUI.upk">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Content\IRIKeeperBackpack.upk">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Localization\WOTCRescueDenmother.int">
       <SubType>Content</SubType>
     </Content>
@@ -94,10 +97,16 @@ tags= war of the chosen, soldier class, soldier customization, weapon</Descripti
     <Content Include="Src\WOTCRescueDenmother\Classes\X2Effect_OneGoodEye.uc">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Src\WOTCRescueDenmother\Classes\X2Effect_ReloadPrimaryWeapon.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\WOTCRescueDenmother\Classes\X2EventListener_Denmother.uc">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\WOTCRescueDenmother\Classes\X2StrategyElement_DenmotherReward.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTCRescueDenmother\Classes\X2TargetingMethod_ResupplyAmmo.uc">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\WOTCRescueDenmother\Classes\XComGameState_DenmotherHealingProject.uc">
