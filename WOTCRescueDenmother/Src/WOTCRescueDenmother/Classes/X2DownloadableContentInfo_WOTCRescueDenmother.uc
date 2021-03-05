@@ -17,6 +17,15 @@ Added "GiveDenmother" command that will add Denmother to your crew, regardless o
 
 Tests:
 
+//	Sweep Objective complete
+//		Alive? Add to crew -handled
+//		Dead? Add to crew - h
+
+//	Sweep Objective NOT complete
+//		Alive (= evacuated)? Add to crew --
+//		Dead? Do not add to crew -- 
+//		Denmother evacced, but rest of the squad is dead? -- expected behavior: you have denmother walk out of skyranger, and she's on the reward screen. --
+//		Denmother is not evacced, and the squad is dead? --expected behavior: no denmother, end screen mentions her as VIP lost --
 
 */
 

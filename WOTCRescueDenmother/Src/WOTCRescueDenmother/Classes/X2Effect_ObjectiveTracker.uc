@@ -1,7 +1,30 @@
 class X2Effect_ObjectiveTracker extends X2Effect_Persistent;
 
 //	This effect is responsible for tracking Denmother throughout the mission and adjusting the displayed objective status in the UI.
-//	The effect also handles handling Denmother herself, and adding her to 
+//	The effect also handles handling Denmother herself, and adding her to squad.
+
+simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffectParameters, XComGameState_BaseObject kNewTargetState, XComGameState NewGameState, XComGameState_Effect NewEffectState)
+{
+	local XComGameState_HeadquartersXCom	XComHQ;
+	local XComGameState_Unit				UnitState;
+
+	UnitState = XComGameState_Unit(NewGameState.GetGameStateForObjectID(ApplyEffectParameters.TargetStateObjectRef.ObjectID));
+	if (UnitState != none)
+	{
+		`LOG("X2Effect_ObjectiveTracker:OnEffectAdded: adding Denmother to squad.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+
+		// Add her to squad so she doesn't get cleaned up by the game if she's evacuated as a corpse.
+		// Can't do it after she's created, cuz then she gets to deploy in Skyranger matinee :joy:
+		XComHQ = class'Denmother'.static.GetAndPrepXComHQ(NewGameState);
+		XComHQ.Squad.AddItem(UnitState.GetReference());
+	}
+	else
+	{
+		`LOG("X2Effect_ObjectiveTracker:OnEffectAdded: Error, could not find Denmother's unit state in New Game State.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+	}
+
+	super.OnEffectAdded(ApplyEffectParameters, kNewTargetState, NewGameState, NewEffectState);
+}
 
 function RegisterForEvents(XComGameState_Effect EffectGameState)
 {

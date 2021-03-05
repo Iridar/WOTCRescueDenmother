@@ -16,8 +16,10 @@ static function X2AbilityTemplate Create_KnockoutAndBleedoutSelf()
 {
 	local X2AbilityTemplate				Template;
 	local X2Effect_Persistent			BleedingOut;
+	local X2Effect_Persistent			UnconsciousEffect;
 	local X2Effect_ObjectiveTracker		ObjectiveTrackerEffect;
 	local X2Effect_BreakConcealmentListener	BreakConcealmentListener;
+
 	
 	`CREATE_X2ABILITY_TEMPLATE(Template, 'IRI_KnockoutAndBleedoutSelf');
 
@@ -33,7 +35,10 @@ static function X2AbilityTemplate Create_KnockoutAndBleedoutSelf()
 	Template.AbilityTargetStyle = default.SelfTarget;
 	Template.AbilityTriggers.AddItem(default.UnitPostBeginPlayTrigger);
 
-	Template.AddTargetEffect(class'X2StatusEffects'.static.CreateUnconsciousStatusEffect());
+	//	Change effect set up a little to reduce the amount of camera panning towards Denmother.
+	UnconsciousEffect = class'X2StatusEffects'.static.CreateUnconsciousStatusEffect();
+	UnconsciousEffect.VisualizationFn = none;
+	Template.AddTargetEffect(UnconsciousEffect);
 
 	BleedingOut = class'X2StatusEffects'.static.CreateBleedingOutStatusEffect();
 	BleedingOut.iNumTurns = default.DenmotherBleedoutTurns;

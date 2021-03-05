@@ -168,33 +168,56 @@ static function CHEventListenerTemplate Create_StrategyListenerTemplate()
 	Template.AddCHEvent('ValidateGTSClassTraining', ELR_GTS, ELD_Immediate);
 	if (class'Denmother'.default.bAccelerateDenmotherHealing)
 	{
-		Template.AddCHEvent('PostMissionUpdateSoldierHealing', ListenerEventFunction_Healing, ELD_Immediate);
+		Template.AddCHEvent('PostMissionUpdateSoldierHealing', ListenerEventFunction_Healing, ELD_OnStateSubmitted);
 	}
 
 	return Template;
 }
 
-static function EventListenerReturn ListenerEventFunction_Healing(Object EventData, Object EventSource, XComGameState NewGameState, Name Event, Object CallbackData)
+static function EventListenerReturn ListenerEventFunction_Healing(Object EventData, Object EventSource, XComGameState GameState, Name Event, Object CallbackData)
 {
-	local XComGameState_Unit UnitState;
-	local UnitValue			 UV;
+	local XComGameState									NewGameState;
+	local XComGameState_Unit							UnitState;
+	local XComGameState_HeadquartersProjectHealSoldier	HealingProject;
+	local XComGameState_DenmotherHealingProject			NewHealingProject;
+	local UnitValue										UV;
+	local XComGameStateHistory							History;
+	local XComGameState_HeadquartersXCom				XComHQ;
 
-	`LOG("PostMissionUpdateSoldierHealing ListenerEventFunction triggered", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+	UnitState = XComGameState_Unit(EventSource);
 
-	if (class'Denmother'.static.IsMissionFirstRetaliation('PostMissionUpdateSoldierHealing'))
+	if (UnitState.GetUnitValue('IRI_ThisUnitIsDenmother_Value', UV) && UnitState.IsAlive() && class'Denmother'.static.IsMissionFirstRetaliation('PostMissionUpdateSoldierHealing'))
 	{
-		UnitState = XComGameState_Unit(EventSource);
-		UnitState = XComGameState_Unit(NewGameState.GetGameStateForObjectID(UnitState.ObjectID));
+		`LOG("PostMissionUpdateSoldierHealing ListenerEventFunction triggered for Denmother.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
 
-		if (UnitState.GetUnitValue('IRI_ThisUnitIsDenmother_Value', UV) && UnitState.IsAlive())
+		History = `XCOMHISTORY;
+		foreach History.IterateByClassType(class'XComGameState_HeadquartersProjectHealSoldier', HealingProject)
 		{
-			UnitState.LowestHP = UnitState.GetBaseStat(eStat_HP) * class'Denmother'.default.bHealthMultiplier;
-			UnitState.SetCurrentStat(eStat_HP, UnitState.LowestHP);
-			`LOG("Set current HP to:" @ UnitState.LowestHP, class'Denmother'.default.bLog, 'IRIDENMOTHER');
+			if (HealingProject.ProjectFocus == UnitState.GetReference())
+			{
+				NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Replacing Denmother Healing Project");
+
+				`LOG("Replacing Denmother Healing Project.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+
+				XComHQ = class'Denmother'.static.GetAndPrepXComHQ(NewGameState);
+
+				XComHQ.Projects.RemoveItem(HealingProject.GetReference());
+				NewGameState.RemoveStateObject(HealingProject.ObjectID);
+
+				NewHealingProject = XComGameState_DenmotherHealingProject(NewGameState.CreateNewStateObject(class'XComGameState_DenmotherHealingProject'));
+				NewHealingProject.SetProjectFocus(UnitState.GetReference());
+				XComHQ.Projects.AddItem(NewHealingProject.GetReference());
+
+				`XCOMGAME.GameRuleset.SubmitGameState(NewGameState);
+				return ELR_NoInterrupt;
+			}
 		}
 	}
+	
 	return ELR_NoInterrupt;
 }
+
+
 
 static function EventListenerReturn ELR_GTS(Object EventData, Object EventSource, XComGameState NewGameState, Name Event, Object CallbackData)
 {

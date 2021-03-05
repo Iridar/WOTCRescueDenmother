@@ -303,7 +303,6 @@ static function FinalizeDenmotherUnitForCrew()
 		{
 			XComHQ = class'Denmother'.static.GetAndPrepXComHQ(NewGameState);
 			XComHQ.AddToCrew(NewGameState, UnitState);
-			`HQPRES.UINewStaffAvailable(UnitState.GetReference());
 		}
 		//else // Unnecessary, handled by the game automatically by moving dead units from squad. 
 		//{
@@ -311,6 +310,12 @@ static function FinalizeDenmotherUnitForCrew()
 		//}		
 
 		`XCOMGAME.GameRuleset.SubmitGameState(NewGameState);
+
+		// Show pop-up after submitting the gamestate so that Denmother's name and appearance have a chance to update for the portrait.
+		if (UnitState.IsAlive())
+		{
+			`HQPRES.UINewStaffAvailable(UnitState.GetReference());
+		}
 	}
 }
 
@@ -322,7 +327,6 @@ static function XComGameState_Unit CreateDenmotherUnit(XComGameState NewGameStat
 {
 	local XComGameState_Unit				NewUnitState;
 	local XComGameState_Analytics			Analytics;
-	local XComGameState_HeadquartersXCom	XComHQ;
 	local int								idx, StartingIdx;
 
 	NewUnitState = CreateSoldier(NewGameState);
@@ -332,10 +336,6 @@ static function XComGameState_Unit CreateDenmotherUnit(XComGameState NewGameStat
 	{
 		//	Cleaned up manually in FinalizeDenmother
 		NewUnitState.SetUnitFloatValue('IRI_ThisUnitIsDenmother_Value', 1, eCleanup_Never);
-
-		// Add her to squad immediately so she doesn't get cleaned up by the game if she's evacuated as a corpse.
-		XComHQ = class'Denmother'.static.GetAndPrepXComHQ(NewGameState);
-		XComHQ.Squad.AddItem(NewUnitState.GetReference());
 	}
 
 	SetDenmotherAppearance(NewUnitState);

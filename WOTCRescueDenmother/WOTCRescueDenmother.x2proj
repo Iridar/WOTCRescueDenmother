@@ -100,6 +100,9 @@ tags= war of the chosen, soldier class, soldier customization, weapon</Descripti
     <Content Include="Src\WOTCRescueDenmother\Classes\X2StrategyElement_DenmotherReward.uc">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Src\WOTCRescueDenmother\Classes\XComGameState_DenmotherHealingProject.uc">
+      <SubType>Content</SubType>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildLocalExtensionPath)\XCOM2.targets" />
 </Project>
