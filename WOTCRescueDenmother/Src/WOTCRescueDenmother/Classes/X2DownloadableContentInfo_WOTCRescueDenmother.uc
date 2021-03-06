@@ -1,11 +1,23 @@
 class X2DownloadableContentInfo_WOTCRescueDenmother extends X2DownloadableContentInfo;
 
 /*
-Ammo Belt as secondary weapon. Confers Resupply Ammo ability that reloads the weapon of a nearby soldier. Can pass on special Ammo effects? Requires perk? Ability is turn ending by default?
-Can be used at range by default? Longer range for bondmates.
-Use magazine model of the target soldier. Will have to use grenade trajectory repurposes for a single target ability.
-Use regular "give" animation at melee range, and grenade underhand animation at other times.
-LWOTC?
+LWOTC tests?
+
+TODO:
+investigate log errors associated with the projectile and animations
+Make target turn to the Keeper when receiving ammo
+Add catch animation
+Make it transfer special ammo effects.
+Different animations when used at melee range.
+Range Limit and Longer range for bondmates.
+Localize flyover
+
+Test how projectile meshes work with upgraded weapons.
+
+Additional abilities: 
+- Resupplying puts on Overwatch? What if you don't wanna, though?
+- Resupplying at close range makes target's attacks non-turn ending. Also grants infinite ammo?
+
 
 Tests:
 

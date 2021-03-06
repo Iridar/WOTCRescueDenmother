@@ -1,5 +1,5 @@
 class X2UnifiedProjectile_ResupplyAmmo extends X2UnifiedProjectile;
-
+/*
 function ConfigureNewProjectile(X2Action_Fire InFireAction, 
 								AnimNotify_FireWeaponVolley InVolleyNotify,
 								XComGameStateContext_Ability AbilityContext,
@@ -9,6 +9,7 @@ function ConfigureNewProjectile(X2Action_Fire InFireAction,
 
 	bWasHit = AbilityContext.IsResultContextHit();
 }
+*/
 
 //A projectile instance's time has come - create the particle effect and start updating it in Tick
 function FireProjectileInstance(int Index)
@@ -220,7 +221,14 @@ function FireProjectileInstance(int Index)
 
 		CreateSkeletalMeshActor = Spawn(class'SkeletalMeshActorSpawnable', self, , Projectiles[Index].InitialSourceLocation, rotator(Projectiles[Index].InitialTravelDirection));
 		Projectiles[Index].TargetAttachActor = CreateSkeletalMeshActor;
-		CreateSkeletalMeshActor.SkeletalMeshComponent.SetSkeletalMesh(Projectiles[Index].ProjectileElement.AttachSkeletalMesh);
+
+		//	ADDED BY IRIDAR
+
+		//CreateSkeletalMeshActor.SkeletalMeshComponent.SetSkeletalMesh(Projectiles[Index].ProjectileElement.AttachSkeletalMesh);
+
+		CreateSkeletalMeshActor.SkeletalMeshComponent.SetSkeletalMesh(GetProjectileSkeletalMesh());
+		//	END OF ADDED
+
 		if (Projectiles[Index].ProjectileElement.CopyWeaponAppearance && SourceWeapon.m_kGameWeapon != none)
 		{
 			SourceWeapon.m_kGameWeapon.DecorateWeaponMesh(CreateSkeletalMeshActor.SkeletalMeshComponent);
@@ -473,6 +481,163 @@ function FireProjectileInstance(int Index)
 		}
 		// End Issue #10
 	}
+}
+
+private function SkeletalMesh GetProjectileSkeletalMesh()
+{
+	local XComGameState_Unit		TargetUnit;
+	local XComGameState_Item		PrimaryWeapon;
+	local X2WeaponTemplate			PrimaryWeaponTemplate;
+	local SkeletalMesh				ReturnMesh;
+	
+	TargetUnit = XComGameState_Unit(`XCOMHISTORY.GetGameStateForObjectID(AbilityContextPrimaryTargetID));
+	if (TargetUnit == none)
+		return GetPlaceholderMesh();
+
+	//`LOG("GetProjectileSkeletalMesh target unit:" @ TargetUnit.GetFullName() @ TargetUnit.GetSoldierClassTemplateName(),, 'IRITEST');
+
+	PrimaryWeapon = TargetUnit.GetPrimaryWeapon();
+	if (PrimaryWeapon == none)
+		return GetPlaceholderMesh();
+
+	PrimaryWeaponTemplate = X2WeaponTemplate(PrimaryWeapon.GetMyTemplate());
+	if (PrimaryWeaponTemplate == none)
+		return GetPlaceholderMesh();
+		
+	ReturnMesh = GetMagazineMesh(PrimaryWeaponTemplate, PrimaryWeapon);
+	if (ReturnMesh != none)
+		return ReturnMesh;
+
+	//`LOG("Did not find the right mesh, falling back.",, 'IRITEST');
+
+	//	Throw a generic rifle magazine if we can't determine how this weapon's magazine is supposed to look like.
+	switch (PrimaryWeaponTemplate.WeaponTech)
+	{
+	case 'magnetic':
+	case 'laser':
+		return SkeletalMesh(`CONTENT.RequestGameArchetype("MagAssaultRifle.Meshes.SM_MagAssaultRifle_MagA"));
+	case 'beam':
+	case 'coil':
+		return SkeletalMesh(`CONTENT.RequestGameArchetype("BeamAssaultRifle.Meshes.SM_BeamAssaultRifle_MagA"));
+	case 'conventional':
+		return SkeletalMesh(`CONTENT.RequestGameArchetype("ConvAssaultRifle.Meshes.SM_ConvAssaultRifle_MagA"));
+	default:
+		return GetPlaceholderMesh();
+	}
+}
+
+private function SkeletalMesh GetPlaceholderMesh()
+{
+	return SkeletalMesh(`CONTENT.RequestGameArchetype("ConvAssaultRifle.Meshes.SM_ConvAssaultRifle_MagA"));
+}
+
+private function SkeletalMesh GetMagazineMesh(const X2WeaponTemplate LocWeaponTemplate, const XComGameState_Item ItemState)
+{
+	local delegate<X2TacticalGameRulesetDataStructures.CheckUpgradeStatus> ValidateAttachmentFn;
+	local array<X2WeaponUpgradeTemplate>	UpgradeTemplates;
+	local array<WeaponAttachment>			Attachments;
+	local WeaponAttachment					Attachment;
+	local array<name>						LikelySocketNames;
+	local int	i, j, k;
+	local bool	bReplaced;
+
+	//`LOG("Begin GetMagazineMesh" @ LocWeaponTemplate.DataName @ ItemState.GetMyTemplateName(),, 'IRITEST');
+	
+	//  copy all default attachments from the weapon template
+	for (i = 0; i < LocWeaponTemplate.DefaultAttachments.Length; ++i)
+	{
+		Attachments.AddItem(LocWeaponTemplate.DefaultAttachments[i]);
+	}
+
+	UpgradeTemplates = ItemState.GetMyWeaponUpgradeTemplates();
+	for (i = 0; i < UpgradeTemplates.Length; ++i)
+	{
+		//	We're only interested in extended mags or autoloaders.
+		if (InStr(UpgradeTemplates[i].DataName, "ReloadUpgrade") == INDEX_NONE &&
+			InStr(UpgradeTemplates[i].DataName, "ClipSizeUpgrade") == INDEX_NONE)
+		{
+			continue;
+		}
+
+		for (j = 0; j < UpgradeTemplates[i].UpgradeAttachments.Length; ++j)
+		{
+			if (UpgradeTemplates[i].UpgradeAttachments[j].ApplyToWeaponTemplate != LocWeaponTemplate.DataName)
+				continue;
+
+			ValidateAttachmentFn = UpgradeTemplates[i].UpgradeAttachments[j].ValidateAttachmentFn;
+			if( ValidateAttachmentFn != None && !ValidateAttachmentFn(UpgradeTemplates) )
+			{
+				continue;
+			}
+
+			bReplaced = false;
+			//  look for sockets already known that an upgrade will replace
+			for (k = 0; k < Attachments.Length; ++k)
+			{
+				if( Attachments[k].AttachSocket == UpgradeTemplates[i].UpgradeAttachments[j].AttachSocket )
+				{
+					Attachments[k].AttachMeshName = UpgradeTemplates[i].UpgradeAttachments[j].AttachMeshName;
+					bReplaced = true;
+					break;
+				}
+			}
+			//  if not replacing an existing mesh, add the upgrade attachment as a new one
+			if (!bReplaced)
+			{
+				Attachments.AddItem(UpgradeTemplates[i].UpgradeAttachments[j]);
+			}
+		}
+	}	
+
+	//`LOG("Found valid attachments:" @ Attachments.Length,, 'IRITEST');
+
+	GetLikelyMagSocketNames(LocWeaponTemplate.DataName, LikelySocketNames);
+	
+	foreach Attachments(Attachment)
+	{
+		//`LOG("Looking at an attachment with socket:" @ Attachment.AttachSocket @ "and mesh:" @ Attachment.AttachMeshName,, 'IRITEST');
+		if (LikelySocketNames.Find(Attachment.AttachSocket) != INDEX_NONE && Attachment.AttachMeshName != "")
+		{
+			//`LOG("It's valid, returning mesh",, 'IRITEST');
+			return SkeletalMesh(`CONTENT.RequestGameArchetype(Attachment.AttachMeshName));
+		}
+	}
+	return none;
+}
+
+private function GetLikelyMagSocketNames(const name WeaponTemplateName, out array<name> LikelySocketNames)
+{
+	local array<X2WeaponUpgradeTemplate>	UpgradeTemplates;
+	local X2WeaponUpgradeTemplate			UpgradeTemplate;
+	local WeaponAttachment					Attachment;
+
+	GetMagazineUpgradeTemplates(UpgradeTemplates);
+	foreach UpgradeTemplates(UpgradeTemplate)
+	{
+		foreach UpgradeTemplate.UpgradeAttachments(Attachment)
+		{
+			if (Attachment.ApplyToWeaponTemplate == WeaponTemplateName && Attachment.AttachSocket != '' && Attachment.AttachMeshName != "")
+			{
+				//`LOG("Found likely socket:" @ Attachment.AttachSocket,, 'IRITEST');
+				LikelySocketNames.AddItem(Attachment.AttachSocket);
+			}
+		}
+	}
+}
+
+static private function GetMagazineUpgradeTemplates(out array<X2WeaponUpgradeTemplate> m_arrWeaponUpgradeTemplates)
+{
+	local X2ItemTemplateManager ItemMgr;
+
+	ItemMgr = class'X2ItemTemplateManager'.static.GetItemTemplateManager();
+
+	m_arrWeaponUpgradeTemplates.AddItem(X2WeaponUpgradeTemplate(ItemMgr.FindItemTemplate('ClipSizeUpgrade_Bsc')));
+	m_arrWeaponUpgradeTemplates.AddItem(X2WeaponUpgradeTemplate(ItemMgr.FindItemTemplate('ClipSizeUpgrade_Adv')));
+	m_arrWeaponUpgradeTemplates.AddItem(X2WeaponUpgradeTemplate(ItemMgr.FindItemTemplate('ClipSizeUpgrade_Sup')));
+
+	m_arrWeaponUpgradeTemplates.AddItem(X2WeaponUpgradeTemplate(ItemMgr.FindItemTemplate('ReloadUpgrade_Bsc')));
+	m_arrWeaponUpgradeTemplates.AddItem(X2WeaponUpgradeTemplate(ItemMgr.FindItemTemplate('ReloadUpgrade_Adv')));
+	m_arrWeaponUpgradeTemplates.AddItem(X2WeaponUpgradeTemplate(ItemMgr.FindItemTemplate('ReloadUpgrade_Sup')));
 }
 
 private function AdjustGrenadePath(XComPrecomputedPath GrenadePath, vector TargetLocation)
