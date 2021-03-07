@@ -10,9 +10,7 @@ Add catch animation
 Make it transfer special ammo effects.
 Different animations when used at melee range.
 Range Limit and Longer range for bondmates.
-Localize flyover
 
-Test how projectile meshes work with upgraded weapons.
 
 Additional abilities: 
 - Resupplying puts on Overwatch? What if you don't wanna, though?

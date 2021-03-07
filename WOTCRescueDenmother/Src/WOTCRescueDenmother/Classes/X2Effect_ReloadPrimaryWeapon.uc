@@ -1,5 +1,7 @@
 class X2Effect_ReloadPrimaryWeapon extends X2Effect;
 
+var localized string strWeaponReloaded;
+
 simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffectParameters, XComGameState_BaseObject kNewTargetState, XComGameState NewGameState, XComGameState_Effect NewEffectState)
 {
 	local XComGameState_Unit UnitState;
@@ -33,7 +35,7 @@ simulated function AddX2ActionsForVisualization(XComGameState VisualizeGameState
 		PlayAnimation.Params.AnimName = 'HL_Reload';
 
 		SoundAndFlyOver = X2Action_PlaySoundAndFlyOver(class'X2Action_PlaySoundAndFlyOver'.static.AddToVisualizationTree(ActionMetadata, VisualizeGameState.GetContext(), false, ActionMetadata.LastActionAdded));
-		SoundAndFlyOver.SetSoundAndFlyOverParameters(None, "WEAPON RELOADED", '', eColor_Good);
+		SoundAndFlyOver.SetSoundAndFlyOverParameters(None, strWeaponReloaded, '', eColor_Good, "img:///UILibrary_PerkIcons.UIPerk_reload");
 	}	
 }
 /*
