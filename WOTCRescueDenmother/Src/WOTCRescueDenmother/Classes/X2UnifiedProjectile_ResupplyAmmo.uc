@@ -651,13 +651,16 @@ private function AdjustGrenadePath(XComPrecomputedPath GrenadePath, vector Targe
 	local vector LineMidPoint, CurveMidPoint;
 	local vector CurveAdjust;
 	local float AlphaCurveAdjust;
+	local vector NewTargetLocation;
 
 	iKeyframes = GrenadePath.iNumKeyframes;
+	NewTargetLocation = TargetLocation;
+	NewTargetLocation.Z += 32; // Aim higher, because soldier tends to be crouched when the throw happens.
 
 	//	Calculate the vector difference between given vector location (target's chest/head) and the current end of the grenade path (target's feet)
-	vDif = TargetLocation - GrenadePath.akKeyframes[iKeyframes - 1].vLoc;
+	vDif = NewTargetLocation - GrenadePath.akKeyframes[iKeyframes - 1].vLoc;
 
-	LineMidPoint = (TargetLocation + GrenadePath.akKeyframes[0].vLoc) / 2;
+	LineMidPoint = (NewTargetLocation + GrenadePath.akKeyframes[0].vLoc) / 2;
 	CurveMidPoint = GrenadePath.akKeyframes[iKeyframes / 2].vLoc;
 
 	//	Filthy hack. For some reason having it the same as in UnifiedProjectile doesn't work.
@@ -665,7 +668,7 @@ private function AdjustGrenadePath(XComPrecomputedPath GrenadePath, vector Targe
 
 	//	Not sure if flipping these bools is necessary
 	GrenadePath.bUseOverrideTargetLocation = true;
-	GrenadePath.OverrideTargetLocation = TargetLocation;
+	GrenadePath.OverrideTargetLocation = NewTargetLocation;
 
 	GrenadePath.bUseOverrideSourceLocation = true;
 	GrenadePath.OverrideSourceLocation = GrenadePath.akKeyframes[0].vLoc;

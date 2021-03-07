@@ -126,6 +126,8 @@ static function OnPostTemplatesCreated()
 {
 	local X2ItemTemplateManager ItemTemplateManager;
 
+	PatchCharacterTemplates();
+
 	ItemTemplateManager = class'X2ItemTemplateManager'.static.GetItemTemplateManager();
 
 	AddCritUpgrade(ItemTemplateManager, 'CritUpgrade_Bsc');
@@ -155,6 +157,35 @@ static function OnPostTemplatesCreated()
 	AddFreeKillUpgrade(ItemTemplateManager, 'FreeKillUpgrade_Bsc');
 	AddFreeKillUpgrade(ItemTemplateManager, 'FreeKillUpgrade_Adv');
 	AddFreeKillUpgrade(ItemTemplateManager, 'FreeKillUpgrade_Sup');
+}
+
+static private function PatchCharacterTemplates()
+{
+    local X2CharacterTemplateManager    CharMgr;
+    local X2CharacterTemplate           CharTemplate;
+	local array<X2DataTemplate>			DifficultyVariants;
+	local X2DataTemplate				DifficultyVariant;
+	local X2DataTemplate				DataTemplate;
+	local XComContentManager			Content;
+	
+    CharMgr = class'X2CharacterTemplateManager'.static.GetCharacterTemplateManager();
+	Content = `CONTENT;
+
+	//	Cycle through all "humanoid" character templates
+	foreach CharMgr.IterateTemplates(DataTemplate, none)
+	{
+		CharMgr.FindDataTemplateAllDifficulties(DataTemplate.DataName, DifficultyVariants);
+		foreach DifficultyVariants(DifficultyVariant)
+		{
+			CharTemplate = X2CharacterTemplate(DifficultyVariant);
+
+			if (CharTemplate != none && CharTemplate.bIsSoldier && CharTemplate.UnitHeight == 2 && CharTemplate.UnitSize == 1)
+			{
+				//	Add AnimSet with catching spare magazines thrown by Resupply Ammo ability.
+				CharTemplate.AdditionalAnimSets.AddItem(AnimSet(Content.RequestGameArchetype("IRIKeeperBackpack.Anims.AS_CatchSupplies")));
+			}
+		}
+	}
 }
 
 
