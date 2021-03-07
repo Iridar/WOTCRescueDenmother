@@ -4,11 +4,9 @@ class X2DownloadableContentInfo_WOTCRescueDenmother extends X2DownloadableConten
 LWOTC tests?
 
 TODO:
-Make target turn to the Keeper when receiving ammo
 Make it transfer special ammo effects.
 Different animations when used at melee range?
 Range Limit and action cost, and Longer range for bondmates.
-
 
 Additional abilities: 
 - Resupplying puts on Overwatch? What if you don't wanna, though?
