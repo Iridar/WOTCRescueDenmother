@@ -40,7 +40,7 @@ function FireProjectileInstance(int Index)
 	local XComGameState_Unit ShooterState;
 
 	local SkeletalMeshActorSpawnable CreateSkeletalMeshActor;
-	local XComAnimNodeBlendDynamic tmpNode;
+	//local XComAnimNodeBlendDynamic tmpNode;
 	local CustomAnimParams AnimParams;
 	local AnimSequence FoundAnimSeq;
 	local AnimNodeSequence PlayingSequence;
@@ -242,14 +242,14 @@ function FireProjectileInstance(int Index)
 		// literally, the only thing that sets this variable is AbilityGrenade - Josh
 		if (AbilityState.GetMyTemplate().bHideWeaponDuringFire)
 			SourceWeapon.Mesh.SetHidden(true);
-
+		/*
 		tmpNode = XComAnimNodeBlendDynamic(CreateSkeletalMeshActor.SkeletalMeshComponent.Animations.FindAnimNode('BlendDynamic'));
 		if (tmpNode != none)
 		{
 			AnimParams.AnimName = 'NO_Idle';
 			AnimParams.Looping = true;
 			tmpNode.PlayDynamicAnim(AnimParams);
-		}
+		}*/
 	}
 
 	// handy debugging helper, just uncomment this and the declarations at the top
@@ -674,7 +674,7 @@ private function AdjustGrenadePath(XComPrecomputedPath GrenadePath, vector Targe
 	GrenadePath.OverrideSourceLocation = GrenadePath.akKeyframes[0].vLoc;
 
 	//	Cycle through current points of the path.
-	for (i = 0; i < iKeyframes; i++)
+	for (i = 1; i < iKeyframes; i++)
 	{	
 		AlphaCurveAdjust = -(Abs(i - iKeyframes / 2) / (iKeyframes / 2)) * (Abs(i - iKeyframes / 2) / (iKeyframes / 2)) + 1.0f;
 		//	This is used to "blend in" the current path point with the desired trajectory.

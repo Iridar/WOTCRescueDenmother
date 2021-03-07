@@ -56,11 +56,71 @@ static function X2AbilityTemplate Create_ResupplyAmmo()
 	ReloadEffect = new class'X2Effect_ReloadPrimaryWeapon';
 	Template.AddTargetEffect(ReloadEffect);
 
+	//Template.CinescriptCameraType = "StandardGrenadeFiring";
 	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState; 
 	//Template.BuildVisualizationFn = GiveRocket_BuildVisualization;
-	Template.BuildVisualizationFn = TypicalAbility_BuildVisualization;
+	//Template.BuildVisualizationFn = TypicalAbility_BuildVisualization;
+	Template.BuildVisualizationFn = ResupplyAmmo_BuildVisualization;
 
 	return Template;
+}
+
+simulated function ResupplyAmmo_BuildVisualization(XComGameState VisualizeGameState)
+{
+	local VisualizationActionMetadata   ActionMetadata;
+	local XComGameStateVisualizationMgr VisMgr;
+	local X2Action						FireAction;
+	local X2Action						ExitCoverAction;
+	local X2Action_ExitCover			TargetExitCover;
+	local X2Action						NewExitCoverAction;
+	local X2Action_MarkerNamed			ExitReplace;
+
+	local XComGameStateHistory			History;
+	local XComGameState_Unit			SourceUnit;
+	local XComGameStateContext_Ability  Context;
+	local X2Action_MoveTurn				MoveTurnAction;
+	local X2Action_TimedWait			TimedWait;
+
+	TypicalAbility_BuildVisualization(VisualizeGameState);
+
+	VisMgr = `XCOMVISUALIZATIONMGR;
+	ExitCoverAction = VisMgr.GetNodeOfType(VisMgr.BuildVisTree, class'X2Action_ExitCover');
+	FireAction = VisMgr.GetNodeOfType(VisMgr.BuildVisTree, class'X2Action_Fire');
+
+	if (ExitCoverAction != none && FireAction != none)
+	{
+		Context = XComGameStateContext_Ability(VisualizeGameState.GetContext());
+
+		//	Replace original Exit Cover Action with a custom one.
+		ActionMetadata = ExitCoverAction.Metadata;
+		NewExitCoverAction = class'X2Action_ExitCoverSupplyThrow'.static.AddToVisualizationTree(ActionMetadata, Context, true,, ExitCoverAction.ParentActions);
+		
+		VisMgr.ConnectAction(FireAction, VisMgr.BuildVisTree, false, NewExitCoverAction);
+
+		ExitReplace = X2Action_MarkerNamed(class'X2Action'.static.CreateVisualizationActionClass(class'X2Action_MarkerNamed', Context));
+		ExitReplace.SetName("ExitActionStub");
+		VisMgr.ReplaceNode(ExitReplace, ExitCoverAction);
+
+		// Make primary target face the shooter.
+		History = `XCOMHISTORY;
+		SourceUnit = XComGameState_Unit(VisualizeGameState.GetGameStateForObjectID(Context.InputContext.SourceObject.ObjectID));
+
+		ActionMetadata.StateObject_OldState = History.GetGameStateForObjectID(Context.InputContext.PrimaryTarget.ObjectID, eReturnType_Reference, VisualizeGameState.HistoryIndex - 1);
+		ActionMetadata.StateObject_NewState = VisualizeGameState.GetGameStateForObjectID(Context.InputContext.PrimaryTarget.ObjectID);
+		ActionMetadata.VisualizeActor = History.GetVisualizer(Context.InputContext.PrimaryTarget.ObjectID);
+
+		TargetExitCover = X2Action_ExitCover(class'X2Action_ExitCover'.static.AddToVisualizationTree(ActionMetadata, Context, false, NewExitCoverAction));
+		TargetExitCover.bSkipExitCoverVisualization = true;
+
+		MoveTurnAction = X2Action_MoveTurn(class'X2Action_MoveTurn'.static.AddToVisualizationTree(ActionMetadata, Context, false, ActionMetadata.LastActionAdded));
+		MoveTurnAction.m_vFacePoint =  `XWORLD.GetPositionFromTileCoordinates(SourceUnit.TileLocation);
+		MoveTurnAction.UpdateAimTarget = true;
+
+		TimedWait = X2Action_TimedWait(class'X2Action_TimedWait'.static.AddToVisualizationTree(ActionMetadata, Context, false, ActionMetadata.LastActionAdded));
+		TimedWait.DelayTimeSec = 5.00f;
+
+		//class'X2Action_EnterCover'.static.AddToVisualizationTree(ActionMetadata, Context, false, ActionMetadata.LastActionAdded);
+	}
 }
 
 simulated function GiveRocket_BuildVisualization(XComGameState VisualizeGameState)

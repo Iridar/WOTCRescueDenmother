@@ -24,11 +24,11 @@ simulated function AddX2ActionsForVisualization(XComGameState VisualizeGameState
 {
 	local X2Action_PlaySoundAndFlyOver	SoundAndFlyOver;
 	local X2Action_PlayAnimation		PlayAnimation;
-	local X2Action_MoveTurn				MoveTurnAction;
-	local XComGameStateContext_Ability  Context;
-	local XComGameState_Unit			SourceUnit;
-	local XComGameStateVisualizationMgr VisMgr;
-	local X2Action						FoundAction;
+	//local X2Action_MoveTurn				MoveTurnAction;
+	//local XComGameStateContext_Ability  Context;
+	//local XComGameState_Unit			SourceUnit;
+	//local XComGameStateVisualizationMgr VisMgr;
+	//local X2Action						FoundAction;
 
 	
 	if (EffectApplyResult == 'AA_Success')
@@ -50,7 +50,7 @@ simulated function AddX2ActionsForVisualization(XComGameState VisualizeGameState
 		PlayAnimation.Params.AnimName = 'HL_Reload';
 
 		SoundAndFlyOver = X2Action_PlaySoundAndFlyOver(class'X2Action_PlaySoundAndFlyOver'.static.AddToVisualizationTree(ActionMetadata, VisualizeGameState.GetContext(), false, ActionMetadata.LastActionAdded));
-		SoundAndFlyOver.SetSoundAndFlyOverParameters(None, strWeaponReloaded, '', eColor_Good, "img:///UILibrary_PerkIcons.UIPerk_reload");
+		SoundAndFlyOver.SetSoundAndFlyOverParameters(None, strWeaponReloaded, 'Reloading', eColor_Good, "img:///UILibrary_PerkIcons.UIPerk_reload");
 	}	
 }
 /*

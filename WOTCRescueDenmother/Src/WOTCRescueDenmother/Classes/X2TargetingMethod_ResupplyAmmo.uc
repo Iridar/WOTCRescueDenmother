@@ -77,7 +77,7 @@ private function AdjustGrenadePath(vector TargetLocation)
 	GrenadePath.OverrideSourceLocation = GrenadePath.akKeyframes[0].vLoc;
 
 	//	Cycle through current points of the path.
-	for (i = 0; i < iKeyframes; i++)
+	for (i = 1; i < iKeyframes; i++)
 	{	
 		AlphaCurveAdjust = -(Abs(i - iKeyframes / 2) / (iKeyframes / 2)) * (Abs(i - iKeyframes / 2) / (iKeyframes / 2)) + 1.0f;
 		//	This is used to "blend in" the current path point with the desired trajectory.
@@ -280,8 +280,8 @@ function DirectSetTarget(int TargetIndex)
 
 function Canceled()
 {
-	super.Canceled();
 	`CAMERASTACK.RemoveCamera(LookatCamera);
+	GrenadePath.ClearPathGraphics();
 	ClearTargetedActors();
 }
 

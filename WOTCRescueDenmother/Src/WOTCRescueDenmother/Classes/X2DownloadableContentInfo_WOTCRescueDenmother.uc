@@ -4,12 +4,10 @@ class X2DownloadableContentInfo_WOTCRescueDenmother extends X2DownloadableConten
 LWOTC tests?
 
 TODO:
-investigate log errors associated with the projectile and animations
 Make target turn to the Keeper when receiving ammo
-Add catch animation
 Make it transfer special ammo effects.
-Different animations when used at melee range.
-Range Limit and Longer range for bondmates.
+Different animations when used at melee range?
+Range Limit and action cost, and Longer range for bondmates.
 
 
 Additional abilities: 
