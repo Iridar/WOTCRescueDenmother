@@ -79,7 +79,7 @@ simulated function ResupplyAmmo_BuildVisualization(XComGameState VisualizeGameSt
 	local XComGameState_Unit			SourceUnit;
 	local XComGameStateContext_Ability  Context;
 	local X2Action_MoveTurn				MoveTurnAction;
-	local X2Action_TimedWait			TimedWait;
+	//local X2Action_TimedWait			TimedWait;
 
 	TypicalAbility_BuildVisualization(VisualizeGameState);
 
@@ -91,7 +91,7 @@ simulated function ResupplyAmmo_BuildVisualization(XComGameState VisualizeGameSt
 	{
 		Context = XComGameStateContext_Ability(VisualizeGameState.GetContext());
 
-		//	Replace original Exit Cover Action with a custom one.
+		//	Replace original Exit Cover Action with a custom one that doesn't make the primary target crouch due to "friendly fire".
 		ActionMetadata = ExitCoverAction.Metadata;
 		NewExitCoverAction = class'X2Action_ExitCoverSupplyThrow'.static.AddToVisualizationTree(ActionMetadata, Context, true,, ExitCoverAction.ParentActions);
 		
@@ -116,10 +116,8 @@ simulated function ResupplyAmmo_BuildVisualization(XComGameState VisualizeGameSt
 		MoveTurnAction.m_vFacePoint =  `XWORLD.GetPositionFromTileCoordinates(SourceUnit.TileLocation);
 		MoveTurnAction.UpdateAimTarget = true;
 
-		TimedWait = X2Action_TimedWait(class'X2Action_TimedWait'.static.AddToVisualizationTree(ActionMetadata, Context, false, ActionMetadata.LastActionAdded));
-		TimedWait.DelayTimeSec = 5.00f;
-
-		//class'X2Action_EnterCover'.static.AddToVisualizationTree(ActionMetadata, Context, false, ActionMetadata.LastActionAdded);
+		// Play idle animation while the projectile travels.
+		class'X2Action_PlayIdleAnimation'.static.AddToVisualizationTree(ActionMetadata, Context, false, ActionMetadata.LastActionAdded);
 	}
 }
 
