@@ -41,15 +41,7 @@ static function X2AbilityTemplate Create_ResupplyAmmo()
 	Template.AbilityShooterConditions.AddItem(default.LivingShooterProperty);
 	Template.AddShooterEffectExclusions();
 
-	TargetCondition = new class'X2Condition_UnitProperty';
-	TargetCondition.ExcludeHostileToSource = true;
-	TargetCondition.ExcludeFriendlyToSource = false;
-	TargetCondition.RequireSquadmates = false;
-	TargetCondition.FailOnNonUnits = true;
-	TargetCondition.ExcludeDead = true;
-	TargetCondition.ExcludeRobotic = false;
-	TargetCondition.ExcludeUnableToAct = true;
-	Template.AbilityTargetConditions.AddItem(TargetCondition);
+	Template.AbilityTargetConditions.AddItem(new class'X2Condition_ResupplyAmmo');
 	Template.AbilityTargetConditions.AddItem(default.GameplayVisibilityCondition);
 
 	//	Remove any existing instances of this effect on the target unit so that we don't get into stupid games 
