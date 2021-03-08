@@ -203,8 +203,8 @@ simulated function ResupplyAmmo_BuildVisualization(XComGameState VisualizeGameSt
 static function X2AbilityTemplate PullAlly()
 {
 	local X2AbilityTemplate                 Template;
-	local X2AbilityCost_ActionPoints        ActionPointCost;
-	local X2AbilityCooldown                 Cooldown;
+	//local X2AbilityCost_ActionPoints        ActionPointCost;
+	//local X2AbilityCooldown                 Cooldown;
 	local X2Condition_UnitProperty          UnitPropertyCondition;
 	local X2Condition_UnblockedNeighborTile UnblockedNeighborTileCondition;
 	local X2AbilityToHitCalc_StandardAim    StandardAim;
@@ -219,14 +219,14 @@ static function X2AbilityTemplate PullAlly()
 	Template.AbilitySourceName = 'eAbilitySource_Perk';
 	Template.eAbilityIconBehaviorHUD = eAbilityIconBehavior_AlwaysShow;
 
-	ActionPointCost = new class'X2AbilityCost_ActionPoints';
-	ActionPointCost.iNumPoints = 1;
-	ActionPointCost.bConsumeAllPoints = false;
-	Template.AbilityCosts.AddItem(ActionPointCost);
+	//ActionPointCost = new class'X2AbilityCost_ActionPoints';
+	//ActionPointCost.iNumPoints = 1;
+	//ActionPointCost.bConsumeAllPoints = false;
+	//Template.AbilityCosts.AddItem(ActionPointCost);
 
-    Cooldown = New class'X2AbilityCooldown';
-	Cooldown.iNumTurns = 5;
-	Template.AbilityCooldown = Cooldown;
+   // Cooldown = New class'X2AbilityCooldown';
+	//Cooldown.iNumTurns = 5;
+	//Template.AbilityCooldown = Cooldown;
 
 	Template.AbilityShooterConditions.AddItem(default.LivingShooterProperty);
 	Template.AddShooterEffectExclusions();
