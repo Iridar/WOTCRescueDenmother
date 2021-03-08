@@ -5,6 +5,7 @@ class X2TargetingMethod_ResupplyAmmo extends X2TargetingMethod_Grenade;
 
 var private X2Camera_LookAtActor LookatCamera;
 var protected int LastTarget;
+var protected vector SourceUnitLocation;
 
 function GetTargetLocations(out array<Vector> TargetLocations)
 {
@@ -105,7 +106,7 @@ function bool GetCurrentTargetFocus(out Vector Focus)
 
 	TargetedActor = GetTargetedActor();
 
-	if(TargetedActor != none)
+	if (TargetedActor != none)
 	{
 		TargetVisualizer = X2VisualizerInterface(TargetedActor);
 		if( TargetVisualizer != None )
@@ -128,6 +129,9 @@ function Init(AvailableAction InAction, int NewTargetIndex)
 	local XComWeapon			WeaponEntity;
 	local PrecomputedPathData	WeaponPrecomputedPathData;
 	local X2AbilityTemplate		AbilityTemplate;
+	local TTile					UnitTileLocation;
+
+	local array<TTile>			Tiles;
 
 	super(X2TargetingMethod).Init(InAction, NewTargetIndex);
 
@@ -171,6 +175,50 @@ function Init(AvailableAction InAction, int NewTargetIndex)
 	LookatCamera.UseTether = false;
 	`CAMERASTACK.AddCamera(LookatCamera);
 
+	AOEMeshActor = `BATTLE.spawn(class'XComInstancedMeshActor');
+	
+	AbilityIsOffensive = GetAbilityIsOffensive();
+	if(AbilityIsOffensive)
+	{
+		AOEMeshActor.InstancedMeshComponent.SetStaticMesh(StaticMesh(DynamicLoadObject("UI_3D.Tile.AOETile", class'StaticMesh')));
+	}
+	else
+	{
+		AOEMeshActor.InstancedMeshComponent.SetStaticMesh(StaticMesh(DynamicLoadObject("UI_3D.Tile.AOETile_Neutral", class'StaticMesh')));
+	}
+
+	// Draw the AOE around the source unit instead of around the target. Raise the origin point a bit so that it draws tiles over low cover.
+	UnitState.GetKeystoneVisibilityLocation(UnitTileLocation);
+	SourceUnitLocation = `XWORLD.GetPositionFromTileCoordinates(UnitTileLocation);
+	SourceUnitLocation.Z += 32;
+	if ( AbilityTemplate.AbilityMultiTargetStyle != none)
+	{
+		//AbilityTemplate.AbilityMultiTargetStyle.GetValidTilesForLocation(Ability, TargetedLocation, Tiles);
+		AbilityTemplate.AbilityMultiTargetStyle.GetValidTilesForLocation(Ability, SourceUnitLocation, Tiles);
+		
+	}
+	/*
+	if( AbilityTemplate.AbilityTargetStyle != none )
+	{
+		AbilityTemplate.AbilityTargetStyle.GetValidTilesForLocation(Ability, TargetedLocation, Tiles);
+	}*/
+
+	if( Tiles.Length > 1 )
+	{
+		//GetTargetedActors(TargetedLocation, CurrentlyMarkedTargets, Tiles);
+		//CheckForFriendlyUnit(CurrentlyMarkedTargets);
+		//MarkTargetedActors(CurrentlyMarkedTargets, (!AbilityIsOffensive) ? FiringUnit.GetTeam() : eTeam_None);
+		DrawAOETiles(Tiles);
+		//DrawSplashRadius();
+
+		//	Probably not necessary to do here, as we do it in Update() anyway, but shouldn't hurt.
+		//GetCurrentTargetFocus(TargetedLocation);
+		//AdjustGrenadePath(TargetedLocation);
+
+		//	Hide-unhide is necessary to prevent the spline from being jumpy
+		//GrenadePath.kRenderablePath.SetHidden(true);
+	}
+
 	DirectSetTarget(0);
 }
 
@@ -198,14 +246,12 @@ function DirectSetTarget(int TargetIndex)
 	local XComPresentationLayer Pres;
 	local UITacticalHUD TacticalHud;
 	local Actor TargetedActor;
-	local array<TTile> Tiles;
 	local TTile TargetedActorTile;
 	local XGUnit TargetedPawn;
 	local vector TargetedLocation;
 	local XComWorldData World;
 	local int NewTarget;
-	local array<Actor> CurrentlyMarkedTargets;
-	local X2AbilityTemplate AbilityTemplate;
+	//local array<Actor> CurrentlyMarkedTargets;
 
 	World = `XWORLD;
 
@@ -221,7 +267,7 @@ function DirectSetTarget(int TargetIndex)
 	TacticalHud.TargetEnemy(Action.AvailableTargets[NewTarget].PrimaryTarget.ObjectID);
 
 	// have the idle state machine look at the new target
-	if(FiringUnit != none)
+	if (FiringUnit != none)
 	{
 		FiringUnit.IdleStateMachine.CheckForStanceUpdate();
 	}
@@ -248,41 +294,15 @@ function DirectSetTarget(int TargetIndex)
 	{
 		TargetedLocation = TargetedActor.Location;
 	}
-
-	AbilityTemplate = Ability.GetMyTemplate();
-
-	if ( AbilityTemplate.AbilityMultiTargetStyle != none)
-	{
-		AbilityTemplate.AbilityMultiTargetStyle.GetValidTilesForLocation(Ability, TargetedLocation, Tiles);
-	}
-
-	if( AbilityTemplate.AbilityTargetStyle != none )
-	{
-		AbilityTemplate.AbilityTargetStyle.GetValidTilesForLocation(Ability, TargetedLocation, Tiles);
-	}
-
-	if( Tiles.Length > 1 )
-	{
-		GetTargetedActors(TargetedLocation, CurrentlyMarkedTargets, Tiles);
-		CheckForFriendlyUnit(CurrentlyMarkedTargets);
-		MarkTargetedActors(CurrentlyMarkedTargets, (!AbilityIsOffensive) ? FiringUnit.GetTeam() : eTeam_None);
-		DrawAOETiles(Tiles);
-		DrawSplashRadius();
-
-		//	Probably not necessary to do here, as we do it in Update() anyway, but shouldn't hurt.
-		//GetCurrentTargetFocus(TargetedLocation);
-		//AdjustGrenadePath(TargetedLocation);
-
-		//	Hide-unhide is necessary to prevent the spline from being jumpy
-		//GrenadePath.kRenderablePath.SetHidden(true);
-	}
 }
 
 function Canceled()
 {
+	super(X2TargetingMethod).Canceled();
+
 	`CAMERASTACK.RemoveCamera(LookatCamera);
 	GrenadePath.ClearPathGraphics();
-	ClearTargetedActors();
+	//ClearTargetedActors();
 }
 
 function Committed()

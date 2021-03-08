@@ -5,8 +5,7 @@ LWOTC tests?
 
 TODO:
 Different animations when used at melee range?
-Range Limit and action cost, and Longer range for bondmates.
-Custom condition
+AOE display for Resupply Ammo
 
 Additional abilities: 
 - Belt Feed: Resupplying adjacent allies makes their attacks non-turn ending, but only while Keeper remains adjacent. Also grants infinite ammo?

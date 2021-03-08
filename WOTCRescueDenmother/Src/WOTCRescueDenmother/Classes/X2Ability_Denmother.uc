@@ -11,6 +11,8 @@ static function array<X2DataTemplate> CreateTemplates()
 	Templates.AddItem(Create_ResupplyAmmo());
 	Templates.AddItem(PurePassive('IRI_SupplyRun', "img:///IRIKeeperBackpack.UI.UIPerk_SupplyRun", false, 'eAbilitySource_Perk', true));
 
+	Templates.AddItem(PullAlly());
+
 	Templates.AddItem(Create_KnockoutAndBleedoutSelf());
 	Templates.AddItem(Create_OneGoodEye_Passive());
 
@@ -27,6 +29,10 @@ static function X2AbilityTemplate Create_ResupplyAmmo()
 	local X2Effect_GrantActionPoints	GrantActionPoints;
 	local X2Condition_AbilityProperty	AbilityProperty;
 
+	local X2AbilityTarget_Single            SingleTarget;
+	local X2AbilityMultiTarget_Radius		Radius;
+	//local X2AbilityPassiveAOE_SelfRadius	PassiveAOEStyle;
+
 	`CREATE_X2ABILITY_TEMPLATE(Template, 'IRI_ResupplyAmmo');
 
 	//	Icon Setup
@@ -39,9 +45,27 @@ static function X2AbilityTemplate Create_ResupplyAmmo()
 	//	Targeting and Triggering
 	Template.AbilityTriggers.AddItem(default.PlayerInputTrigger);
 	Template.AbilityToHitCalc = default.DeadEye;
-	Template.AbilityTargetStyle = default.SimpleSingleTarget;
+
+	SingleTarget = new class'X2AbilityTarget_Single';
+	SingleTarget.OnlyIncludeTargetsInsideWeaponRange = true;
+	SingleTarget.bIncludeSelf = false;
+	SingleTarget.bShowAOE = true;
+	Template.AbilityTargetStyle = SingleTarget;
+	Template.bLimitTargetIcons = false;
+
+	//PassiveAOEStyle = new class'X2AbilityPassiveAOE_SelfRadius';
+	//PassiveAOEStyle.OnlyIncludeTargetsInsideWeaponRange = true;
+	//Template.AbilityPassiveAOEStyle = PassiveAOEStyle;
+	
+	Radius = new class'X2AbilityMultiTarget_Radius';
+	Radius.bUseWeaponRadius = true;
+	Radius.bUseWeaponBlockingCoverFlag = true;
+	Radius.bExcludeSelfAsTargetIfWithinRadius = true;
+	Radius.fTargetRadius = 0.25f;
+	Template.AbilityMultiTargetStyle = Radius;
+
 	Template.TargetingMethod = class'X2TargetingMethod_ResupplyAmmo';
-	Template.SkipRenderOfAOETargetingTiles = true;
+	Template.SkipRenderOfAOETargetingTiles = false;
 	Template.SkipRenderOfTargetingTemplate = true;	
 
 	Template.AbilityShooterConditions.AddItem(default.LivingShooterProperty);
@@ -56,8 +80,8 @@ static function X2AbilityTemplate Create_ResupplyAmmo()
 	UnitProperty.ExcludeRobotic = false;
 	UnitProperty.ExcludeUnableToAct = true;
 	UnitProperty.TreatMindControlledSquadmateAsHostile = true;
-	UnitProperty.RequireWithinRange = true;
-	UnitProperty.WithinRange = `TILESTOUNITS(default.ResupplyAmmoDistanceTiles);
+	//UnitProperty.RequireWithinRange = true;
+	//UnitProperty.WithinRange = `TILESTOUNITS(default.ResupplyAmmoDistanceTiles);
 	Template.AbilityTargetConditions.AddItem(UnitProperty);
 	ResupplyCondition = new class'X2Condition_ResupplyAmmo';
 	Template.AbilityTargetConditions.AddItem(ResupplyCondition);
@@ -173,6 +197,102 @@ simulated function ResupplyAmmo_BuildVisualization(XComGameState VisualizeGameSt
 		}
 	}
 }
+
+
+
+static function X2AbilityTemplate PullAlly()
+{
+	local X2AbilityTemplate                 Template;
+	local X2AbilityCost_ActionPoints        ActionPointCost;
+	local X2AbilityCooldown                 Cooldown;
+	local X2Condition_UnitProperty          UnitPropertyCondition;
+	local X2Condition_UnblockedNeighborTile UnblockedNeighborTileCondition;
+	local X2AbilityToHitCalc_StandardAim    StandardAim;
+	local X2Effect_GetOverHere              GetOverHereEffect;
+	local X2Effect_TriggerEvent				PostAbilityMelee;
+	local X2Effect_ApplyWeaponDamage		EnvironmentDamageForProjectile;
+	local X2Effect_RemoveEffects			RemoveEffects;
+
+	`CREATE_X2ABILITY_TEMPLATE(Template, 'IRI_PullAlly');
+	Template.IconImage = "img:///UILibrary_XPACK_Common.PerkIcons.UIPerk_Justice";
+
+	Template.AbilitySourceName = 'eAbilitySource_Perk';
+	Template.eAbilityIconBehaviorHUD = eAbilityIconBehavior_AlwaysShow;
+
+	ActionPointCost = new class'X2AbilityCost_ActionPoints';
+	ActionPointCost.iNumPoints = 1;
+	ActionPointCost.bConsumeAllPoints = false;
+	Template.AbilityCosts.AddItem(ActionPointCost);
+
+    Cooldown = New class'X2AbilityCooldown';
+	Cooldown.iNumTurns = 5;
+	Template.AbilityCooldown = Cooldown;
+
+	Template.AbilityShooterConditions.AddItem(default.LivingShooterProperty);
+	Template.AddShooterEffectExclusions();
+
+	// There must be a free tile around the source unit
+	UnblockedNeighborTileCondition = new class'X2Condition_UnblockedNeighborTile';
+	UnblockedNeighborTileCondition.RequireVisible = true;
+	Template.AbilityShooterConditions.AddItem(UnblockedNeighborTileCondition);
+
+	// The Target must be alive and a humanoid
+	UnitPropertyCondition = new class'X2Condition_UnitProperty';
+	UnitPropertyCondition.ExcludeDead = true;
+	UnitPropertyCondition.ExcludeRobotic = true;
+	UnitPropertyCondition.FailOnNonUnits = true;
+	UnitPropertyCondition.ExcludeCivilian = true;
+	UnitPropertyCondition.ExcludeTurret = true;
+	UnitPropertyCondition.TreatMindControlledSquadmateAsHostile = true;
+	UnitPropertyCondition.ExcludeHostileToSource = true;
+	UnitPropertyCondition.ExcludeFriendlyToSource = false;
+	UnitPropertyCondition.RequireWithinMinRange = true;
+	Template.AbilityTargetConditions.AddItem(UnitPropertyCondition);
+
+	Template.AbilityTargetConditions.AddItem(default.GameplayVisibilityCondition);
+	//	prevent various stationary units from being pulled inappropriately
+	Template.AbilityTargetConditions.AddItem(class'X2Ability_TemplarAbilitySet'.static.InvertAndExchangeEffectsCondition());
+
+	Template.AbilityTargetStyle = default.SimpleSingleTarget;
+	Template.AbilityTriggers.AddItem(default.PlayerInputTrigger);
+	Template.AbilityToHitCalc = default.DeadEye;
+
+	GetOverHereEffect = new class'X2Effect_GetOverHere';
+ 	GetOverHereEffect.OverrideStartAnimName = 'NO_GrapplePullStart';
+ 	GetOverHereEffect.OverrideStopAnimName = 'NO_GrapplePullStop';
+	GetOverHereEffect.RequireVisibleTile = true;
+	Template.AddTargetEffect(GetOverHereEffect);
+
+	EnvironmentDamageForProjectile = new class'X2Effect_ApplyWeaponDamage';
+	EnvironmentDamageForProjectile.bIgnoreBaseDamage = true;
+	EnvironmentDamageForProjectile.EnvironmentalDamageAmount = 30;
+	Template.AddTargetEffect(EnvironmentDamageForProjectile);
+
+	RemoveEffects = new class'X2Effect_RemoveEffects';
+	RemoveEffects.EffectNamesToRemove.AddItem(class'X2Effect_Suppression'.default.EffectName);
+	Template.AddTargetEffect(RemoveEffects);
+
+	Template.bForceProjectileTouchEvents = true;
+
+	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;
+	Template.BuildVisualizationFn = class'X2Ability_SkirmisherAbilitySet'.static.Justice_BuildVisualization;
+	Template.BuildInterruptGameStateFn = TypicalAbility_BuildInterruptGameState;
+	Template.Hostility = eHostility_Defensive;
+	Template.bFrameEvenWhenUnitIsHidden = true;
+	Template.ActionFireClass = class'XComGame.X2Action_ViperGetOverHere';
+	Template.ActivationSpeech = 'Justice';
+		
+	return Template;
+}
+
+
+
+
+
+
+
+
+
 
 static function X2AbilityTemplate Create_KnockoutAndBleedoutSelf()
 {
