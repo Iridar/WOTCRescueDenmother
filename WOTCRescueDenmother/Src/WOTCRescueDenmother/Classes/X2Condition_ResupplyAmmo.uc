@@ -1,11 +1,5 @@
 class X2Condition_ResupplyAmmo extends X2Condition config(Denmother);
 
-var protected X2Condition_UnitProperty UnitProperty;
-
-
-var config int ResupplyAmmoDistanceTiles;
-
-
 /*
 return 'AA_TileIsBlocked';
 return 'AA_UnitIsWrongType';
@@ -30,25 +24,6 @@ return 'AA_NotInRange';
 return 'AA_NoTargets';
 return 'AA_NotVisible';
 */
-
-event name CallMeetsCondition(XComGameState_BaseObject kTarget) 
-{
-	return UnitProperty.MeetsCondition(kTarget); 
-}
-
-static private function int GetBondLevel(const XComGameState_Unit SourceUnit, const XComGameState_Unit TargetUnit)
-{
-	local SoldierBond BondInfo;
-
-	if (SourceUnit.GetBondData(SourceUnit.GetReference(), BondInfo))
-	{
-		if (BondInfo.Bondmate.ObjectID == TargetUnit.ObjectID)
-		{
-			return BondInfo.BondLevel;
-		}
-	}
-	return 0;
-}
 
 static private function bool UnitHasValidExperimentalAmmo(const XComGameState_Unit UnitState, const XComGameState_Item ItemState)
 {
@@ -84,17 +59,17 @@ event name CallMeetsConditionWithSource(XComGameState_BaseObject kTarget, XComGa
 	
 	if (SourceUnit != none && TargetUnit != none)
 	{
-		UnitProperty.WithinRange = `TILESTOUNITS(ResupplyAmmoDistanceTiles + GetBondLevel(SourceUnit, TargetUnit));
-		if (UnitProperty.MeetsConditionWithSource(kTarget, kSource) == 'AA_Success')
-		{
-			PrimaryWeapon = TargetUnit.GetPrimaryWeapon();
-			if (PrimaryWeapon == none)
-				return 'AA_WeaponIncompatible';	
+		PrimaryWeapon = TargetUnit.GetPrimaryWeapon();
+		if (PrimaryWeapon == none)
+			return 'AA_WeaponIncompatible';	
 
-			if (UnitHasValidExperimentalAmmo(SourceUnit, PrimaryWeapon) || PrimaryWeapon.Ammo < PrimaryWeapon.GetClipSize())
-			{
-				return 'AA_Success';
-			}
+		if (UnitHasValidExperimentalAmmo(SourceUnit, PrimaryWeapon) || PrimaryWeapon.Ammo < PrimaryWeapon.GetClipSize())
+		{
+			return 'AA_Success';
+		}
+		else
+		{
+			return 'AA_WeaponIncompatible';	
 		}
 	}
 	
@@ -120,18 +95,3 @@ function bool CanEverBeValid(XComGameState_Unit SourceUnit, bool bStrategyCheck)
 	return true;
 }
 */
-defaultproperties
-{
-	Begin Object Class=X2Condition_UnitProperty Name=DefaultUnitProperty
-		ExcludeHostileToSource = true
-		ExcludeFriendlyToSource = false
-		RequireSquadmates = false
-		FailOnNonUnits = true
-		ExcludeDead = true
-		ExcludeRobotic = false
-		ExcludeUnableToAct = true
-		TreatMindControlledSquadmateAsHostile = true
-		RequireWithinRange = true
-	End Object
-	UnitProperty = DefaultUnitProperty
-}

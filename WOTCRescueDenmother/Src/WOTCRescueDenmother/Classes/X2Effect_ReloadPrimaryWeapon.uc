@@ -96,6 +96,7 @@ simulated function AddX2ActionsForVisualization(XComGameState VisualizeGameState
 	local X2Action_PlayAnimation			PlayAnimation;
 	local XComGameState_Effect_TransferAmmo TransferAmmo;
 	local XComGameState_Unit				TargetUnit;
+	local X2Action_MarkerNamed				MarkerAction;
 
 	if (EffectApplyResult == 'AA_Success')
 	{	
@@ -119,6 +120,10 @@ simulated function AddX2ActionsForVisualization(XComGameState VisualizeGameState
 
 		SoundAndFlyOver = X2Action_PlaySoundAndFlyOver(class'X2Action_PlaySoundAndFlyOver'.static.AddToVisualizationTree(ActionMetadata, VisualizeGameState.GetContext(), false, ActionMetadata.LastActionAdded));
 		SoundAndFlyOver.SetSoundAndFlyOverParameters(None, TransferAmmo.GetFlyoverString(), 'Reloading', eColor_Good, "img:///UILibrary_PerkIcons.UIPerk_reload");
+
+		// Add a marker so this spot in viz tree can later by found by ResupplyAmmo_BuildVisualization.
+		MarkerAction = X2Action_MarkerNamed(class'X2Action_MarkerNamed'.static.AddToVisualizationTree(ActionMetadata, VisualizeGameState.GetContext(), false, ActionMetadata.LastActionAdded));
+		MarkerAction.SetName("IRI_FlyoverMarker");
 	}	
 }
 /*

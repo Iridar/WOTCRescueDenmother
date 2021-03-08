@@ -9,9 +9,19 @@ Range Limit and action cost, and Longer range for bondmates.
 Custom condition
 
 Additional abilities: 
-- Resupplying puts on Overwatch? What if you don't wanna, though?
-- Resupplying at close range makes target's attacks non-turn ending. Also grants infinite ammo?
+- Belt Feed: Resupplying adjacent allies makes their attacks non-turn ending, but only while Keeper remains adjacent. Also grants infinite ammo?
+- Resupplying puts on Overwatch?
+- Ammo Pocket?
+- Give out bandages? Can be used individually by soldiers to heal and stop bleeding. Can be used on others.
+- Deploy sandbags / cover?
+- Deploy rope / ladder / grapple hook?
+- Convert Overwatch actions to regular ones for a single target?
+- Repair (heal robotics)?
+- Some kind of scavenge ability?
 
+- Supply Run: Using Resupply Ammo grants a Move-only action.
+- Logistics Expert: grant abilities to grapple to an ally, and grapple an ally to you, as well as to use grapple to collect loot.
+- Zipline: set up a zipline that can be used by all allied units.
 
 Tests:
 
@@ -24,6 +34,47 @@ Tests:
 //		Dead? Not in the crew, not in the morgue, no weapon. -- CHECKED, no backstory
 //		Denmother evacced, but rest of the squad is dead? -- expected behavior: you have denmother walk out of skyranger, and she's on the reward screen, bad backstory. -- CHECKED.
 //		Denmother is not evacced, and the squad is dead? --expected behavior: no denmother, end screen mentions her as VIP lost -- CHECK, no backstory
+
+Texture2D'UILibrary_PerkIcons.UIPerk_codex_superposition'
+Texture2D'UILibrary_PerkIcons.UIPerk_codex_techvulnerability'
+Texture2D'UILibrary_PerkIcons.UIPerk_codex_teleport'
+Texture2D'UILibrary_PerkIcons.UIPerk_disoriented'
+Texture2D'UILibrary_PerkIcons.UIPerk_drop_unit'
+Texture2D'UILibrary_PerkIcons.UIPerk_eaglesnest'
+Texture2D'UILibrary_XPACK_Common.PerkIcons.UIPerk_exchange'
+Texture2D'UILibrary_XPACK_Common.PerkIcons.UIPerk_fullthrottle'
+
+Texture2D'UILibrary_PerkIcons.UIPerk_grapple'
+Texture2D'UILibrary_XPACK_Common.PerkIcons.UIPerk_grapple'
+Texture2D'UILibrary_PerkIcons.UIPerk_height'
+Texture2D'UILibrary_PerkIcons.UIPerk_helpinghand'
+Texture2D'UILibrary_PerkIcons.UIPerk_holotargeting'
+Texture2D'UILibrary_XPACK_Common.PerkIcons.UIPerk_mobilityprotocol'
+
+Texture2D'UILibrary_PerkIcons.UIPerk_savior'
+Texture2D'UILibrary_XPACK_Common.PerkIcons.UIPerk_parkour'
+Texture2D'UILibrary_PerkIcons.UIPerk_item_storagemodule'
+
+Texture2D'UILibrary_XPACK_Common.PerkIcons.UIPerk_juggernaut'
+
+Texture2D'UILibrary_XPACK_Common.PerkIcons.UIPerk_leap'
+
+Texture2D'UILibrary_PerkIcons.UIPerk_locked'
+
+Belt Feed:
+Texture2D'UILibrary_PerkIcons.UIPerk_maximumordanance'
+
+
+Zipline:
+Texture2D'UILibrary_PerkIcons.UIPerk_holdtheline'
+
+Texture2D'UILibrary_PerkIcons.UIPerk_sprinter'
+
+
+Texture2D'UILibrary_PerkIcons.UIPerk_stickandmove'
+
+Grapple Supplies: 
+Texture2D'UILibrary_PerkIcons.UIPerk_targetpaint'
 
 */
 

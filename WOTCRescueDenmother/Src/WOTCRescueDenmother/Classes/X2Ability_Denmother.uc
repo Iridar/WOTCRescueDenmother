@@ -2,11 +2,14 @@ class X2Ability_Denmother extends X2Ability config(Denmother);
 
 var config int DenmotherBleedoutTurns;
 
+var config(Keeper) float ResupplyAmmoDistanceTiles;
+
 static function array<X2DataTemplate> CreateTemplates()
 {
 	local array<X2DataTemplate> Templates;
 
 	Templates.AddItem(Create_ResupplyAmmo());
+	Templates.AddItem(PurePassive('IRI_SupplyRun', "img:///IRIKeeperBackpack.UI.UIPerk_SupplyRun", false, 'eAbilitySource_Perk', true));
 
 	Templates.AddItem(Create_KnockoutAndBleedoutSelf());
 	Templates.AddItem(Create_OneGoodEye_Passive());
@@ -18,8 +21,11 @@ static function X2AbilityTemplate Create_ResupplyAmmo()
 {
 	local X2AbilityTemplate				Template;
 	local X2Effect_ReloadPrimaryWeapon	ReloadEffect;
-	local X2Condition_UnitProperty      TargetCondition;
+	local X2Condition_UnitProperty      UnitProperty;
 	local X2Effect_RemoveEffects		RemoveEffects;
+	local X2Condition_ResupplyAmmo		ResupplyCondition;
+	local X2Effect_GrantActionPoints	GrantActionPoints;
+	local X2Condition_AbilityProperty	AbilityProperty;
 
 	`CREATE_X2ABILITY_TEMPLATE(Template, 'IRI_ResupplyAmmo');
 
@@ -41,24 +47,44 @@ static function X2AbilityTemplate Create_ResupplyAmmo()
 	Template.AbilityShooterConditions.AddItem(default.LivingShooterProperty);
 	Template.AddShooterEffectExclusions();
 
-	Template.AbilityTargetConditions.AddItem(new class'X2Condition_ResupplyAmmo');
+	UnitProperty = new class'X2Condition_UnitProperty';
+	UnitProperty.ExcludeHostileToSource = true;
+	UnitProperty.ExcludeFriendlyToSource = false;
+	UnitProperty.RequireSquadmates = false;
+	UnitProperty.FailOnNonUnits = true;
+	UnitProperty.ExcludeDead = true;
+	UnitProperty.ExcludeRobotic = false;
+	UnitProperty.ExcludeUnableToAct = true;
+	UnitProperty.TreatMindControlledSquadmateAsHostile = true;
+	UnitProperty.RequireWithinRange = true;
+	UnitProperty.WithinRange = `TILESTOUNITS(default.ResupplyAmmoDistanceTiles);
+	Template.AbilityTargetConditions.AddItem(UnitProperty);
+	ResupplyCondition = new class'X2Condition_ResupplyAmmo';
+	Template.AbilityTargetConditions.AddItem(ResupplyCondition);
 	Template.AbilityTargetConditions.AddItem(default.GameplayVisibilityCondition);
 
 	//	Remove any existing instances of this effect on the target unit so that we don't get into stupid games 
 	//	between multiple keepers trying to apply their ammo effects to the same target.
 	RemoveEffects = new class'X2Effect_RemoveEffects';
 	RemoveEffects.EffectNamesToRemove.AddItem(class'X2Effect_ReloadPrimaryWeapon'.default.EffectName);
-	Template.AddShooterEffect(RemoveEffects);	
+	Template.AddTargetEffect(RemoveEffects);	
 
 	ReloadEffect = new class'X2Effect_ReloadPrimaryWeapon';
 	ReloadEffect.BuildPersistentEffect(1, true, false);
 	ReloadEffect.SetDisplayInfo(ePerkBuff_Bonus, Template.LocFriendlyName, Template.GetMyHelpText(), Template.IconImage, true);
 	Template.AddTargetEffect(ReloadEffect);
 
+	AbilityProperty = new class'X2Condition_AbilityProperty';
+	AbilityProperty.OwnerHasSoldierAbilities.AddItem('IRI_SupplyRun');
+
+	GrantActionPoints = new class'X2Effect_GrantActionPoints';
+	GrantActionPoints.NumActionPoints = 1;
+	GrantActionPoints.PointType = class'X2CharacterTemplateManager'.default.MoveActionPoint;
+	GrantActionPoints.TargetConditions.AddItem(AbilityProperty);
+	Template.AddShooterEffect(GrantActionPoints);
+
 	//Template.CinescriptCameraType = "StandardGrenadeFiring";
 	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState; 
-	//Template.BuildVisualizationFn = GiveRocket_BuildVisualization;
-	//Template.BuildVisualizationFn = TypicalAbility_BuildVisualization;
 	Template.BuildVisualizationFn = ResupplyAmmo_BuildVisualization;
 
 	return Template;
@@ -74,6 +100,12 @@ simulated function ResupplyAmmo_BuildVisualization(XComGameState VisualizeGameSt
 	local X2Action						NewExitCoverAction;
 	local X2Action_MarkerNamed			ExitReplace;
 
+	local X2Action_PlaySoundAndFlyOver	SoundAndFlyOver;
+	local X2AbilityTemplate				AbilityTemplate;
+	local array<X2Action>				FindActions;
+	local X2Action						FindAction;
+	local X2Action_MarkerNamed			MarkerAction;
+
 	local XComGameStateHistory			History;
 	local XComGameState_Unit			SourceUnit;
 	local XComGameStateContext_Ability  Context;
@@ -85,6 +117,7 @@ simulated function ResupplyAmmo_BuildVisualization(XComGameState VisualizeGameSt
 	VisMgr = `XCOMVISUALIZATIONMGR;
 	ExitCoverAction = VisMgr.GetNodeOfType(VisMgr.BuildVisTree, class'X2Action_ExitCover');
 	FireAction = VisMgr.GetNodeOfType(VisMgr.BuildVisTree, class'X2Action_Fire');
+	VisMgr.GetNodesOfType(VisMgr.BuildVisTree, class'X2Action_MarkerNamed', FindActions);
 
 	if (ExitCoverAction != none && FireAction != none)
 	{
@@ -117,6 +150,27 @@ simulated function ResupplyAmmo_BuildVisualization(XComGameState VisualizeGameSt
 
 		// Play idle animation while the projectile travels.
 		class'X2Action_PlayIdleAnimation'.static.AddToVisualizationTree(ActionMetadata, Context, false, ActionMetadata.LastActionAdded);
+
+		// Handle Supply Run flyover.
+		if (SourceUnit.HasSoldierAbility('IRI_SupplyRun', true))
+		{
+			foreach FindActions(FindAction)
+			{
+				MarkerAction = X2Action_MarkerNamed(FindAction);
+				if (MarkerAction.MarkerName == 'IRI_FlyoverMarker')
+				{
+					break;
+				}
+			}
+
+			AbilityTemplate = class'X2AbilityTemplateManager'.static.GetAbilityTemplateManager().FindAbilityTemplate('IRI_SupplyRun');
+			if (AbilityTemplate != none && MarkerAction != none)
+			{
+				ActionMetadata = FireAction.Metadata;
+				SoundAndFlyOver = X2Action_PlaySoundAndFlyOver(class'X2Action_PlaySoundAndFlyOver'.static.AddToVisualizationTree(ActionMetadata, Context, false, MarkerAction));
+				SoundAndFlyOver.SetSoundAndFlyOverParameters(None, AbilityTemplate.LocFlyOverText, '', eColor_Good, AbilityTemplate.IconImage);
+			}
+		}
 	}
 }
 
