@@ -207,9 +207,7 @@ static function X2AbilityTemplate PullAlly()
 	//local X2AbilityCooldown                 Cooldown;
 	local X2Condition_UnitProperty          UnitPropertyCondition;
 	local X2Condition_UnblockedNeighborTile UnblockedNeighborTileCondition;
-	local X2AbilityToHitCalc_StandardAim    StandardAim;
 	local X2Effect_GetOverHere              GetOverHereEffect;
-	local X2Effect_TriggerEvent				PostAbilityMelee;
 	local X2Effect_ApplyWeaponDamage		EnvironmentDamageForProjectile;
 	local X2Effect_RemoveEffects			RemoveEffects;
 
