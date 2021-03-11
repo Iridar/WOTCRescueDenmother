@@ -5,10 +5,7 @@ LWOTC tests?
 
 TODO:
 Different animations when used at melee range?
-Better AOE display for Resupply Ammo? (Is it imperfect??)
-
-Better viz for Get Pulled
-
+Fix AOE display for REsupply Ammo - shows range that is too close.
 
 
 Additional abilities: 

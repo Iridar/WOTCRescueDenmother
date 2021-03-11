@@ -34,9 +34,9 @@ event OnAnimNotify(AnimNotify ReceiveNotify)
 		`LOG("Running OnAnimNotify for Play Animation",, 'IRITEST');
 	}
 }*/
-
+/*
 DefaultProperties
 {
 	InputEventIDs.Add("Visualizer_ProjectileHit")
 	OutputEventIDs.Add("Visualizer_ProjectileHit")
-}
+}*/
