@@ -1,0 +1,1 @@
+class X2Action_MoveTurnCustom extends X2Action_MoveTurn;

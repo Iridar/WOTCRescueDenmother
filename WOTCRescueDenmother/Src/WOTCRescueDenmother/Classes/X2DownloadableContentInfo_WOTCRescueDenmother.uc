@@ -5,7 +5,11 @@ LWOTC tests?
 
 TODO:
 Different animations when used at melee range?
-AOE display for Resupply Ammo
+Better AOE display for Resupply Ammo? (Is it imperfect??)
+
+Better viz for Get Pulled
+
+
 
 Additional abilities: 
 - Belt Feed: Resupplying adjacent allies makes their attacks non-turn ending, but only while Keeper remains adjacent. Also grants infinite ammo?

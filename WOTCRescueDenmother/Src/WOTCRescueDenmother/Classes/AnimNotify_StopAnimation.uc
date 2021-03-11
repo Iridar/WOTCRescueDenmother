@@ -1,0 +1,1 @@
+class AnimNotify_StopAnimation extends AnimNotify_Script;

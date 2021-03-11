@@ -6,26 +6,37 @@ function Init()
 {
 	super.Init();
 
-	switch (Unit.m_eCoverState)
+	if (Params.AnimName == '')
 	{
-	case eCS_LowLeft:
-	case eCS_LowRight:
-		Params.AnimName = 'LL_IdleAlert';
-		break;
-	case eCS_HighLeft:
-	case eCS_HighRight:
-		Params.AnimName = 'HL_IdleAlert';
-		break;
-	case eCS_None:
-		Params.AnimName = 'NO_IdleAlertGunDwn';
-		break;
+		switch (Unit.m_eCoverState)
+		{
+		case eCS_LowLeft:
+		case eCS_LowRight:
+			Params.AnimName = 'LL_IdleAlert';
+			break;
+		case eCS_HighLeft:
+		case eCS_HighRight:
+			Params.AnimName = 'HL_IdleAlert';
+			break;
+		case eCS_None:
+			Params.AnimName = 'NO_IdleAlertGunDwn';
+			break;
+		}
 	}
 }
+/*
+event OnAnimNotify(AnimNotify ReceiveNotify)
+{
+	if( XComAnimNotify_NotifyTarget(ReceiveNotify) != None || AnimNotify_StopAnimation(ReceiveNotify) != none)
+	{
+		`XEVENTMGR.TriggerEvent('Visualizer_AbilityHit', self, self);
+		CompleteAction();
+		`LOG("Running OnAnimNotify for Play Animation",, 'IRITEST');
+	}
+}*/
 
 DefaultProperties
 {
-	InputEventIDs.Add( "Visualizer_AbilityHit" )
-	InputEventIDs.Add( "Visualizer_ProjectileHit" )
-	OutputEventIDs.Add( "Visualizer_AbilityHit" )
-	OutputEventIDs.Add( "Visualizer_ProjectileHit" )
+	InputEventIDs.Add("Visualizer_ProjectileHit")
+	OutputEventIDs.Add("Visualizer_ProjectileHit")
 }

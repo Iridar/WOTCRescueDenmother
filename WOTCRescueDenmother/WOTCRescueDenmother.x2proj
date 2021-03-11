@@ -84,6 +84,9 @@ tags= war of the chosen, soldier class, soldier customization, weapon</Descripti
     <Content Include="ReadMe.txt" />
     <Content Include="ModPreview.jpg" />
     <Content Include="Localization\XComGame.int" />
+    <Content Include="Src\WOTCRescueDenmother\Classes\AnimNotify_StopAnimation.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\WOTCRescueDenmother\Classes\Denmother.uc">
       <SubType>Content</SubType>
     </Content>
@@ -94,6 +97,9 @@ tags= war of the chosen, soldier class, soldier customization, weapon</Descripti
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\WOTCRescueDenmother\Classes\X2Action_ExitCoverSupplyThrow.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTCRescueDenmother\Classes\X2Action_MoveTurnCustom.uc">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\WOTCRescueDenmother\Classes\X2Action_PlayIdleAnimation.uc">

@@ -12,6 +12,7 @@ static function array<X2DataTemplate> CreateTemplates()
 	Templates.AddItem(PurePassive('IRI_SupplyRun', "img:///IRIKeeperBackpack.UI.UIPerk_SupplyRun", false, 'eAbilitySource_Perk', true));
 
 	Templates.AddItem(PullAlly());
+	Templates.AddItem(PullLoot());
 
 	Templates.AddItem(Create_KnockoutAndBleedoutSelf());
 	Templates.AddItem(Create_OneGoodEye_Passive());
@@ -134,7 +135,6 @@ simulated function ResupplyAmmo_BuildVisualization(XComGameState VisualizeGameSt
 	local XComGameState_Unit			SourceUnit;
 	local XComGameStateContext_Ability  Context;
 	local X2Action_MoveTurn				MoveTurnAction;
-	//local X2Action_TimedWait			TimedWait;
 
 	TypicalAbility_BuildVisualization(VisualizeGameState);
 
@@ -256,8 +256,8 @@ static function X2AbilityTemplate PullAlly()
 	Template.AbilityToHitCalc = default.DeadEye;
 
 	GetOverHereEffect = new class'X2Effect_GetOverHere';
- 	GetOverHereEffect.OverrideStartAnimName = 'NO_GrapplePullStart';
- 	GetOverHereEffect.OverrideStopAnimName = 'NO_GrapplePullStop';
+ 	GetOverHereEffect.OverrideStartAnimName = 'NO_KeeperGetPulled';
+ 	GetOverHereEffect.OverrideStopAnimName = 'NO_GrappleStop';
 	GetOverHereEffect.RequireVisibleTile = true;
 	Template.AddTargetEffect(GetOverHereEffect);
 
@@ -273,22 +273,147 @@ static function X2AbilityTemplate PullAlly()
 	Template.bForceProjectileTouchEvents = true;
 
 	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;
-	Template.BuildVisualizationFn = class'X2Ability_SkirmisherAbilitySet'.static.Justice_BuildVisualization;
+	Template.BuildVisualizationFn = PullAlly_BuildVisualization;
 	Template.BuildInterruptGameStateFn = TypicalAbility_BuildInterruptGameState;
 	Template.Hostility = eHostility_Defensive;
 	Template.bFrameEvenWhenUnitIsHidden = true;
 	Template.ActionFireClass = class'XComGame.X2Action_ViperGetOverHere';
-	Template.ActivationSpeech = 'Justice';
+	//Template.ActivationSpeech = 'Justice';
+
+	Template.AdditionalAbilities.AddItem('IRI_PullLoot');
 		
 	return Template;
 }
 
+simulated function PullAlly_BuildVisualization(XComGameState VisualizeGameState)
+{
+	local VisualizationActionMetadata   ActionMetadata;
+	local XComGameStateVisualizationMgr VisMgr;
+	local X2Action						FireAction;
+	local X2Action						ExitCoverAction;
 
+	local XComGameState_Unit			SourceUnit;
+	local XComGameStateContext_Ability  Context;
+	local X2Action_MoveTurn				MoveTurnAction;
+	local X2Action_ViperGetOverHere		GetOverHereAction;
+	local X2Action						TargetGetPulledAction;
+	local X2Action_PlayIdleAnimation	PlayAnimation1;
+	local X2Action_PlayIdleAnimation	PlayAnimation2;
+	local X2Action_WaitForAnotherAction WaitAction;
 
+	TypicalAbility_BuildVisualization(VisualizeGameState);
 
+	VisMgr = `XCOMVISUALIZATIONMGR;
+	Context = XComGameStateContext_Ability(VisualizeGameState.GetContext());
+	ExitCoverAction = VisMgr.GetNodeOfType(VisMgr.BuildVisTree, class'X2Action_ExitCover');
+	FireAction = VisMgr.GetNodeOfType(VisMgr.BuildVisTree, class'X2Action_Fire');
+	TargetGetPulledAction = VisMgr.GetNodeOfType(VisMgr.BuildVisTree, class'X2Action_ViperGetOverHereTarget');
 
+	if (ExitCoverAction != none && FireAction != none && Context != none)
+	{
+		// From the Grapple Pull BuildViz
+		GetOverHereAction = X2Action_ViperGetOverHere(VisMgr.GetNodeOfType(VisMgr.BuildVisTree, class'X2Action_ViperGetOverHere'));
+		GetOverHereAction.StartAnimName = 'NO_StranglePullStart';
+		GetOverHereAction.StopAnimName = 'NO_StranglePullStop';		
 
+		// Make primary target face the shooter.
+		SourceUnit = XComGameState_Unit(`XCOMHISTORY.GetGameStateForObjectID(Context.InputContext.SourceObject.ObjectID));
 
+		ActionMetadata = TargetGetPulledAction.Metadata;
+
+		class'X2Action_ExitCover'.static.AddToVisualizationTree(ActionMetadata, Context, false, ExitCoverAction.TreeRoot);
+		//TargetExitCover.bSkipExitCoverVisualization = true;
+
+		MoveTurnAction = X2Action_MoveTurn(class'X2Action_MoveTurn'.static.AddToVisualizationTree(ActionMetadata, Context, false, ActionMetadata.LastActionAdded));
+		MoveTurnAction.m_vFacePoint =  `XWORLD.GetPositionFromTileCoordinates(SourceUnit.TileLocation);
+		MoveTurnAction.UpdateAimTarget = true;
+
+		// Play generic idle animation so that the soldier doesn't auto-turn to nearest enemy via IdleStateMachine
+		PlayAnimation1 = X2Action_PlayIdleAnimation(class'X2Action_PlayIdleAnimation'.static.AddToVisualizationTree(ActionMetadata, Context, false, ActionMetadata.LastActionAdded));
+		PlayAnimation1.bFinishAnimationWait = false; // Set up this action to instacomplete the moment the next action is ready
+
+		// And the next action is ready when the shooter finishes Exit Cover.
+		WaitAction = X2Action_WaitForAnotherAction(class'X2Action_WaitForAnotherAction'.static.AddToVisualizationTree(ActionMetadata, Context, false, ActionMetadata.LastActionAdded));
+		WaitAction.ActionToWaitFor = ExitCoverAction;
+
+		// Play "raise left hand" animation while the projectile travels. Use a custom action so it can be interrupt by projectile hitting.
+		PlayAnimation2 = X2Action_PlayIdleAnimation(class'X2Action_PlayIdleAnimation'.static.AddToVisualizationTree(ActionMetadata, Context, false, ActionMetadata.LastActionAdded));
+		PlayAnimation2.Params.AnimName = 'HL_SignalHaltA';
+		//VisMgr.ConnectAction(PlayAnimation2, VisMgr.BuildVisTree, false, PlayAnimation1);
+	}
+}
+
+static function X2AbilityTemplate PullLoot()
+{
+	local X2AbilityTemplate                 Template;		
+	//local X2Condition_UnitProperty          UnitPropertyCondition;	
+	local X2Condition_Lootable              LootableCondition;
+	local X2Condition_Visibility			VisibilityCondition;
+	local X2AbilityTrigger_PlayerInput      InputTrigger;
+	local X2AbilityMultiTarget_Radius       MultiTarget;
+	local X2AbilityTarget_Single            SingleTarget;
+	//local X2Condition_UnitEffects			UnitEffects;
+
+	`CREATE_X2ABILITY_TEMPLATE(Template, 'IRI_PullLoot');
+
+	Template.IconImage = "img:///UILibrary_PerkIcons.UIPerk_loot"; 
+	Template.ShotHUDPriority = class'UIUtilities_Tactical'.const.LOOT_PRIORITY;
+	Template.bDisplayInUITooltip = false;
+	Template.bDontDisplayInAbilitySummary = true;
+		/*
+	UnitPropertyCondition = new class'X2Condition_UnitProperty';
+	UnitPropertyCondition.ExcludeDead = true;
+	UnitPropertyCondition.ExcludeImpaired = true;
+	UnitPropertyCondition.ImpairedIgnoresStuns = true;
+	UnitPropertyCondition.ExcludePanicked = true;
+	Template.AbilityShooterConditions.AddItem(UnitPropertyCondition);
+
+	UnitEffects = new class'X2Condition_UnitEffects';
+	UnitEffects.AddExcludeEffect(class'X2Ability_CarryUnit'.default.CarryUnitEffectName, 'AA_CarryingUnit');
+	Template.AbilityShooterConditions.AddItem(UnitEffects);
+	*/
+	Template.AbilityShooterConditions.AddItem(default.LivingShooterProperty);
+	Template.AddShooterEffectExclusions();
+
+	LootableCondition = new class'X2Condition_Lootable';
+	//LootableCondition.LootableRange = `TILESTOUNITS(17);
+	LootableCondition.bRestrictRange = false;
+	Template.AbilityTargetConditions.AddItem(LootableCondition);
+
+	VisibilityCondition = new class'X2Condition_Visibility';
+	VisibilityCondition.bRequireLOS = true;
+	Template.AbilityTargetConditions.AddItem(VisibilityCondition);
+
+	InputTrigger = new class'X2AbilityTrigger_PlayerInput';
+	Template.AbilityTriggers.AddItem(InputTrigger);
+
+	SingleTarget = new class'X2AbilityTarget_Single';
+	SingleTarget.bAllowInteractiveObjects = true;
+	Template.AbilityTargetStyle = SingleTarget;	
+
+	MultiTarget = new class'X2AbilityMultiTarget_Loot';
+	MultiTarget.bUseWeaponRadius = false;
+	MultiTarget.fTargetRadius = class'X2Ability_DefaultAbilitySet'.default.EXPANDED_LOOT_RANGE;
+	MultiTarget.bIgnoreBlockingCover = true; // UI doesn't/cant conform to cover so don't block the collection either
+	Template.AbilityMultiTargetStyle = MultiTarget;
+	Template.SkipRenderOfAOETargetingTiles = true;
+
+	LootableCondition = new class'X2Condition_Lootable';
+	//  Note: the multi target handles restricting the range on these based on the primary target's location
+	Template.AbilityMultiTargetConditions.AddItem(LootableCondition);
+
+	Template.eAbilityIconBehaviorHUD = eAbilityIconBehavior_ShowIfAvailable;
+	Template.AbilitySourceName = 'eAbilitySource_Perk';
+		
+	Template.CustomFireAnim = 'NO_Pull_Loot';
+	Template.BuildNewGameStateFn = class'X2Ability_DefaultAbilitySet'.static.LootAbility_BuildGameState;
+	Template.BuildVisualizationFn = TypicalAbility_BuildVisualization;
+	Template.Hostility = eHostility_Neutral;
+
+	Template.CinescriptCameraType = "Loot";
+
+	return Template;
+}
 
 
 
