@@ -346,13 +346,10 @@ simulated function PullAlly_BuildVisualization(XComGameState VisualizeGameState)
 static function X2AbilityTemplate PullLoot()
 {
 	local X2AbilityTemplate                 Template;		
-	//local X2Condition_UnitProperty          UnitPropertyCondition;	
 	local X2Condition_Lootable              LootableCondition;
 	local X2Condition_Visibility			VisibilityCondition;
-	local X2AbilityTrigger_PlayerInput      InputTrigger;
 	local X2AbilityMultiTarget_Radius       MultiTarget;
 	local X2AbilityTarget_Single            SingleTarget;
-	//local X2Condition_UnitEffects			UnitEffects;
 
 	`CREATE_X2ABILITY_TEMPLATE(Template, 'IRI_PullLoot');
 
@@ -360,32 +357,10 @@ static function X2AbilityTemplate PullLoot()
 	Template.ShotHUDPriority = class'UIUtilities_Tactical'.const.LOOT_PRIORITY;
 	Template.bDisplayInUITooltip = false;
 	Template.bDontDisplayInAbilitySummary = true;
-		/*
-	UnitPropertyCondition = new class'X2Condition_UnitProperty';
-	UnitPropertyCondition.ExcludeDead = true;
-	UnitPropertyCondition.ExcludeImpaired = true;
-	UnitPropertyCondition.ImpairedIgnoresStuns = true;
-	UnitPropertyCondition.ExcludePanicked = true;
-	Template.AbilityShooterConditions.AddItem(UnitPropertyCondition);
 
-	UnitEffects = new class'X2Condition_UnitEffects';
-	UnitEffects.AddExcludeEffect(class'X2Ability_CarryUnit'.default.CarryUnitEffectName, 'AA_CarryingUnit');
-	Template.AbilityShooterConditions.AddItem(UnitEffects);
-	*/
-	Template.AbilityShooterConditions.AddItem(default.LivingShooterProperty);
-	Template.AddShooterEffectExclusions();
-
-	LootableCondition = new class'X2Condition_Lootable';
-	//LootableCondition.LootableRange = `TILESTOUNITS(17);
-	LootableCondition.bRestrictRange = false;
-	Template.AbilityTargetConditions.AddItem(LootableCondition);
-
-	VisibilityCondition = new class'X2Condition_Visibility';
-	VisibilityCondition.bRequireLOS = true;
-	Template.AbilityTargetConditions.AddItem(VisibilityCondition);
-
-	InputTrigger = new class'X2AbilityTrigger_PlayerInput';
-	Template.AbilityTriggers.AddItem(InputTrigger);
+	// Targeting and Triggering
+	Template.AbilityToHitCalc = default.DeadEye;
+	Template.AbilityTriggers.AddItem(default.PlayerInputTrigger);
 
 	SingleTarget = new class'X2AbilityTarget_Single';
 	SingleTarget.bAllowInteractiveObjects = true;
@@ -398,6 +373,20 @@ static function X2AbilityTemplate PullLoot()
 	Template.AbilityMultiTargetStyle = MultiTarget;
 	Template.SkipRenderOfAOETargetingTiles = true;
 
+	//	Shooter Conditions
+	Template.AbilityShooterConditions.AddItem(default.LivingShooterProperty);
+	Template.AddShooterEffectExclusions();
+
+	// Target Conditions
+	LootableCondition = new class'X2Condition_Lootable';
+	//LootableCondition.LootableRange = `TILESTOUNITS(17);
+	LootableCondition.bRestrictRange = false;
+	Template.AbilityTargetConditions.AddItem(LootableCondition);
+
+	VisibilityCondition = new class'X2Condition_Visibility';
+	VisibilityCondition.bRequireLOS = true;
+	Template.AbilityTargetConditions.AddItem(VisibilityCondition);
+
 	LootableCondition = new class'X2Condition_Lootable';
 	//  Note: the multi target handles restricting the range on these based on the primary target's location
 	Template.AbilityMultiTargetConditions.AddItem(LootableCondition);
@@ -407,7 +396,8 @@ static function X2AbilityTemplate PullLoot()
 		
 	Template.CustomFireAnim = 'NO_Pull_Loot';
 	Template.BuildNewGameStateFn = class'X2Ability_DefaultAbilitySet'.static.LootAbility_BuildGameState;
-	Template.BuildVisualizationFn = TypicalAbility_BuildVisualization;
+	Template.BuildVisualizationFn = PullLoot_BuildVisualization; //TypicalAbility_BuildVisualization;
+	Template.ModifyNewContextFn = ModifyContext_PullLoot;
 	Template.Hostility = eHostility_Neutral;
 
 	Template.CinescriptCameraType = "Loot";
@@ -415,6 +405,54 @@ static function X2AbilityTemplate PullLoot()
 	return Template;
 }
 
+static function PullLoot_BuildVisualization(XComGameState VisualizeGameState)
+{
+	local XComGameStateHistory				History;
+	local XComGameStateContext_Ability		Context;
+	local StateObjectReference				InteractingUnitRef;	
+	local Lootable							LootTarget;
+	local VisualizationActionMetadata       ActionMetadata;
+
+	History = `XCOMHISTORY;
+	Context = XComGameStateContext_Ability(VisualizeGameState.GetContext());
+	InteractingUnitRef = Context.InputContext.SourceObject;
+	LootTarget = Lootable(History.GetGameStateForObjectID(Context.InputContext.PrimaryTarget.ObjectID));
+
+	//Configure the visualization track for the shooter
+	//****************************************************************************************
+	ActionMetadata.StateObject_OldState = History.GetGameStateForObjectID(InteractingUnitRef.ObjectID, eReturnType_Reference, VisualizeGameState.HistoryIndex - 1);
+	ActionMetadata.StateObject_NewState = VisualizeGameState.GetGameStateForObjectID(InteractingUnitRef.ObjectID);
+	ActionMetadata.VisualizeActor = History.GetVisualizer(InteractingUnitRef.ObjectID);
+
+	class'X2Action_ExitCoverLoot'.static.AddToVisualizationTree(ActionMetadata, Context);
+	class'X2Action_Fire'.static.AddToVisualizationTree(ActionMetadata, Context, false, ActionMetadata.LastActionAdded);
+	class'X2Action_EnterCover'.static.AddToVisualizationTree(ActionMetadata, Context, false, ActionMetadata.LastActionAdded);
+	class'X2Action_Loot'.static.AddToVisualizationTreeIfLooted(LootTarget, Context, ActionMetadata);	
+	//****************************************************************************************
+}
+
+static function ModifyContext_PullLoot(XComGameStateContext Context)
+{
+	local XComGameStateContext_Ability	AbilityContext;
+	local Lootable						LootTarget;
+	local TTile							LootTileLocation;
+	local vector						LootLocation;
+
+	AbilityContext = XComGameStateContext_Ability(Context);
+
+	LootTarget = Lootable(`XCOMHISTORY.GetGameStateForObjectID(AbilityContext.InputContext.PrimaryTarget.ObjectID));
+
+	LootTileLocation = LootTarget.GetLootLocation();
+	LootLocation = `XWORLD.GetPositionFromTileCoordinates(LootTileLocation);
+
+	AbilityContext.InputContext.TargetLocations.Length = 0;
+	AbilityContext.InputContext.TargetLocations.AddItem(LootLocation);
+
+	AbilityContext.ResultContext.ProjectileHitLocations.Length = 0;
+	AbilityContext.ResultContext.ProjectileHitLocations.AddItem(LootLocation);
+
+	AbilityContext.ResultContext.HitResult = eHit_Success;
+} 
 
 
 static function X2AbilityTemplate Create_KnockoutAndBleedoutSelf()
