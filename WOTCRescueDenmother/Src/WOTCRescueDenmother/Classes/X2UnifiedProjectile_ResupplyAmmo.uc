@@ -223,10 +223,14 @@ function FireProjectileInstance(int Index)
 		Projectiles[Index].TargetAttachActor = CreateSkeletalMeshActor;
 
 		//	ADDED BY IRIDAR
-
-		//CreateSkeletalMeshActor.SkeletalMeshComponent.SetSkeletalMesh(Projectiles[Index].ProjectileElement.AttachSkeletalMesh);
-
-		CreateSkeletalMeshActor.SkeletalMeshComponent.SetSkeletalMesh(GetProjectileSkeletalMesh());
+		if (Projectiles[Index].ProjectileElement.bIsCustomDefinition && Projectiles[Index].ProjectileElement.AttachSkeletalMesh != none)
+		{
+			CreateSkeletalMeshActor.SkeletalMeshComponent.SetSkeletalMesh(Projectiles[Index].ProjectileElement.AttachSkeletalMesh);
+		}
+		else
+		{
+			CreateSkeletalMeshActor.SkeletalMeshComponent.SetSkeletalMesh(GetProjectileSkeletalMesh());
+		}
 		//	END OF ADDED
 
 		if (Projectiles[Index].ProjectileElement.CopyWeaponAppearance && SourceWeapon.m_kGameWeapon != none)
@@ -655,7 +659,7 @@ private function AdjustGrenadePath(XComPrecomputedPath GrenadePath, vector Targe
 
 	iKeyframes = GrenadePath.iNumKeyframes;
 	NewTargetLocation = TargetLocation;
-	NewTargetLocation.Z += 32; // Aim higher, because soldier tends to be crouched when the throw happens.
+	NewTargetLocation.Z += 28; // Aim higher, because soldier tends to be crouched when the throw happens.
 
 	//	Calculate the vector difference between given vector location (target's chest/head) and the current end of the grenade path (target's feet)
 	vDif = NewTargetLocation - GrenadePath.akKeyframes[iKeyframes - 1].vLoc;

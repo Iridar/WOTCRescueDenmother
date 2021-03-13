@@ -1,5 +1,7 @@
 class X2Action_ExitCoverLoot extends X2Action_ExitCover;
 
+// Custom exit cover action that makes the actor face the lootable object.
+
 var private int  StepOutVisibilityHistoryIndex;
 
 //Variables used during the Executing state

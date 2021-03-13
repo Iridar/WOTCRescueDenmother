@@ -95,11 +95,18 @@ simulated function AddX2ActionsForVisualization(XComGameState VisualizeGameState
 	local X2Action_PlaySoundAndFlyOver		SoundAndFlyOver;
 	local X2Action_PlayAnimation			PlayAnimation;
 	local XComGameState_Effect_TransferAmmo TransferAmmo;
+	local XComGameState_Unit				SourceUnit;
 	local XComGameState_Unit				TargetUnit;
-	local X2Action_MarkerNamed				MarkerAction;
+	local XComGameStateContext_Ability		Context;
+	local X2AbilityTemplate					AbilityTemplate;
+	local VisualizationActionMetadata		ShooterMetadata;
+	local XComGameStateHistory				History;
 
 	if (EffectApplyResult == 'AA_Success')
 	{	
+		Context = XComGameStateContext_Ability(VisualizeGameState.GetContext());
+		History = `XCOMHISTORY;
+
 		TargetUnit = XComGameState_Unit(ActionMetadata.StateObject_NewState);
 		if (TargetUnit == none)
 		{
@@ -112,18 +119,30 @@ simulated function AddX2ActionsForVisualization(XComGameState VisualizeGameState
 			`LOG("X2Effect_ReloadPrimaryWeapon no effect state.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
 			return;
 		}
-		PlayAnimation = X2Action_PlayAnimation(class'X2Action_PlayAnimation'.static.AddToVisualizationTree(ActionMetadata, VisualizeGameState.GetContext(), false, ActionMetadata.LastActionAdded));
+		PlayAnimation = X2Action_PlayAnimation(class'X2Action_PlayAnimation'.static.AddToVisualizationTree(ActionMetadata, Context, false, ActionMetadata.LastActionAdded));
 		PlayAnimation.Params.AnimName = 'HL_CatchSupplies';
 
-		PlayAnimation = X2Action_PlayAnimation(class'X2Action_PlayAnimation'.static.AddToVisualizationTree(ActionMetadata, VisualizeGameState.GetContext(), false, ActionMetadata.LastActionAdded));
+		PlayAnimation = X2Action_PlayAnimation(class'X2Action_PlayAnimation'.static.AddToVisualizationTree(ActionMetadata, Context, false, ActionMetadata.LastActionAdded));
 		PlayAnimation.Params.AnimName = 'HL_Reload';
 
-		SoundAndFlyOver = X2Action_PlaySoundAndFlyOver(class'X2Action_PlaySoundAndFlyOver'.static.AddToVisualizationTree(ActionMetadata, VisualizeGameState.GetContext(), false, ActionMetadata.LastActionAdded));
+		SoundAndFlyOver = X2Action_PlaySoundAndFlyOver(class'X2Action_PlaySoundAndFlyOver'.static.AddToVisualizationTree(ActionMetadata, Context, false, ActionMetadata.LastActionAdded));
 		SoundAndFlyOver.SetSoundAndFlyOverParameters(None, TransferAmmo.GetFlyoverString(), 'Reloading', eColor_Good, "img:///UILibrary_PerkIcons.UIPerk_reload");
 
-		// Add a marker so this spot in viz tree can later by found by ResupplyAmmo_BuildVisualization.
-		MarkerAction = X2Action_MarkerNamed(class'X2Action_MarkerNamed'.static.AddToVisualizationTree(ActionMetadata, VisualizeGameState.GetContext(), false, ActionMetadata.LastActionAdded));
-		MarkerAction.SetName("IRI_FlyoverMarker");
+		// Handle Supply Run flyover.
+		SourceUnit = XComGameState_Unit(History.GetGameStateForObjectID(Context.InputContext.SourceObject.ObjectID));
+		if (SourceUnit.HasSoldierAbility('IRI_SupplyRun', true))
+		{
+			AbilityTemplate = class'X2AbilityTemplateManager'.static.GetAbilityTemplateManager().FindAbilityTemplate('IRI_SupplyRun');
+			if (AbilityTemplate != none)
+			{
+				ShooterMetadata.StateObject_OldState = History.GetGameStateForObjectID(Context.InputContext.SourceObject.ObjectID, eReturnType_Reference, VisualizeGameState.HistoryIndex - 1);
+				ShooterMetadata.StateObject_NewState = VisualizeGameState.GetGameStateForObjectID(Context.InputContext.SourceObject.ObjectID);
+				ShooterMetadata.VisualizeActor = History.GetVisualizer(Context.InputContext.SourceObject.ObjectID);
+
+				SoundAndFlyOver = X2Action_PlaySoundAndFlyOver(class'X2Action_PlaySoundAndFlyOver'.static.AddToVisualizationTree(ShooterMetadata, Context, false, SoundAndFlyOver));
+				SoundAndFlyOver.SetSoundAndFlyOverParameters(None, AbilityTemplate.LocFlyOverText, '', eColor_Good, AbilityTemplate.IconImage);
+			}
+		}
 	}	
 }
 /*

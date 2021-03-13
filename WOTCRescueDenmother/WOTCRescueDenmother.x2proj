@@ -105,10 +105,22 @@ tags= war of the chosen, soldier class, soldier customization, weapon</Descripti
     <Content Include="Src\WOTCRescueDenmother\Classes\X2Action_PlayIdleAnimation.uc">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Src\WOTCRescueDenmother\Classes\X2Condition_BandageThrow.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTCRescueDenmother\Classes\X2Condition_ExcludeSelfTarget.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\WOTCRescueDenmother\Classes\X2Condition_ResupplyAmmo.uc">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\WOTCRescueDenmother\Classes\X2DownloadableContentInfo_WOTCRescueDenmother.uc" />
+    <Content Include="Src\WOTCRescueDenmother\Classes\X2Effect_AddOverwatchActionPoint.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTCRescueDenmother\Classes\X2Effect_BandageThrow.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\WOTCRescueDenmother\Classes\X2Effect_BreakConcealmentListener.uc">
       <SubType>Content</SubType>
     </Content>

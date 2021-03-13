@@ -4,8 +4,10 @@ class X2DownloadableContentInfo_WOTCRescueDenmother extends X2DownloadableConten
 LWOTC tests?
 
 TODO:
-Different animations when used at melee range?
+PullAlly prefer into cover
 Fix AOE display for REsupply Ammo - shows range that is too close.
+Grapple Gun ability
+Pull Loot icon
 
 
 Additional abilities: 
@@ -47,7 +49,7 @@ Texture2D'UILibrary_XPACK_Common.PerkIcons.UIPerk_fullthrottle'
 Texture2D'UILibrary_PerkIcons.UIPerk_grapple'
 Texture2D'UILibrary_XPACK_Common.PerkIcons.UIPerk_grapple'
 Texture2D'UILibrary_PerkIcons.UIPerk_height'
-Texture2D'UILibrary_PerkIcons.UIPerk_helpinghand'
+
 Texture2D'UILibrary_PerkIcons.UIPerk_holotargeting'
 Texture2D'UILibrary_XPACK_Common.PerkIcons.UIPerk_mobilityprotocol'
 
