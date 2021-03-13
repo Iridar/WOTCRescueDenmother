@@ -130,12 +130,13 @@ function Init(AvailableAction InAction, int NewTargetIndex)
 	local PrecomputedPathData	WeaponPrecomputedPathData;
 	local X2AbilityTemplate		AbilityTemplate;
 	local TTile					UnitTileLocation;
-
 	local array<TTile>			Tiles;
+	local array<TTile>			ShowTiles;
+	local GameRulesCache_VisibilityInfo DirectionInfo;
+	local XComWorldData			WorldData;
+	local TTile					TestTile;
 
 	super(X2TargetingMethod).Init(InAction, NewTargetIndex);
-
-	//AssociatedPlayerState = XComGameState_Player(`XCOMHISTORY.GetGameStateForObjectID(UnitState.ControllingPlayer.ObjectID));
 	
 	//	Init grenade path.
 	GetGrenadeWeaponInfo(WeaponEntity, WeaponPrecomputedPathData);
@@ -171,9 +172,9 @@ function Init(AvailableAction InAction, int NewTargetIndex)
 	}
 
 	//	Top Down Init
-	LookatCamera = new class'X2Camera_LookAtActor';
-	LookatCamera.UseTether = false;
-	`CAMERASTACK.AddCamera(LookatCamera);
+	//LookatCamera = new class'X2Camera_LookAtActor';
+	//LookatCamera.UseTether = false;
+	//`CAMERASTACK.AddCamera(LookatCamera);
 
 	AOEMeshActor = `BATTLE.spawn(class'XComInstancedMeshActor');
 	
@@ -187,55 +188,30 @@ function Init(AvailableAction InAction, int NewTargetIndex)
 		AOEMeshActor.InstancedMeshComponent.SetStaticMesh(StaticMesh(DynamicLoadObject("UI_3D.Tile.AOETile_Neutral", class'StaticMesh')));
 	}
 
+	WorldData = `XWORLD;
 	// Draw the AOE around the source unit instead of around the target. Raise the origin point a bit so that it draws tiles over low cover.
 	UnitState.GetKeystoneVisibilityLocation(UnitTileLocation);
-	SourceUnitLocation = `XWORLD.GetPositionFromTileCoordinates(UnitTileLocation);
-	SourceUnitLocation.Z += 32;
-	if ( AbilityTemplate.AbilityMultiTargetStyle != none)
-	{
-		//AbilityTemplate.AbilityMultiTargetStyle.GetValidTilesForLocation(Ability, TargetedLocation, Tiles);
-		AbilityTemplate.AbilityMultiTargetStyle.GetValidTilesForLocation(Ability, SourceUnitLocation, Tiles);
-		
-	}
-	/*
+	SourceUnitLocation = WorldData.GetPositionFromTileCoordinates(UnitTileLocation);
+	//SourceUnitLocation.Z += 32;
+
 	if( AbilityTemplate.AbilityTargetStyle != none )
 	{
-		AbilityTemplate.AbilityTargetStyle.GetValidTilesForLocation(Ability, TargetedLocation, Tiles);
-	}*/
-
-	if( Tiles.Length > 1 )
+		AbilityTemplate.AbilityTargetStyle.GetValidTilesForLocation(Ability, SourceUnitLocation, Tiles);
+	}
+	foreach Tiles(TestTile)
 	{
-		//GetTargetedActors(TargetedLocation, CurrentlyMarkedTargets, Tiles);
-		//CheckForFriendlyUnit(CurrentlyMarkedTargets);
-		//MarkTargetedActors(CurrentlyMarkedTargets, (!AbilityIsOffensive) ? FiringUnit.GetTeam() : eTeam_None);
-		DrawAOETiles(Tiles);
-		//DrawSplashRadius();
+		if (WorldData.CanSeeTileToTile(UnitTileLocation, TestTile, DirectionInfo))
+		{
+			ShowTiles.AddItem(TestTile);
+		}
+	}
 
-		//	Probably not necessary to do here, as we do it in Update() anyway, but shouldn't hurt.
-		//GetCurrentTargetFocus(TargetedLocation);
-		//AdjustGrenadePath(TargetedLocation);
-
-		//	Hide-unhide is necessary to prevent the spline from being jumpy
-		//GrenadePath.kRenderablePath.SetHidden(true);
+	if (ShowTiles.Length > 1)
+	{
+		DrawAOETiles(ShowTiles);
 	}
 
 	DirectSetTarget(0);
-}
-
-//	Override the original method to make the splash radius centered around target's feet.
-//	It is normally drawn at the end of the grenade path, which is not what I want for this ability.
-simulated protected function Vector GetSplashRadiusCenter( bool SkipTileSnap = false )
-{
-	local Actor TargetedActor;
-	local vector Center;
-
-	TargetedActor = GetTargetedActor();
-	if (TargetedActor != none)
-	{
-		Center = TargetedActor.Location;
-	}
-	
-	return Center;
 }
 
 //	===================================================
@@ -272,17 +248,9 @@ function DirectSetTarget(int TargetIndex)
 		FiringUnit.IdleStateMachine.CheckForStanceUpdate();
 	}
 
-	// have the camera look at the new target (or the source unit if no target is available)
-	TargetedActor = GetTargetedActor();
-	if(TargetedActor != none)
-	{
-		LookatCamera.ActorToFollow = TargetedActor;
-	}
-	else if(FiringUnit != none)
-	{
-		LookatCamera.ActorToFollow = FiringUnit;
-	}
+	//LookatCamera.ActorToFollow = FiringUnit;
 
+	TargetedActor = GetTargetedActor();
 	TargetedPawn = XGUnit(TargetedActor);
 	if( TargetedPawn != none )
 	{
@@ -300,7 +268,7 @@ function Canceled()
 {
 	super(X2TargetingMethod).Canceled();
 
-	`CAMERASTACK.RemoveCamera(LookatCamera);
+	//`CAMERASTACK.RemoveCamera(LookatCamera);
 	GrenadePath.ClearPathGraphics();
 	//ClearTargetedActors();
 }

@@ -5,7 +5,6 @@ LWOTC tests?
 
 TODO:
 PullAlly prefer into cover
-Fix AOE display for REsupply Ammo - shows range that is too close.
 
 Additional abilities: 
 - Belt Feed: Resupplying adjacent allies makes their attacks non-turn ending, but only while Keeper remains adjacent. Also grants infinite ammo?

@@ -43,13 +43,10 @@ static function X2AbilityTemplate Create_BandageThrow()
 {
 	local X2AbilityTemplate						Template;
 	local X2Condition_UnitProperty				UnitProperty;
-	
 	local X2Effect_BandageThrow					BandageThrow;	
 	local X2Effect_GrantActionPoints			GrantActionPoints;
 	local X2Condition_AbilityProperty			AbilityProperty;
-
 	local X2AbilityTarget_Single				SingleTarget;
-	local X2AbilityMultiTarget_Radius			Radius;
 	local X2Effect_RemoveEffectsByDamageType	RemoveEffects;
 	local X2Effect_ApplyMedikitHeal				HealEffect;
 
@@ -76,13 +73,6 @@ static function X2AbilityTemplate Create_BandageThrow()
 	SingleTarget.bShowAOE = true;
 	Template.AbilityTargetStyle = SingleTarget;
 	Template.bLimitTargetIcons = false;
-
-	Radius = new class'X2AbilityMultiTarget_Radius';
-	Radius.bUseWeaponRadius = true;
-	Radius.bUseWeaponBlockingCoverFlag = true;
-	Radius.bExcludeSelfAsTargetIfWithinRadius = true;
-	Radius.fTargetRadius = 0.25f;
-	Template.AbilityMultiTargetStyle = Radius;
 
 	Template.TargetingMethod = class'X2TargetingMethod_ResupplyAmmo';
 	Template.SkipRenderOfAOETargetingTiles = false;
@@ -153,10 +143,7 @@ static function X2AbilityTemplate Create_ResupplyAmmo()
 	local X2Condition_ResupplyAmmo			ResupplyCondition;
 	local X2Effect_GrantActionPoints		GrantActionPoints;
 	local X2Condition_AbilityProperty		AbilityProperty;
-
 	local X2AbilityTarget_Single            SingleTarget;
-	local X2AbilityMultiTarget_Radius		Radius;
-	//local X2AbilityPassiveAOE_SelfRadius	PassiveAOEStyle;
 
 	`CREATE_X2ABILITY_TEMPLATE(Template, 'IRI_ResupplyAmmo');
 
@@ -179,18 +166,7 @@ static function X2AbilityTemplate Create_ResupplyAmmo()
 	SingleTarget.bIncludeSelf = false;
 	SingleTarget.bShowAOE = true;
 	Template.AbilityTargetStyle = SingleTarget;
-	Template.bLimitTargetIcons = false;
-
-	//PassiveAOEStyle = new class'X2AbilityPassiveAOE_SelfRadius';
-	//PassiveAOEStyle.OnlyIncludeTargetsInsideWeaponRange = true;
-	//Template.AbilityPassiveAOEStyle = PassiveAOEStyle;
-	
-	Radius = new class'X2AbilityMultiTarget_Radius';
-	Radius.bUseWeaponRadius = true;
-	Radius.bUseWeaponBlockingCoverFlag = true;
-	Radius.bExcludeSelfAsTargetIfWithinRadius = true;
-	Radius.fTargetRadius = 0.25f;
-	Template.AbilityMultiTargetStyle = Radius;
+	Template.bLimitTargetIcons = true;
 
 	Template.TargetingMethod = class'X2TargetingMethod_ResupplyAmmo';
 	Template.SkipRenderOfAOETargetingTiles = false;
