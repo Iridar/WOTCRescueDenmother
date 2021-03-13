@@ -283,7 +283,7 @@ static function X2AbilityTemplate PullAlly()
 	local X2AbilityTemplate                 Template;
 	local X2Condition_UnitProperty          UnitPropertyCondition;
 	local X2Condition_UnblockedNeighborTile UnblockedNeighborTileCondition;
-	local X2Effect_GetOverHere              GetOverHereEffect;
+	local X2Effect_PullAlly		            GetOverHereEffect;
 	local X2Effect_ApplyWeaponDamage		EnvironmentDamageForProjectile;
 	local X2Effect_RemoveEffects			RemoveEffects;
 
@@ -325,10 +325,9 @@ static function X2AbilityTemplate PullAlly()
 	Template.AbilityTriggers.AddItem(default.PlayerInputTrigger);
 	Template.AbilityToHitCalc = default.DeadEye;
 
-	GetOverHereEffect = new class'X2Effect_GetOverHere';
+	GetOverHereEffect = new class'X2Effect_PullAlly';
  	GetOverHereEffect.OverrideStartAnimName = 'NO_KeeperGetPulled';
  	GetOverHereEffect.OverrideStopAnimName = 'NO_GrappleStop';
-	GetOverHereEffect.RequireVisibleTile = true;
 	Template.AddTargetEffect(GetOverHereEffect);
 
 	EnvironmentDamageForProjectile = new class'X2Effect_ApplyWeaponDamage';
