@@ -6,9 +6,6 @@ LWOTC tests?
 TODO:
 PullAlly prefer into cover
 Fix AOE display for REsupply Ammo - shows range that is too close.
-Grapple Gun ability
-Pull Loot icon
-
 
 Additional abilities: 
 - Belt Feed: Resupplying adjacent allies makes their attacks non-turn ending, but only while Keeper remains adjacent. Also grants infinite ammo?
@@ -61,22 +58,17 @@ Texture2D'UILibrary_XPACK_Common.PerkIcons.UIPerk_juggernaut'
 
 Texture2D'UILibrary_XPACK_Common.PerkIcons.UIPerk_leap'
 
+Lock door
 Texture2D'UILibrary_PerkIcons.UIPerk_locked'
 
 Belt Feed:
 Texture2D'UILibrary_PerkIcons.UIPerk_maximumordanance'
 
 
-Zipline:
-Texture2D'UILibrary_PerkIcons.UIPerk_holdtheline'
-
 Texture2D'UILibrary_PerkIcons.UIPerk_sprinter'
 
-
+Dash icon
 Texture2D'UILibrary_PerkIcons.UIPerk_stickandmove'
-
-Grapple Supplies: 
-Texture2D'UILibrary_PerkIcons.UIPerk_targetpaint'
 
 */
 
@@ -350,6 +342,24 @@ static function bool AbilityTagExpandHandler(string InString, out string OutStri
 		return true;
 	case 'IRI_ONE_GOOD_EYE_STACKS':
 		OutString = SetColor(class'X2Effect_OneGoodEye'.default.MaxStacks);
+		return true;
+	case 'PullAllyCooldown':
+		OutString = SetColor(class'X2Ability_Denmother'.default.PullAllyCooldown);
+		return true;
+	case 'ResupplyAmmoCooldown':
+		OutString = SetColor(class'X2Ability_Denmother'.default.ResupplyAmmoCooldown);
+		return true;
+	case 'BandageThrowCooldown':
+		OutString = SetColor(class'X2Ability_Denmother'.default.BandageThrowCooldown);
+		return true;
+	case 'BandageThrowCharges':
+		OutString = SetColor(class'X2Ability_Denmother'.default.BandageThrowCharges);
+		return true;
+	case 'BandageThrowHeal':
+		OutString = SetColor(class'X2Ability_Denmother'.default.BandageThrowHeal);
+		return true;
+	case 'BandageThrowDuration':
+		OutString = SetColor(class'X2Ability_Denmother'.default.BandageThrowDuration + 1);
 		return true;
 	//	===================================================
 	default:

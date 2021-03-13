@@ -6,12 +6,15 @@ var config int DenmotherBleedoutTurns;
 var config(Keeper) int PullAllyCooldown;
 var config(Keeper) int ResupplyAmmoCooldown;
 var config(Keeper) int BandageThrowCooldown;
+var config(Keeper) int BandageThrowHeal;
+var config(Keeper) int BandageThrowDuration;
 var config(Keeper) int BandageThrowCharges;
 
 static function array<X2DataTemplate> CreateTemplates()
 {
 	local array<X2DataTemplate> Templates;
 
+	Templates.AddItem(Create_GrappleGun());
 	Templates.AddItem(Create_ResupplyAmmo());
 	Templates.AddItem(Create_BandageThrow());
 	Templates.AddItem(PurePassive('IRI_SupplyRun', "img:///IRIKeeperBackpack.UI.UIPerk_SupplyRun", false, 'eAbilitySource_Perk', true));
@@ -23,6 +26,17 @@ static function array<X2DataTemplate> CreateTemplates()
 	Templates.AddItem(Create_OneGoodEye_Passive());
 
 	return Templates;
+}
+
+static function X2AbilityTemplate Create_GrappleGun()
+{
+	local X2AbilityTemplate	Template;
+
+	Template = class'X2Ability_DefaultAbilitySet'.static.AddGrapple('IRI_GrappleGun');
+
+	Template.AdditionalAbilities.AddItem('IRI_PullLoot');
+
+	return Template;
 }
 
 static function X2AbilityTemplate Create_BandageThrow()
@@ -98,12 +112,12 @@ static function X2AbilityTemplate Create_BandageThrow()
 	Template.AddTargetEffect(RemoveEffects);	
 
 	BandageThrow = new class'X2Effect_BandageThrow';
-	BandageThrow.BuildPersistentEffect(2, false, false, false, eGameRule_PlayerTurnBegin);
+	BandageThrow.BuildPersistentEffect(default.BandageThrowDuration, false, false, false, eGameRule_PlayerTurnBegin);
 	BandageThrow.DuplicateResponse = eDupe_Allow;
 	BandageThrow.SetDisplayInfo(ePerkBuff_Bonus, Template.LocFriendlyName, Template.GetMyHelpText(), Template.IconImage, true);
 	
 	HealEffect = new class'X2Effect_ApplyMedikitHeal';
-	HealEffect.PerUseHP = 1;
+	HealEffect.PerUseHP = default.BandageThrowHeal;
 	BandageThrow.ApplyOnTick.AddItem(HealEffect);
 
 	Template.AddTargetEffect(BandageThrow);	
@@ -298,7 +312,7 @@ static function X2AbilityTemplate PullAlly()
 	local X2Effect_RemoveEffects			RemoveEffects;
 
 	`CREATE_X2ABILITY_TEMPLATE(Template, 'IRI_PullAlly');
-	Template.IconImage = "img:///UILibrary_XPACK_Common.PerkIcons.UIPerk_Justice";
+	Template.IconImage = "img:///UILibrary_PerkIcons.UIPerk_holdtheline";
 
 	Template.AbilitySourceName = 'eAbilitySource_Perk';
 	Template.eAbilityIconBehaviorHUD = eAbilityIconBehavior_AlwaysShow;
@@ -438,7 +452,7 @@ static function X2AbilityTemplate PullLoot()
 
 	`CREATE_X2ABILITY_TEMPLATE(Template, 'IRI_PullLoot');
 
-	Template.IconImage = "img:///UILibrary_PerkIcons.UIPerk_loot"; 
+	Template.IconImage = "img:///UILibrary_PerkIcons.UIPerk_targetpaint"; 
 	Template.ShotHUDPriority = class'UIUtilities_Tactical'.const.LOOT_PRIORITY;
 	Template.bDisplayInUITooltip = false;
 	Template.bDontDisplayInAbilitySummary = true;
