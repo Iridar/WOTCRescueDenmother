@@ -9,6 +9,8 @@ var config(Keeper) int BandageThrowCooldown;
 var config(Keeper) int BandageThrowHeal;
 var config(Keeper) int BandageThrowDuration;
 var config(Keeper) int BandageThrowCharges;
+var config(Keeper) int BandageThrow_EmpoweredHeal;
+var config(Keeper) name BandageThrow_EmpowerTech;
 
 static function array<X2DataTemplate> CreateTemplates()
 {
@@ -108,6 +110,8 @@ static function X2AbilityTemplate Create_BandageThrow()
 	
 	HealEffect = new class'X2Effect_ApplyMedikitHeal';
 	HealEffect.PerUseHP = default.BandageThrowHeal;
+	HealEffect.IncreasedPerUseHP = default.BandageThrow_EmpoweredHeal;
+	HealEffect.IncreasedHealProject = default.BandageThrow_EmpowerTech;
 	BandageThrow.ApplyOnTick.AddItem(HealEffect);
 
 	Template.AddTargetEffect(BandageThrow);	
@@ -288,14 +292,18 @@ static function X2AbilityTemplate PullAlly()
 	local X2Effect_RemoveEffects			RemoveEffects;
 
 	`CREATE_X2ABILITY_TEMPLATE(Template, 'IRI_PullAlly');
-	Template.IconImage = "img:///UILibrary_PerkIcons.UIPerk_holdtheline";
 
+	//	Icon Setup
+	Template.IconImage = "img:///UILibrary_PerkIcons.UIPerk_holdtheline";
 	Template.AbilitySourceName = 'eAbilitySource_Perk';
 	Template.eAbilityIconBehaviorHUD = eAbilityIconBehavior_AlwaysShow;
 
-	AddActionCost(Template);
-	AddCooldown(Template, default.PullAllyCooldown);
+	//	Targeting and Triggering
+	Template.AbilityTargetStyle = default.SimpleSingleTarget;
+	Template.AbilityTriggers.AddItem(default.PlayerInputTrigger);
+	Template.AbilityToHitCalc = default.DeadEye;
 
+	//	Shooter Conditions
 	Template.AbilityShooterConditions.AddItem(default.LivingShooterProperty);
 	Template.AddShooterEffectExclusions();
 
@@ -304,27 +312,29 @@ static function X2AbilityTemplate PullAlly()
 	UnblockedNeighborTileCondition.RequireVisible = true;
 	Template.AbilityShooterConditions.AddItem(UnblockedNeighborTileCondition);
 
-	// The Target must be alive and a humanoid
+	//	Costs
+	AddActionCost(Template);
+	AddCooldown(Template, default.PullAllyCooldown);
+
+	//	Target Conditions
 	UnitPropertyCondition = new class'X2Condition_UnitProperty';
 	UnitPropertyCondition.ExcludeDead = true;
 	UnitPropertyCondition.ExcludeRobotic = true;
+	UnitPropertyCondition.ExcludeUnableToAct = true;
 	UnitPropertyCondition.FailOnNonUnits = true;
 	UnitPropertyCondition.ExcludeCivilian = true;
 	UnitPropertyCondition.ExcludeTurret = true;
 	UnitPropertyCondition.TreatMindControlledSquadmateAsHostile = true;
 	UnitPropertyCondition.ExcludeHostileToSource = true;
 	UnitPropertyCondition.ExcludeFriendlyToSource = false;
-	UnitPropertyCondition.RequireWithinMinRange = true;
+	//UnitPropertyCondition.RequireWithinMinRange = true;
 	Template.AbilityTargetConditions.AddItem(UnitPropertyCondition);
 
 	Template.AbilityTargetConditions.AddItem(default.GameplayVisibilityCondition);
 	//	prevent various stationary units from being pulled inappropriately
 	Template.AbilityTargetConditions.AddItem(class'X2Ability_TemplarAbilitySet'.static.InvertAndExchangeEffectsCondition());
 
-	Template.AbilityTargetStyle = default.SimpleSingleTarget;
-	Template.AbilityTriggers.AddItem(default.PlayerInputTrigger);
-	Template.AbilityToHitCalc = default.DeadEye;
-
+	//	Effects
 	GetOverHereEffect = new class'X2Effect_PullAlly';
  	GetOverHereEffect.OverrideStartAnimName = 'NO_KeeperGetPulled';
  	GetOverHereEffect.OverrideStopAnimName = 'NO_GrappleStop';
@@ -340,7 +350,6 @@ static function X2AbilityTemplate PullAlly()
 	Template.AddTargetEffect(RemoveEffects);
 
 	Template.bForceProjectileTouchEvents = true;
-
 	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;
 	Template.BuildVisualizationFn = PullAlly_BuildVisualization;
 	Template.BuildInterruptGameStateFn = TypicalAbility_BuildInterruptGameState;

@@ -1,6 +1,10 @@
 class X2DownloadableContentInfo_WOTCRescueDenmother extends X2DownloadableContentInfo;
 
 /*
+Denmother can break concealment if enemies stumble upon her?
+Denmother spawns standing?
+
+
 LWOTC tests?
 
 TODO:
