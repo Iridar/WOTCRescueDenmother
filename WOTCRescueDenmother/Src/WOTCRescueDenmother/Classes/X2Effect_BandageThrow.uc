@@ -1,20 +1,29 @@
 class X2Effect_BandageThrow extends X2Effect_Persistent;
-/*
+
 simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffectParameters, XComGameState_BaseObject kNewTargetState, XComGameState NewGameState, XComGameState_Effect NewEffectState)
 {
-	local XComGameState_Unit UnitState;
-
-	UnitState = XComGameState_Unit(kNewTargetState);
-	
-	if (UnitState != none)
-	{
-		
-	}
+	local XComGameState_Unit SourceUnit;
 
 	super.OnEffectAdded(ApplyEffectParameters, kNewTargetState, NewGameState, NewEffectState);
+
+	// Handle Supply RUn interaction. Easier to do here than via separate effect, in this case.
+	// Exit if self-targeted.
+	if (ApplyEffectParameters.SourceStateObjectRef == ApplyEffectParameters.TargetStateObjectRef)
+		return;
+
+	SourceUnit = XComGameState_Unit(NewGameState.GetGameStateForObjectID(ApplyEffectParameters.SourceStateObjectRef.ObjectID));
+	if (SourceUnit == none)
+	{
+		SourceUnit = XComGameState_Unit(NewGameState.ModifyStateObject(class'XComGameState_Unit', ApplyEffectParameters.SourceStateObjectRef.ObjectID));
+	}
+	
+	if (SourceUnit != none && SourceUnit.HasSoldierAbility('IRI_SupplyRun'))
+	{
+		SourceUnit.ActionPoints.AddItem(class'X2CharacterTemplateManager'.default.MoveActionPoint);		
+	}
 }
 
-*/
+
 simulated function AddX2ActionsForVisualization(XComGameState VisualizeGameState, out VisualizationActionMetadata ActionMetadata, const name EffectApplyResult)
 {
 	local X2Action_PlaySoundAndFlyOver		SoundAndFlyOver;

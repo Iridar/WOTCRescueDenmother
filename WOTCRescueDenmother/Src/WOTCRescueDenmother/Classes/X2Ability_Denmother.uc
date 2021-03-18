@@ -46,8 +46,8 @@ static function X2AbilityTemplate Create_BandageThrow()
 	local X2AbilityTemplate						Template;
 	local X2Condition_UnitProperty				UnitProperty;
 	local X2Effect_BandageThrow					BandageThrow;	
-	local X2Effect_GrantActionPoints			GrantActionPoints;
-	local X2Condition_AbilityProperty			AbilityProperty;
+	//local X2Effect_GrantActionPoints			GrantActionPoints;
+	//local X2Condition_AbilityProperty			AbilityProperty;
 	local X2AbilityTarget_Single				SingleTarget;
 	local X2Effect_RemoveEffectsByDamageType	RemoveEffects;
 	local X2Effect_ApplyMedikitHeal				HealEffect;
@@ -117,15 +117,16 @@ static function X2AbilityTemplate Create_BandageThrow()
 	Template.AddTargetEffect(BandageThrow);	
 	Template.AddTargetEffect(HealEffect);
 
-	AbilityProperty = new class'X2Condition_AbilityProperty';
-	AbilityProperty.OwnerHasSoldierAbilities.AddItem('IRI_SupplyRun');
+	//AbilityProperty = new class'X2Condition_AbilityProperty';
+	//AbilityProperty.OwnerHasSoldierAbilities.AddItem('IRI_SupplyRun');
 
-	GrantActionPoints = new class'X2Effect_GrantActionPoints';
-	GrantActionPoints.NumActionPoints = 1;
-	GrantActionPoints.PointType = class'X2CharacterTemplateManager'.default.MoveActionPoint;
-	GrantActionPoints.TargetConditions.AddItem(AbilityProperty);
-	GrantActionPoints.TargetConditions.AddItem(new class'X2Condition_ExcludeSelfTarget');
-	Template.AddShooterEffect(GrantActionPoints);
+	// Condition is pointless, because source of the effect and target of the effect will always be the same unit.
+	//GrantActionPoints = new class'X2Effect_GrantActionPoints';
+	//GrantActionPoints.NumActionPoints = 1;
+	//GrantActionPoints.PointType = class'X2CharacterTemplateManager'.default.MoveActionPoint;
+	//GrantActionPoints.TargetConditions.AddItem(AbilityProperty);
+	//GrantActionPoints.TargetConditions.AddItem(new class'X2Condition_ExcludeSelfTarget');
+	//Template.AddShooterEffect(GrantActionPoints);
 
 	//Template.CinescriptCameraType = "StandardGrenadeFiring";
 	Template.bLimitTargetIcons = true;
