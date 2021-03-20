@@ -6,7 +6,7 @@ static function array<X2DataTemplate> CreateTemplates()
 
 	Templates.AddItem(Create_TacticalListenerTemplate());
 	Templates.AddItem(Create_StrategyListenerTemplate());
-	Templates.AddItem(CreateOnGetLocalizedCategoryListenerTemplate());
+	//Templates.AddItem(CreateOnGetLocalizedCategoryListenerTemplate());
 
 	return Templates;
 }
@@ -258,7 +258,7 @@ static private function bool IsSoldierUnlockTemplatePurchased(const name Soldier
 	}
 	return false;
 }
-
+/*
 
 static function CHEventListenerTemplate CreateOnGetLocalizedCategoryListenerTemplate()
 {
@@ -291,4 +291,4 @@ static function EventListenerReturn OnGetLocalizedCategory(Object EventData, Obj
 		}
     }
     return ELR_NoInterrupt;
-}
+}*/

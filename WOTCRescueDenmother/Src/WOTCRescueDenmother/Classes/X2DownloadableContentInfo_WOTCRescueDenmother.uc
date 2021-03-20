@@ -158,7 +158,7 @@ exec function GiveDenmother()
 	UnitState.SetBackground(class'Denmother'.default.strDenmother_Background_Good);
 	
 	class'Denmother'.static.AddItemToHQInventory('IRI_Denmother_ObjectiveDummyItem_Good', NewGameState);
-	class'Denmother'.static.AddItemToHQInventory('IRI_Keeper_SupplyPack', NewGameState);	
+	//class'Denmother'.static.AddItemToHQInventory('IRI_Keeper_SupplyPack', NewGameState);	
 
 	XComHQ = class'Denmother'.static.GetAndPrepXComHQ(NewGameState);
 	XComHQ.AddToCrew(NewGameState, UnitState);
