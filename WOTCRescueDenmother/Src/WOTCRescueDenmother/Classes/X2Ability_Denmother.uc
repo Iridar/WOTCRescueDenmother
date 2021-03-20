@@ -217,6 +217,7 @@ static function X2AbilityTemplate Create_ResupplyAmmo()
 	Template.AddShooterEffect(GrantActionPoints);
 
 	//Template.CinescriptCameraType = "StandardGrenadeFiring";
+	Template.CustomFireAnim = 'FF_GrenadeUnderhand';
 	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState; 
 	Template.BuildVisualizationFn = ResupplyAmmo_BuildVisualization;
 

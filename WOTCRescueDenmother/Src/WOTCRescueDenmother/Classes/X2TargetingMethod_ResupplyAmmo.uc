@@ -1,4 +1,4 @@
-class X2TargetingMethod_ResupplyAmmo extends X2TargetingMethod_Grenade;
+class X2TargetingMethod_ResupplyAmmo extends X2TargetingMethod_GrenadePerkWeapon;
 
 //	This targeting method is a mix between Grenade and Top Down targeting.
 //	It works the same as Top Down in all aspects, except it also draws a spline trajectory curve to the target's hitbox.
@@ -15,39 +15,6 @@ function GetTargetLocations(out array<Vector> TargetLocations)
 	GetCurrentTargetFocus(Focus);
 	TargetLocations.AddItem(Focus);
 }
-
-function GetGrenadeWeaponInfo(out XComWeapon WeaponEntity, out PrecomputedPathData WeaponPrecomputedPathData)
-{
-	local XComGameState_Item WeaponItem;
-	//local X2WeaponTemplate WeaponTemplate;
-	local XGWeapon WeaponVisualizer;
-
-	WeaponItem = Ability.GetSourceWeapon();
-	//WeaponTemplate = X2WeaponTemplate(WeaponItem.GetMyTemplate());
-	WeaponVisualizer = XGWeapon(WeaponItem.GetVisualizer());
-
-	// Tutorial Band-aid fix for missing visualizer due to cheat GiveItem
-	if (WeaponVisualizer == none)
-	{
-		class'XGItem'.static.CreateVisualizer(WeaponItem);
-		WeaponVisualizer = XGWeapon(WeaponItem.GetVisualizer());
-		WeaponEntity = XComWeapon(WeaponVisualizer.CreateEntity(WeaponItem));
-
-		if (WeaponEntity != none)
-		{
-			WeaponEntity.m_kPawn = FiringUnit.GetPawn();
-		}
-	}
-	else
-	{
-		WeaponEntity = WeaponVisualizer.GetEntity();
-	}
-
-	WeaponPrecomputedPathData.InitialPathTime = 1.0f;
-	WeaponPrecomputedPathData.MaxPathTime = 2.5f;
-	WeaponPrecomputedPathData.MaxNumberOfBounces = 0;
-}
-
 /*
 function name ValidateTargetLocations(const array<Vector> TargetLocations)
 {

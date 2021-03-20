@@ -48,6 +48,9 @@ tags= war of the chosen, soldier class, soldier customization, weapon</Descripti
     <Content Include="Config\XComGameData.ini">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Config\XComGameData_SoldierSkills.ini">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Config\XComKeeper.ini">
       <SubType>Content</SubType>
     </Content>
