@@ -24,65 +24,63 @@ The in-game cosmetics are not a perfect mirror of what you see in the cinematic,
 
 [h1]KEEPER CLASS[/h1]
 
-Two skill rows of vanilla perks. Same stat progression as Sharpshooter. Made mostly for flavor. 
+Two skill rows of perks, some of the perks are completely new. Same stat progression as Sharpshooter.
 [b]Primary weapon:[/b] assault rifle. 
-[b]Secondary Weapon:[/b] pistol. 
+[b]Secondary Weapon:[/b] Supply Pack (not upgradeable). 
 [b]Armor:[/b] regular soldier and sharpshooter armor.
 
 [table]
 [tr]
 	[th]Rank[/th]
 	[th]Overseer[/th]
-	[th]Survivalist[/th]
+	[th]Logistician[/th]
 	[th]Comment[/th]
 [/tr]
 [tr]
 	[th]Squaddie[/th]
-	[th]Combat Presence[/th]
-	[th]Pistol Shot[/th]
+	[th]Grapple Gun[/th]
+	[th]Resupply Ammo[/th]
 	[th]-[/th]
 [/tr]
 [tr]
 	[th]Corporal[/th]
 	[th]Deep Cover[/th]
-	[th]Quickdraw[/th]
-	[th]Safe Overwatch vs shoot + Overwatch[/th]
+	[th]Bandage Throw[/th]
+	[th]Safety vs Utility[/th]
 [/tr]
 [tr]
 	[th]Sergeant[/th]
 	[th]Aim[/th]
-	[th]Reflex[/th]
-	[th]More accurate Overwatch vs more actions when shot[/th]
+	[th]Supply Run[/th]
+	[th]Accuracy vs Mobility[/th]
 [/tr]
 [tr]
 	[th]Lieutenant[/th]
 	[th]Waylay[/th]
-	[th]Rifle Return Fire[/th]
-	[th]More Overwatch shots vs direct retaliation[/th]
+	[th]Reposition[/th]
+	[th]More Overwatch shots vs Utility[/th]
 [/tr]
 [tr]
 	[th]Captain[/th]
-	[th]Holo Targeting[/th]
 	[th]Covering Fire[/th]
+	[th]Holo Targeting[/th]
 	[th]Accuracy buff when firing multiple shots vs triggering reaction shots more reliably[/th]
 [/tr]
 [tr]
 	[th]Major[/th]
-	[th]Cool Under Pressure[/th]
-	[th]Hail of Bullets[/th]
-	[th]Overwatch buff vs guaranteed damage[/th]
+	[th]Rifle Return Fire[/th]
+	[th]Reflex[/th]
+	[th]Immediate retaliation vs Utility next turn[/th]
 [/tr]
 [tr]
 	[th]Colonel[/th]
 	[th]Guardian[/th]
-	[th]Fan Fire[/th]
-	[th]Even more Overwatch shots vs burst damage[/th]
+	[th]Cool Under Pressure[/th]
+	[th]Even more Overwatch shots vs Better Overwatch shots[/th]
 [/tr]
 [/table]
 
-[b]Deep Cover[/b] works great with an Overwatch build, because it will activate Hunker Down automatically if you Overwatch. [b]Aim[/b] will then also buff the accuracy of the Overwatch shot.
-
-[b]Waylay[/b] is often misunderstood. What it does is grants you an additional Overwatch shot if you enter Overwatch with one AP remaining, and +2 shots if you do it with 2 AP remaining. So worst case scenario, it's +1 Overwatch shot guaranteed.
+[b][url=https://steamcommunity.com/workshop/filedetails/discussion/2189770689/6303323544996086307/]Some commentary and description of the new perks can be found >>> HERE <<<.[/url][/b]
 
 Denmother herself also gains an additional flavor perk: [b]One Good Eye[/b] - works similarly to [b]Zero In[/b], but resets only when switching targets. 
 
@@ -112,10 +110,6 @@ The mod does not require a new campaign start, but obviously you want it to be a
 [*] [url=https://steamcommunity.com/sharedfiles/filedetails/?id=1127014384][b]Empty WOTC Deco Slots for XCOM Soldiers (+ Some other empty things)[/b][/url] is required, unless you play with [b][url=https://steamcommunity.com/sharedfiles/filedetails/?id=1135440846]Unrestricted Customization - Wotc[/url][/b].
 [*] [url=https://steamcommunity.com/workshop/filedetails/?id=1134256495][b]X2WOTCCommunityHighlander[/b][/url] v1.21 or higher is required. [/list]
 The only part of the mod that requires specifically the v1.21 of the Highlander is being able to train additional Keepers in GTS after purchasing their GTS unlock. If you don't care about that, you can use the mod with any Highlander v1.18 or above.
-
-[h1]INCOMPTABILE MODS[/h1]
-
-Appears to be incompatible with [b]LWOTC[/b] - Denmother doesn't appear on the first Haven Defense.
 
 [h1]COMPANION MODS[/h1]
 

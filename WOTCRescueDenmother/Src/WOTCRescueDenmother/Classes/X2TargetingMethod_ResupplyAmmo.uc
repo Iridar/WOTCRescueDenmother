@@ -130,11 +130,13 @@ function Init(AvailableAction InAction, int NewTargetIndex)
 	local PrecomputedPathData	WeaponPrecomputedPathData;
 	local X2AbilityTemplate		AbilityTemplate;
 	local TTile					UnitTileLocation;
-	local array<TTile>			Tiles;
 	local array<TTile>			ShowTiles;
-	local GameRulesCache_VisibilityInfo DirectionInfo;
 	local XComWorldData			WorldData;
 	local TTile					TestTile;
+	local array<TilePosPair>	TilePairs;
+	local TilePosPair			TilePair;
+
+	local GameRulesCache_VisibilityInfo DirectionInfo;
 
 	super(X2TargetingMethod).Init(InAction, NewTargetIndex);
 	
@@ -194,12 +196,18 @@ function Init(AvailableAction InAction, int NewTargetIndex)
 	SourceUnitLocation = WorldData.GetPositionFromTileCoordinates(UnitTileLocation);
 	//SourceUnitLocation.Z += 32;
 
-	if( AbilityTemplate.AbilityTargetStyle != none )
+	if (AbilityTemplate.DataName == 'IRI_ResupplyAmmo')
 	{
-		AbilityTemplate.AbilityTargetStyle.GetValidTilesForLocation(Ability, SourceUnitLocation, Tiles);
+		WorldData.CollectTilesInCylinder(TilePairs, SourceUnitLocation, `TILESTOUNITS(class'X2Ability_Denmother'.default.ResupplyAmmoDistanceTiles), 0.0f);
 	}
-	foreach Tiles(TestTile)
+	else
 	{
+		WorldData.CollectTilesInCylinder(TilePairs, SourceUnitLocation, `TILESTOUNITS(class'X2Ability_Denmother'.default.BandageThrowDistanceTiles), 0.0f);
+	}
+
+	foreach TilePairs(TilePair)
+	{
+		TestTile = TilePair.Tile;
 		if (WorldData.CanSeeTileToTile(UnitTileLocation, TestTile, DirectionInfo))
 		{
 			ShowTiles.AddItem(TestTile);

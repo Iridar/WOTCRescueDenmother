@@ -333,6 +333,7 @@ static function RemoveCosmeticsFromThisModFromRandomGeneration()
 static function bool AbilityTagExpandHandler(string InString, out string OutString)
 {
 	local name TagText;
+	local X2TechTemplate TechTemplate;
 	
 	TagText = name(InString);
 	switch (TagText)
@@ -364,11 +365,27 @@ static function bool AbilityTagExpandHandler(string InString, out string OutStri
 	case 'BandageThrowDuration':
 		OutString = SetColor(class'X2Ability_Denmother'.default.BandageThrowDuration + 1);
 		return true;
+	case 'BandageThrowHealEmpowered':
+		OutString = SetColor(class'X2Ability_Denmother'.default.BandageThrow_EmpoweredHeal);
+		return true;
+	case 'BandageThrow_EmpowerTechName':
+		TechTemplate = X2TechTemplate(class'X2StrategyElementTemplateManager'.static.GetStrategyElementTemplateManager().FindStrategyElementTemplate(class'X2Ability_Denmother'.default.BandageThrow_EmpowerTech));
+		if (TechTemplate != none)
+		{
+			OutString = SetColor(TechTemplate.DisplayName);
+		}
+		else
+		{
+			OutString = SetColor("ERROR, NO TECH TEMPLATE FOR NAME:" @ class'X2Ability_Denmother'.default.BandageThrow_EmpowerTech @ "|| ");
+		}
+		return true;
 	//	===================================================
 	default:
             return false;
     }  
 }
+
+
 
 static function string SetColor(coerce string Value)
 {	

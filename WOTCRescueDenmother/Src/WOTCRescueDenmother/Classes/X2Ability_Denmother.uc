@@ -2,7 +2,9 @@ class X2Ability_Denmother extends X2Ability config(Denmother);
 
 var config int DenmotherBleedoutTurns;
 
-//var config(Keeper) float ResupplyAmmoDistanceTiles;
+var config(Keeper) float ResupplyAmmoDistanceTiles;
+var config(Keeper) float BandageThrowDistanceTiles;
+
 var config(Keeper) int PullAllyCooldown;
 var config(Keeper) int ResupplyAmmoCooldown;
 var config(Keeper) int BandageThrowCooldown;
@@ -70,7 +72,7 @@ static function X2AbilityTemplate Create_BandageThrow()
 	Template.AbilityToHitCalc = default.DeadEye;
 
 	SingleTarget = new class'X2AbilityTarget_Single';
-	SingleTarget.OnlyIncludeTargetsInsideWeaponRange = true;
+	SingleTarget.OnlyIncludeTargetsInsideWeaponRange = false;
 	SingleTarget.bIncludeSelf = true;
 	SingleTarget.bShowAOE = true;
 	Template.AbilityTargetStyle = SingleTarget;
@@ -92,8 +94,8 @@ static function X2AbilityTemplate Create_BandageThrow()
 	UnitProperty.ExcludeRobotic = true;
 	UnitProperty.ExcludeUnableToAct = true;
 	UnitProperty.TreatMindControlledSquadmateAsHostile = true;
-	//UnitProperty.RequireWithinRange = true;
-	//UnitProperty.WithinRange = `TILESTOUNITS(default.ResupplyAmmoDistanceTiles);
+	UnitProperty.RequireWithinRange = true;
+	UnitProperty.WithinRange = `TILESTOUNITS(default.BandageThrowDistanceTiles);
 	Template.AbilityTargetConditions.AddItem(UnitProperty);
 	Template.AbilityTargetConditions.AddItem(default.GameplayVisibilityCondition);
 	Template.AbilityTargetConditions.AddItem(new class'X2Condition_BandageThrow');
@@ -167,7 +169,7 @@ static function X2AbilityTemplate Create_ResupplyAmmo()
 	Template.AbilityToHitCalc = default.DeadEye;
 
 	SingleTarget = new class'X2AbilityTarget_Single';
-	SingleTarget.OnlyIncludeTargetsInsideWeaponRange = true;
+	SingleTarget.OnlyIncludeTargetsInsideWeaponRange = false;
 	SingleTarget.bIncludeSelf = false;
 	SingleTarget.bShowAOE = true;
 	Template.AbilityTargetStyle = SingleTarget;
@@ -189,8 +191,8 @@ static function X2AbilityTemplate Create_ResupplyAmmo()
 	UnitProperty.ExcludeRobotic = false;
 	UnitProperty.ExcludeUnableToAct = true;
 	UnitProperty.TreatMindControlledSquadmateAsHostile = true;
-	//UnitProperty.RequireWithinRange = true;
-	//UnitProperty.WithinRange = `TILESTOUNITS(default.ResupplyAmmoDistanceTiles);
+	UnitProperty.RequireWithinRange = true;
+	UnitProperty.WithinRange = `TILESTOUNITS(default.ResupplyAmmoDistanceTiles);
 	Template.AbilityTargetConditions.AddItem(UnitProperty);
 	ResupplyCondition = new class'X2Condition_ResupplyAmmo';
 	Template.AbilityTargetConditions.AddItem(ResupplyCondition);
