@@ -36,7 +36,7 @@ static final function bool IsMissionFirstRetaliation(name LogName)
 
 	`LOG("IsMissionFirstRetaliation check by:" @ LogName, class'Denmother'.default.bLog, 'IRIDENMOTHER');
 
-	if (LWOTC_IsCurrentMissionIsRetaliation())
+	if (LWOTC_IsCurrentMissionIsRetaliation() && !LWOTC_IsFirstDenmotherSpawn())
 	{
 		`LOG("LWOTC_IsCurrentMissionIsRetaliation check succeeds.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
 		return true;
