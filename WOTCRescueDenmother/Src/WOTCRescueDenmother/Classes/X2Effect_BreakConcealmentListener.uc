@@ -24,12 +24,12 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 	UnitState = XComGameState_Unit(NewGameState.GetGameStateForObjectID(ApplyEffectParameters.TargetStateObjectRef.ObjectID));
 	if (UnitState != none)
 	{
-		`LOG("X2Effect_BreakConcealmentListener:OnEffectAdded: activating Denmother's concealment.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+		`LOG("X2Effect_BreakConcealmentListener:OnEffectAdded: activating Denmother's concealment.", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
 		UnitState.SetIndividualConcealment(true, NewGameState);
 	}
 	else
 	{
-		`LOG("X2Effect_BreakConcealmentListener:OnEffectAdded: Error, could not find Denmother's unit state in New Game State.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+		`LOG("X2Effect_BreakConcealmentListener:OnEffectAdded: Error, could not find Denmother's unit state in New Game State.", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
 	}
 }
 
@@ -71,7 +71,7 @@ static function EventListenerReturn AbilityActivated_Listener(Object EventData, 
 	// Break Denmother's concealment the moment she's targeted by an XCOM Ability.
 	if (bDenmotherMultiTarget || AbilityContext.InputContext.PrimaryTarget == EffectState.ApplyEffectParameters.TargetStateObjectRef)
 	{
-		`LOG("X2Effect_BreakConcealmentListener:AbilityActivated_Listener: breking Denmother's concealment.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+		`LOG("X2Effect_BreakConcealmentListener:AbilityActivated_Listener: breking Denmother's concealment.", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
 		NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Breaking Denmother Concealment");
 		UnitState = XComGameState_Unit(NewGameState.ModifyStateObject(class'XComGameState_Unit', EffectState.ApplyEffectParameters.TargetStateObjectRef.ObjectID));
 		UnitState.SetIndividualConcealment(false, NewGameState);

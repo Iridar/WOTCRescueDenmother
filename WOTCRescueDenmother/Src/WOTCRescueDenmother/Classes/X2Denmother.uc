@@ -1,4 +1,5 @@
-class Denmother extends Object config (Denmother);
+class X2Denmother extends Object config (DenmotherConfig);
+
 
 var localized string strDenmotherFirstName;
 var localized string strDenmotherLastName;
@@ -34,11 +35,11 @@ static final function bool IsMissionFirstRetaliation(name LogName)
 	local XComGameState_MissionSite			MissionState;
 	local XComGameState_BattleData			BattleData;
 
-	`LOG("IsMissionFirstRetaliation check by:" @ LogName, class'Denmother'.default.bLog, 'IRIDENMOTHER');
+	`LOG("IsMissionFirstRetaliation check by:" @ LogName, class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
 
 	if (LWOTC_IsCurrentMissionIsRetaliation() && !LWOTC_IsFirstDenmotherSpawn())
 	{
-		`LOG("LWOTC_IsCurrentMissionIsRetaliation check succeeds.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+		`LOG("LWOTC_IsCurrentMissionIsRetaliation check succeeds.", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
 		return true;
 	}
 
@@ -46,14 +47,14 @@ static final function bool IsMissionFirstRetaliation(name LogName)
 	BattleData = XComGameState_BattleData(History.GetSingleGameStateObjectForClass(class'XComGameState_BattleData'));
 	if (BattleData == none)
 	{
-		`LOG("IsMissionFirstRetaliation WARNING, no Battle Data, check fails.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+		`LOG("IsMissionFirstRetaliation WARNING, no Battle Data, check fails.", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
 		return false;
 	}
 
 	MissionState = XComGameState_MissionSite(History.GetGameStateForObjectID(BattleData.m_iMissionID));
 	if (MissionState == none)
 	{
-		`LOG("IsMissionFirstRetaliation WARNING, no Mission State, check fails.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+		`LOG("IsMissionFirstRetaliation WARNING, no Mission State, check fails.", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
 		return false;
 	}
 
@@ -62,21 +63,21 @@ static final function bool IsMissionFirstRetaliation(name LogName)
 		CalendarState = XComGameState_MissionCalendar(History.GetSingleGameStateObjectForClass(class'XComGameState_MissionCalendar'));
 		if (CalendarState == none)
 		{
-			`LOG("IsMissionFirstRetaliation WARNING, no Calendar State, check fails.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+			`LOG("IsMissionFirstRetaliation WARNING, no Calendar State, check fails.", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
 			return false;
 		}
 		//	I.e. return "true" if calendar DID NOT create multiple retaliation missions yet
 		if (!CalendarState.HasCreatedMultipleMissionsOfSource('MissionSource_Retaliation'))
 		{
-			`LOG("IsMissionFirstRetaliation check succeeds, this is first retaliation.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+			`LOG("IsMissionFirstRetaliation check succeeds, this is first retaliation.", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
 			return true;
 		}
-		`LOG("IsMissionFirstRetaliation check fails, this retaliation is not first.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+		`LOG("IsMissionFirstRetaliation check fails, this retaliation is not first.", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
 		return false;
 		
 	}
 
-	`LOG("IsMissionFirstRetaliation check fails, different mission source:" @ MissionState.Source, class'Denmother'.default.bLog, 'IRIDENMOTHER');
+	`LOG("IsMissionFirstRetaliation check fails, different mission source:" @ MissionState.Source, class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
 	return false;
 }
 
@@ -139,13 +140,13 @@ static function XComGameState_Unit GetDenmotherTacticalUnitState()
 
 		if (UnitState != none)
 		{
-			`LOG("GetDenmotherTacticalUnitState: Found Denmother Tactical Unit State, she's alive:" @ UnitState.IsAlive(), class'Denmother'.default.bLog, 'IRIDENMOTHER');
+			`LOG("GetDenmotherTacticalUnitState: Found Denmother Tactical Unit State, she's alive:" @ UnitState.IsAlive(), class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
 			return UnitState;
 		}
-		`LOG("GetDenmotherTacticalUnitState: did not find Denmother Unit State", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+		`LOG("GetDenmotherTacticalUnitState: did not find Denmother Unit State", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
 		return none;
 	}
-	`LOG("GetDenmotherTacticalUnitState: did not find Denmother Objective State", class'Denmother'.default.bLog, 'IRIDENMOTHER');	
+	`LOG("GetDenmotherTacticalUnitState: did not find Denmother Objective State", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');	
 	return none;
 }
 
@@ -161,11 +162,11 @@ static function XComGameState_Unit GetDenmotherHistoryUnitState()
 	{
 		if (UnitState.GetUnitValue('IRI_ThisUnitIsDenmother_Value', UV))
 		{
-			`LOG("GetDenmotherHistoryUnitState: found Denmother Unit State.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+			`LOG("GetDenmotherHistoryUnitState: found Denmother Unit State.", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
 			return UnitState;
 		}
 	}
-	`LOG("GetDenmotherHistoryUnitState: did not find Denmother Unit State.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+	`LOG("GetDenmotherHistoryUnitState: did not find Denmother Unit State.", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
 	return none;
 }
 
@@ -266,7 +267,7 @@ static function bool IsSweepObjectiveComplete()
 	{
 		for(idx = 0; idx < BattleData.MapData.ActiveMission.MissionObjectives.Length; idx++)
 		{
-			`LOG("IsSweepObjectiveComplete:" @ BattleData.MapData.ActiveMission.MissionObjectives[idx].ObjectiveName @ BattleData.MapData.ActiveMission.MissionObjectives[idx].bCompleted, class'Denmother'.default.bLog, 'IRIDENMOTHER');
+			`LOG("IsSweepObjectiveComplete:" @ BattleData.MapData.ActiveMission.MissionObjectives[idx].ObjectiveName @ BattleData.MapData.ActiveMission.MissionObjectives[idx].bCompleted, class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
 			if (BattleData.MapData.ActiveMission.MissionObjectives[idx].ObjectiveName == 'Sweep')
 			{
 				return BattleData.MapData.ActiveMission.MissionObjectives[idx].bCompleted;
@@ -308,7 +309,7 @@ static function FinalizeDenmotherUnitForCrew()
 
 		GiveOneGoodEyeAbility(UnitState, NewGameState);
 
-		UnitState.SetCharacterName(class'Denmother'.default.strDenmotherFirstName, class'Denmother'.default.strDenmotherLastName, class'Denmother'.default.strDenmotherNickName);
+		UnitState.SetCharacterName(class'X2Denmother'.default.strDenmotherFirstName, class'X2Denmother'.default.strDenmotherLastName, class'X2Denmother'.default.strDenmotherNickName);
 
 		UnitState.kAppearance = default.AvengerAppearance;
 		if (DLCLoaded('DLC_2'))
@@ -324,28 +325,28 @@ static function FinalizeDenmotherUnitForCrew()
 		BattleData = XComGameState_BattleData(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_BattleData'));
 		if (UnitState.IsDead())
 		{
-			`LOG("FinalizeDenmotherUnitForCrew: Denmother is dead, setting dead backstory.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
-			UnitState.SetBackground(class'Denmother'.default.strDenmother_Background_Dead);
+			`LOG("FinalizeDenmotherUnitForCrew: Denmother is dead, setting dead backstory.", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
+			UnitState.SetBackground(class'X2Denmother'.default.strDenmother_Background_Dead);
 			//	This will unlock "Denmother died" dossier.
 			AddItemToHQInventory('IRI_Denmother_ObjectiveDummyItem_Dead', NewGameState);
 		}
-		else if (class'Denmother'.static.WereCiviliansRescued(BattleData))
+		else if (class'X2Denmother'.static.WereCiviliansRescued(BattleData))
 		{
-			`LOG("FinalizeDenmotherUnitForCrew: Civilians were rescued, setting good backstory.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
-			UnitState.SetBackground(class'Denmother'.default.strDenmother_Background_Good);
+			`LOG("FinalizeDenmotherUnitForCrew: Civilians were rescued, setting good backstory.", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
+			UnitState.SetBackground(class'X2Denmother'.default.strDenmother_Background_Good);
 			AddItemToHQInventory('IRI_Denmother_ObjectiveDummyItem_Good', NewGameState);
 			
 		}
 		else
 		{	
-			`LOG("FinalizeDenmotherUnitForCrew: Civilians were NOT rescued, setting bad backstory.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
-			UnitState.SetBackground(class'Denmother'.default.strDenmother_Background_Bad);
+			`LOG("FinalizeDenmotherUnitForCrew: Civilians were NOT rescued, setting bad backstory.", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
+			UnitState.SetBackground(class'X2Denmother'.default.strDenmother_Background_Bad);
 			AddItemToHQInventory('IRI_Denmother_ObjectiveDummyItem_Bad', NewGameState);
 		}
 
 		if (UnitState.IsAlive())
 		{
-			XComHQ = class'Denmother'.static.GetAndPrepXComHQ(NewGameState);
+			XComHQ = class'X2Denmother'.static.GetAndPrepXComHQ(NewGameState);
 			XComHQ.AddToCrew(NewGameState, UnitState);
 		}
 		//else // Unnecessary, handled by the game automatically by moving dead units from squad. 
@@ -424,7 +425,7 @@ static function XComGameState_Unit CreateDenmotherUnit(XComGameState NewGameStat
 	}
 	if (Analytics != none)
 	{
-		`LOG("Adding analytics values to generated unit", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+		`LOG("Adding analytics values to generated unit", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
 		Analytics.AddValue( "ACC_UNIT_SERVICE_LENGTH", 0, NewUnitState.GetReference( ) );
 		Analytics.AddValue( "ACC_UNIT_HEALING", 0, NewUnitState.GetReference( ) );
 		Analytics.AddValue( "ACC_UNIT_SUCCESSFUL_ATTACKS", 0, NewUnitState.GetReference( ) );
@@ -489,11 +490,11 @@ static function SetGroupAndPlayer(XComGameState_Unit UnitState, ETeam SetTeam, X
 			PreviousGroupState = UnitState.GetGroupMembership(NewGameState);
 			if (PreviousGroupState != none) 
 			{
-				`LOG("Removing Denmother from group:" @ PreviousGroupState.TeamName, class'Denmother'.default.bLog, 'IRIDENMOTHER');
+				`LOG("Removing Denmother from group:" @ PreviousGroupState.TeamName, class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
 				PreviousGroupState.RemoveUnitFromGroup(UnitState.ObjectID, NewGameState);
 			}
 
-			`LOG("Assigned group to Denmother:" @ Group.TeamName, class'Denmother'.default.bLog, 'IRIDENMOTHER');
+			`LOG("Assigned group to Denmother:" @ Group.TeamName, class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
 			Group = XComGameState_AIGroup(NewGameState.ModifyStateObject(class'XComGameState_AIGroup', Group.ObjectID));
 			Group.AddUnitToGroup(UnitState.ObjectID, NewGameState);
 			break;
@@ -505,7 +506,7 @@ static function SetGroupAndPlayer(XComGameState_Unit UnitState, ETeam SetTeam, X
 	{
 		if (PlayerState.GetTeam() == SetTeam)
 		{
-			`LOG("Assigned player to Denmother:" @ PlayerState.GetTeam(), class'Denmother'.default.bLog, 'IRIDENMOTHER');
+			`LOG("Assigned player to Denmother:" @ PlayerState.GetTeam(), class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
 			UnitState.SetControllingPlayer(PlayerState.GetReference());
 			break;
 		}
@@ -589,7 +590,7 @@ static function AddItemToHQInventory(name TemplateName, XComGameState NewGameSta
 		ItemState = ItemTemplate.CreateInstanceFromTemplate(NewGameState);
 		if (XComHQ.PutItemInInventory(NewGameState, ItemState))
 		{
-			`LOG("Added" @ TemplateName @ "to HQ ivnentory.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+			`LOG("Added" @ TemplateName @ "to HQ ivnentory.", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
 		}
 	}
 }

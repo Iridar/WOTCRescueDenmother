@@ -1,4 +1,4 @@
-class X2Effect_OneGoodEye extends X2Effect_Persistent config(Denmother);
+class X2Effect_OneGoodEye extends X2Effect_Persistent config(DenmotherConfig);
 
 var config int BonusAimPerShot;
 var config int BonusCritPerShot;
@@ -9,7 +9,7 @@ function RegisterForEvents(XComGameState_Effect EffectGameState)
 	local X2EventManager EventMgr;
 	local Object EffectObj;
 
-	`LOG("Register One Good Eye listener", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+	`LOG("Register One Good Eye listener", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
 
 	EventMgr = `XEVENTMGR;
 	EffectObj = EffectGameState;
@@ -29,7 +29,7 @@ static function EventListenerReturn ZeroInListener(Object EventData, Object Even
 	if (GameState.GetContext().InterruptionStatus == eInterruptionStatus_Interrupt)
 		return ELR_NoInterrupt;
 
-	`LOG("Zero In Listener Running", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+	`LOG("Zero In Listener Running", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
 
 	AbilityState = XComGameState_Ability(EventData);
 	UnitState = XComGameState_Unit(EventSource);
@@ -38,12 +38,12 @@ static function EventListenerReturn ZeroInListener(Object EventData, Object Even
 	
 	if (AbilityState != none && UnitState != none && AbilityContext != none && EffectState != none && AbilityState.IsAbilityInputTriggered())
 	{
-		`LOG("Initial checks done", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+		`LOG("Initial checks done", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
 
 		SourceWeapon = AbilityState.GetSourceWeapon();
 		if (AbilityState.GetMyTemplate().Hostility == eHostility_Offensive && SourceWeapon != none && SourceWeapon.InventorySlot == eInvSlot_PrimaryWeapon)
 		{
-			`LOG("This is a valid ability", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+			`LOG("This is a valid ability", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
 
 			NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("One Good Eye Increment");
 			UnitState = XComGameState_Unit(NewGameState.ModifyStateObject(UnitState.Class, UnitState.ObjectID));
@@ -52,14 +52,14 @@ static function EventListenerReturn ZeroInListener(Object EventData, Object Even
 			UnitState.GetUnitValue('IRI_OneGoodEye_Target', UValue);
 			if (int(UValue.fValue) == AbilityContext.InputContext.PrimaryTarget.ObjectID)
 			{
-				`LOG("A: Register additional shot against the same target", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+				`LOG("A: Register additional shot against the same target", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
 				//	If so, increment the shots value
 				UnitState.GetUnitValue('IRI_OneGoodEye_Shots', UValue);
 				UnitState.SetUnitFloatValue('IRI_OneGoodEye_Shots', UValue.fValue + 1, eCleanup_BeginTactical);
 			}
 			else
 			{
-				`LOG("B: Begin tracking against a new target", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+				`LOG("B: Begin tracking against a new target", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
 				//	else, reset it to 1 and begin recording against the new target
 				UnitState.SetUnitFloatValue('IRI_OneGoodEye_Shots', 1, eCleanup_BeginTactical);
 				UnitState.SetUnitFloatValue('IRI_OneGoodEye_Target', AbilityContext.InputContext.PrimaryTarget.ObjectID, eCleanup_BeginTactical);
@@ -67,7 +67,7 @@ static function EventListenerReturn ZeroInListener(Object EventData, Object Even
 
 			if (UnitState.ActionPoints.Length > 0)
 			{
-				`LOG("Unit has actions left, showing flyover", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+				`LOG("Unit has actions left, showing flyover", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
 				//	show flyover for boost, but only if they have actions left to potentially use them
 				NewGameState.ModifyStateObject(class'XComGameState_Ability', EffectState.ApplyEffectParameters.AbilityStateObjectRef.ObjectID);		//	create this for the vis function
 				XComGameStateContext_ChangeContainer(NewGameState.GetContext()).BuildVisualizationFn = EffectState.TriggerAbilityFlyoverVisualizationFn;
@@ -75,7 +75,7 @@ static function EventListenerReturn ZeroInListener(Object EventData, Object Even
 		}
 		else
 		{
-			`LOG("This was not a valid ability, resetting trackers", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+			`LOG("This was not a valid ability, resetting trackers", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
 			NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("One Good Eye Reset");
 			UnitState = XComGameState_Unit(NewGameState.ModifyStateObject(UnitState.Class, UnitState.ObjectID));
 			UnitState.ClearUnitValue('IRI_OneGoodEye_Shots');
@@ -127,13 +127,13 @@ static private function SubmitNewGameState(out XComGameState NewGameState)
 
 	if (NewGameState.GetNumGameStateObjects() > 0)
 	{
-		`LOG("Submitting game state", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+		`LOG("Submitting game state", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
 		TacticalRules = `TACTICALRULES;
 		TacticalRules.SubmitGameState(NewGameState);
 	}
 	else
 	{
-		`LOG("Cleaning up game state", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+		`LOG("Cleaning up game state", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
 		History = `XCOMHISTORY;
 		History.CleanupPendingGameState(NewGameState);
 	}

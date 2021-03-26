@@ -1,18 +1,18 @@
-class X2Ability_Denmother extends X2Ability config(Denmother);
+class X2Ability_Denmother extends X2Ability config(DenmotherConfig);
 
 var config int DenmotherBleedoutTurns;
 
-var config(Keeper) float ResupplyAmmoDistanceTiles;
-var config(Keeper) float BandageThrowDistanceTiles;
+var config(KeeperConfig) float ResupplyAmmoDistanceTiles;
+var config(KeeperConfig) float BandageThrowDistanceTiles;
 
-var config(Keeper) int PullAllyCooldown;
-var config(Keeper) int ResupplyAmmoCooldown;
-var config(Keeper) int BandageThrowCooldown;
-var config(Keeper) int BandageThrowHeal;
-var config(Keeper) int BandageThrowDuration;
-var config(Keeper) int BandageThrowCharges;
-var config(Keeper) int BandageThrow_EmpoweredHeal;
-var config(Keeper) name BandageThrow_EmpowerTech;
+var config(KeeperConfig) int PullAllyCooldown;
+var config(KeeperConfig) int ResupplyAmmoCooldown;
+var config(KeeperConfig) int BandageThrowCooldown;
+var config(KeeperConfig) int BandageThrowHeal;
+var config(KeeperConfig) int BandageThrowDuration;
+var config(KeeperConfig) int BandageThrowCharges;
+var config(KeeperConfig) int BandageThrow_EmpoweredHeal;
+var config(KeeperConfig) name BandageThrow_EmpowerTech;
 
 static function array<X2DataTemplate> CreateTemplates()
 {
@@ -605,7 +605,7 @@ static function bool Denmother_Bleedout_EffectTicked(X2Effect_Persistent Persist
 {
 	if (kNewEffectState.FullTurnsTicked == 0)
 	{
-		`LOG("Denmother Bleedout ticking for the first time, increasing turns remaining.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+		`LOG("Denmother Bleedout ticking for the first time, increasing turns remaining.", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
 		kNewEffectState.iTurnsRemaining++;
 	}
 	// The effect will continue.
@@ -631,7 +631,7 @@ static function Denmother_BleedingOutVisualizationTicked(XComGameState Visualize
 		{
 			if (EffectState.FullTurnsTicked == 0)
 			{
-				`LOG("Skipping bleedout visualization tick for the first turn", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+				`LOG("Skipping bleedout visualization tick for the first turn", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
 				return;
 			}
 		}

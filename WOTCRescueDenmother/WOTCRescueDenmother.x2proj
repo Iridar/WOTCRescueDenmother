@@ -39,7 +39,7 @@ tags= war of the chosen, soldier class, soldier customization, weapon</Descripti
     <Content Include="Config\XComContent.ini">
       <SubType>Content</SubType>
     </Content>
-    <Content Include="Config\XComDenmother.ini">
+    <Content Include="Config\XComDenmotherConfig.ini">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Config\XComEncyclopedia.ini">
@@ -51,7 +51,7 @@ tags= war of the chosen, soldier class, soldier customization, weapon</Descripti
     <Content Include="Config\XComGameData_SoldierSkills.ini">
       <SubType>Content</SubType>
     </Content>
-    <Content Include="Config\XComKeeper.ini">
+    <Content Include="Config\XComKeeperConfig.ini">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Config\XComStrategyTuning.ini">
@@ -87,9 +87,6 @@ tags= war of the chosen, soldier class, soldier customization, weapon</Descripti
     <Content Include="ReadMe.txt" />
     <Content Include="ModPreview.jpg" />
     <Content Include="Localization\XComGame.int" />
-    <Content Include="Src\WOTCRescueDenmother\Classes\Denmother.uc">
-      <SubType>Content</SubType>
-    </Content>
     <Content Include="Src\WOTCRescueDenmother\Classes\UIScreenListener_Denmother.uc">
       <SubType>Content</SubType>
     </Content>
@@ -114,10 +111,10 @@ tags= war of the chosen, soldier class, soldier customization, weapon</Descripti
     <Content Include="Src\WOTCRescueDenmother\Classes\X2Condition_ResupplyAmmo.uc">
       <SubType>Content</SubType>
     </Content>
-    <Content Include="Src\WOTCRescueDenmother\Classes\X2DownloadableContentInfo_WOTCRescueDenmother.uc" />
-    <Content Include="Src\WOTCRescueDenmother\Classes\X2Effect_AddOverwatchActionPoint.uc">
+    <Content Include="Src\WOTCRescueDenmother\Classes\X2Denmother.uc">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Src\WOTCRescueDenmother\Classes\X2DownloadableContentInfo_WOTCRescueDenmother.uc" />
     <Content Include="Src\WOTCRescueDenmother\Classes\X2Effect_BandageThrow.uc">
       <SubType>Content</SubType>
     </Content>

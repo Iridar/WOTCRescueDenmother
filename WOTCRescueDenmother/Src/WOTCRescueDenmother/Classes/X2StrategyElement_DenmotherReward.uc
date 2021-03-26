@@ -1,5 +1,4 @@
-class X2StrategyElement_DenmotherReward extends X2StrategyElement config(Denmother);
-
+class X2StrategyElement_DenmotherReward extends X2StrategyElement config(DenmotherConfig);
 var config int GTS_Training_Unlock_Cost_Supplies;
 var config name GTS_Training_Unlock_Grants_Ability;
 

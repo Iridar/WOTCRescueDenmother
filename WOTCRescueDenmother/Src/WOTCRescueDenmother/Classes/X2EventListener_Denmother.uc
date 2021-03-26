@@ -34,23 +34,23 @@ static function EventListenerReturn ListenerEventFunction_Immediate(Object Event
 	local XComGameState_Unit				UnitState;
 	local vector							Position;
 
-	`LOG("Post Aliens Spawned ListenerEventFunction triggered", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+	`LOG("Post Aliens Spawned ListenerEventFunction triggered", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
 	//	=================================================================
 	//	INITIAL CHECKS -> Make sure this is the first retaliation in the campaign, exit otherwise.
 
-	if (class'Denmother'.static.IsMissionFirstRetaliation('PostAliensSpawned'))
+	if (class'X2Denmother'.static.IsMissionFirstRetaliation('PostAliensSpawned'))
 	{
 		//	=================================================================
 		//	CREATE AND DEPLOY DENMOTHER 
 
-		`LOG("This is First retaliation, creating soldier.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+		`LOG("This is First retaliation, creating soldier.", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
 
 		//	Generate unit
-		UnitState = class'Denmother'.static.CreateDenmotherUnit(NewGameState);
+		UnitState = class'X2Denmother'.static.CreateDenmotherUnit(NewGameState);
 
-		`LOG("Old position:" @ `XWORLD.GetPositionFromTileCoordinates(UnitState.TileLocation), class'Denmother'.default.bLog, 'IRIDENMOTHER');
+		`LOG("Old position:" @ `XWORLD.GetPositionFromTileCoordinates(UnitState.TileLocation), class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
 		Position = GetDenmotherSpawnPosition();
-		`LOG("New position:" @ Position, class'Denmother'.default.bLog, 'IRIDENMOTHER');
+		`LOG("New position:" @ Position, class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
 
 		// Denmother starts concealed with 0 tile detection radius to prevent enemies from reacting to her.
 		UnitState.SetIndividualConcealment(true, NewGameState);
@@ -98,20 +98,20 @@ static private function vector GetDenmotherSpawnPosition()
 		}
 	}
 
-	`LOG("Found this many civilians in the Game State:" @ i - 1, class'Denmother'.default.bLog, 'IRIDENMOTHER');
+	`LOG("Found this many civilians in the Game State:" @ i - 1, class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
 	Position /= i;
 	
-	`LOG("Average civvies :" @ Position, class'Denmother'.default.bLog, 'IRIDENMOTHER');
+	`LOG("Average civvies :" @ Position, class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
 	//	At this point in time, Position will hold coordinates of a center point between all civvies
 
 	Position = World.FindClosestValidLocation(Position,/*bool bAllowFlying*/ false,/*bool bPrioritizeZLevel*/ false,/*bool bAvoidNoSpawnZones=false*/true); 
 	
-	`LOG("Valid spawn posi:" @ Position, class'Denmother'.default.bLog, 'IRIDENMOTHER');
+	`LOG("Valid spawn posi:" @ Position, class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
 
 	World.GetFloorTileForPosition(Position, Tile);
 	Position = World.GetPositionFromTileCoordinates(Tile);
 
-	`LOG("Floor tile posit:" @ Position, class'Denmother'.default.bLog, 'IRIDENMOTHER');
+	`LOG("Floor tile posit:" @ Position, class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
 
 	return Position;
 
@@ -135,7 +135,7 @@ static private function AddStrategyUnitToBoard(XComGameState_Unit Unit, XComGame
 	local X2AbilityTemplate				AbilityTemplate;
     local X2AbilityTemplateManager		AbilityTemplateManager;	
 
-	class'Denmother'.static.SetGroupAndPlayer(Unit, eTeam_XCom, NewGameState);
+	class'X2Denmother'.static.SetGroupAndPlayer(Unit, eTeam_XCom, NewGameState);
 
 	// add item states. This needs to be done so that the visualizer sync picks up the IDs and creates their visualizers -LEB
 	foreach Unit.InventoryItems(ItemReference)
@@ -167,7 +167,7 @@ static function CHEventListenerTemplate Create_StrategyListenerTemplate()
 	Template.RegisterInStrategy = true;
 
 	Template.AddCHEvent('ValidateGTSClassTraining', ELR_GTS, ELD_Immediate);
-	if (class'Denmother'.default.bAccelerateDenmotherHealing)
+	if (class'X2Denmother'.default.bAccelerateDenmotherHealing)
 	{
 		Template.AddCHEvent('PostMissionUpdateSoldierHealing', ListenerEventFunction_Healing, ELD_OnStateSubmitted);
 	}
@@ -187,9 +187,9 @@ static function EventListenerReturn ListenerEventFunction_Healing(Object EventDa
 
 	UnitState = XComGameState_Unit(EventSource);
 
-	if (UnitState.GetUnitValue('IRI_ThisUnitIsDenmother_Value', UV) && UnitState.IsAlive() && class'Denmother'.static.IsMissionFirstRetaliation('PostMissionUpdateSoldierHealing'))
+	if (UnitState.GetUnitValue('IRI_ThisUnitIsDenmother_Value', UV) && UnitState.IsAlive() && class'X2Denmother'.static.IsMissionFirstRetaliation('PostMissionUpdateSoldierHealing'))
 	{
-		`LOG("PostMissionUpdateSoldierHealing ListenerEventFunction triggered for Denmother.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+		`LOG("PostMissionUpdateSoldierHealing ListenerEventFunction triggered for Denmother.", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
 
 		History = `XCOMHISTORY;
 		foreach History.IterateByClassType(class'XComGameState_HeadquartersProjectHealSoldier', HealingProject)
@@ -198,9 +198,9 @@ static function EventListenerReturn ListenerEventFunction_Healing(Object EventDa
 			{
 				NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Replacing Denmother Healing Project");
 
-				`LOG("Replacing Denmother Healing Project.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+				`LOG("Replacing Denmother Healing Project.", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
 
-				XComHQ = class'Denmother'.static.GetAndPrepXComHQ(NewGameState);
+				XComHQ = class'X2Denmother'.static.GetAndPrepXComHQ(NewGameState);
 
 				XComHQ.Projects.RemoveItem(HealingProject.GetReference());
 				NewGameState.RemoveStateObject(HealingProject.ObjectID);
@@ -232,7 +232,7 @@ static function EventListenerReturn ELR_GTS(Object EventData, Object EventSource
 		SoldierClassTemplate = X2SoldierClassTemplate(OverrideTuple.Data[1].o);
 		if (SoldierClassTemplate != none && SoldierClassTemplate.DataName == 'Keeper')
 		{
-			`LOG("Running GTS check for Keeper class" @ OverrideTuple.Data[0].b, class'Denmother'.default.bLog, 'IRIDENMOTHER');
+			`LOG("Running GTS check for Keeper class" @ OverrideTuple.Data[0].b, class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
 			if (IsSoldierUnlockTemplatePurchased('IRI_Keeper_GTS_Unlock'))
 			{
 				OverrideTuple.Data[0].b = true;

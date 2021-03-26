@@ -46,7 +46,7 @@ static private function FindValidPullTile(const XComGameState_Unit SourceUnit, c
 
 	GetAvailableTiles(SourceTile, AvailableTiles);
 
-	`LOG("FindValidPullTile::AvailableTiles:" @ AvailableTiles.Length @ ", Source Tile:" @ SourceTile.X @ SourceTile.Y @ SourceTile.Z, class'Denmother'.default.bLog, 'IRIDENMOTHER');
+	`LOG("FindValidPullTile::AvailableTiles:" @ AvailableTiles.Length @ ", Source Tile:" @ SourceTile.X @ SourceTile.Y @ SourceTile.Z, class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
 
 	//	Default to nearest valid location if we can't pull the unit to a neighboring tile.
 	if (AvailableTiles.Length == 0)
@@ -54,7 +54,7 @@ static private function FindValidPullTile(const XComGameState_Unit SourceUnit, c
 		TeleportToLocation = World.FindClosestValidLocation(SourceLocation, false, true);
 		TeleportToTile = World.GetTileCoordinatesFromPosition(TeleportToLocation);
 
-		`LOG("Found no available tiles, defaulting to closest valid location." @ AvailableTiles.Length, class'Denmother'.default.bLog, 'IRIDENMOTHER');
+		`LOG("Found no available tiles, defaulting to closest valid location." @ AvailableTiles.Length, class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
 		return;
 	}
 	//	Stop validation here if there's only one tile. (1)
@@ -62,7 +62,7 @@ static private function FindValidPullTile(const XComGameState_Unit SourceUnit, c
 	{
 		TeleportToTile = AvailableTiles[0];
 
-		`LOG("Found only one available tile, skipping further validation.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+		`LOG("Found only one available tile, skipping further validation.", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
 		return;
 	}
 
@@ -70,7 +70,7 @@ static private function FindValidPullTile(const XComGameState_Unit SourceUnit, c
 
 	TruncateAvailableTilesByCover(TargetUnit, AvailableTiles);
 
-	`LOG("Available Tiles after cover trunction:" @ AvailableTiles.Length, class'Denmother'.default.bLog, 'IRIDENMOTHER');
+	`LOG("Available Tiles after cover trunction:" @ AvailableTiles.Length, class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
 
 	//	Stop validation here if there's only one tile. (2)
 	if (AvailableTiles.Length == 1)
@@ -113,7 +113,7 @@ static private function TruncateAvailableTilesByCover(const XComGameState_Unit M
 	//	Sort available tiles by cover they provide.
 	foreach AvailableTiles(TestTile)
 	{	
-		`LOG("TruncateAvailableTilesByCover::Looking at tile:" @ TestTile.X @ TestTile.Y @ TestTile.Z, class'Denmother'.default.bLog, 'IRIDENMOTHER');
+		`LOG("TruncateAvailableTilesByCover::Looking at tile:" @ TestTile.X @ TestTile.Y @ TestTile.Z, class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
 
 		TestLocation = World.GetPositionFromTileCoordinates(TestTile);
 		//	Build an array of enemy units that can see this tile.
@@ -127,29 +127,29 @@ static private function TruncateAvailableTilesByCover(const XComGameState_Unit M
 				EnemyUnits.AddItem(EnemyUnit);
 			}
 		}
-		`LOG("This tile is visible to:" @ EnemyUnits.Length @ "enemy units.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+		`LOG("This tile is visible to:" @ EnemyUnits.Length @ "enemy units.", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
 
 		//	No units see this tile. But is this tile in cover or not?
 		if (EnemyUnits.Length == 0)
 		{
 			NoEnemyLoSTiles.AddItem(TestTile);
-			`LOG("This tile is not visible to enemies.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+			`LOG("This tile is not visible to enemies.", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
 
 			if (World.IsLocationHighCover(TestLocation))
 			{
-				`LOG("This tile has high cover.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+				`LOG("This tile has high cover.", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
 				bTileIsHighCover = true;
 				bTileIsLowCover = false; 
 			}
 			else if (World.IsLocationLowCover(TestLocation))
 			{
-				`LOG("This tile has low cover.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+				`LOG("This tile has low cover.", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
 				bTileIsHighCover = false;
 				bTileIsLowCover = true;				
 			}
 			else
 			{
-				`LOG("This tile has NO cover.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+				`LOG("This tile has NO cover.", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
 				bTileIsHighCover = false;
 				bTileIsLowCover = false;	
 			}
@@ -169,11 +169,11 @@ static private function TruncateAvailableTilesByCover(const XComGameState_Unit M
 				case CT_Standing:
 					break;
 				case CT_MidLevel:
-					`LOG("This tile has NO high cover.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+					`LOG("This tile has NO high cover.", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
 					bTileIsHighCover = false;
 					break;
 				case CT_None:
-					`LOG("This tile has NO low cover.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+					`LOG("This tile has NO low cover.", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
 					bTileIsHighCover = false;
 					bTileIsLowCover = false;
 					break;
@@ -192,23 +192,23 @@ static private function TruncateAvailableTilesByCover(const XComGameState_Unit M
 		}
 	}
 
-	`LOG("Found tiles in total, High:" @ HighCoverTiles.Length @ ", Low:" @ LowCoverTiles.Length @ "No LoS:" @ NoEnemyLoSTiles.Length, class'Denmother'.default.bLog, 'IRIDENMOTHER');
+	`LOG("Found tiles in total, High:" @ HighCoverTiles.Length @ ", Low:" @ LowCoverTiles.Length @ "No LoS:" @ NoEnemyLoSTiles.Length, class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
 
 	//	Truncate the AvailableTiles array, leaving only tiles with best cover.
 	//	We prefer High Cover > Low Cover > No Enemy LoS tiles.
 	if (HighCoverTiles.Length > 0)
 	{
 		AvailableTiles = HighCoverTiles;
-		`LOG("Selecting High Cover array.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+		`LOG("Selecting High Cover array.", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
 	}
 	else if (LowCoverTiles.Length > 0)
 	{
 		AvailableTiles = LowCoverTiles;
-		`LOG("Selecting Low Cover array.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+		`LOG("Selecting Low Cover array.", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
 	}	//	Prefer tiles outside enemy LoS only if the unit is low on HP and doesn't have any action points.
 	else if (NoEnemyLoSTiles.Length > 0 && MovingUnit.ActionPoints.Length == 0 && (MovingUnit.GetCurrentStat(eStat_HP) / MovingUnit.GetMaxStat(eStat_HP) < 0.5f))
 	{
-		`LOG("Selecting No LoS array.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+		`LOG("Selecting No LoS array.", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
 		AvailableTiles = NoEnemyLoSTiles;
 	}
 }
