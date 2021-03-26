@@ -6,7 +6,6 @@ static function array<X2DataTemplate> CreateTemplates()
 
 	Templates.AddItem(Create_TacticalListenerTemplate());
 	Templates.AddItem(Create_StrategyListenerTemplate());
-	//Templates.AddItem(CreateOnGetLocalizedCategoryListenerTemplate());
 
 	return Templates;
 }
@@ -122,10 +121,6 @@ static private function vector GetDenmotherSpawnPosition()
 	
 
 	//return World.GetPositionFromTileCoordinates(Tile);
-}
-
-static private function TTile SeekValidFloorPosition(const TTile Tile)
-{
 }
 
 static private function AddStrategyUnitToBoard(XComGameState_Unit Unit, XComGameState NewGameState)
@@ -258,37 +253,3 @@ static private function bool IsSoldierUnlockTemplatePurchased(const name Soldier
 	}
 	return false;
 }
-/*
-
-static function CHEventListenerTemplate CreateOnGetLocalizedCategoryListenerTemplate()
-{
-	local CHEventListenerTemplate Template;
-
-	`CREATE_X2TEMPLATE(class'CHEventListenerTemplate', Template, 'IRI_RocketsGetLocalizedCategory');
-
-	Template.RegisterInTactical = true;
-	Template.RegisterInStrategy = true;
-
-	Template.AddCHEvent('GetLocalizedCategory', OnGetLocalizedCategory, ELD_Immediate);
-	return Template;
-}
-
-static function EventListenerReturn OnGetLocalizedCategory(Object EventData, Object EventSource, XComGameState GameState, Name Event, Object CallbackData)
-{
-    local XComLWTuple		Tuple;
-    local X2WeaponTemplate	Template;
-	local X2ItemTemplate	SupplyPackItemTemplate;
-
-    Template = X2WeaponTemplate(EventSource);
-
-    if (Template.WeaponCat == 'IRI_SupplyPack')
-    {	
-		SupplyPackItemTemplate = class'X2ItemTemplateManager'.static.GetItemTemplateManager().FindItemTemplate('IRI_Keeper_SupplyPack');
-		if (SupplyPackItemTemplate != none)
-		{
-			Tuple = XComLWTuple(EventData);
-			Tuple.Data[0].s = SupplyPackItemTemplate.FriendlyName;
-		}
-    }
-    return ELR_NoInterrupt;
-}*/
