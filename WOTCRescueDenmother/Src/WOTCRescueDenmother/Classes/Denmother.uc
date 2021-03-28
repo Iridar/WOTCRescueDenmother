@@ -36,9 +36,9 @@ static final function bool IsMissionFirstRetaliation(name LogName)
 
 	`LOG("IsMissionFirstRetaliation check by:" @ LogName, class'Denmother'.default.bLog, 'IRIDENMOTHER');
 
-	if (LWOTC_IsCurrentMissionIsRetaliation() && !LWOTC_IsFirstDenmotherSpawn())
+	if (LWOTC_IsCurrentMissionIsRetaliation() && LWOTC_IsFirstDenmotherSpawn())
 	{
-		`LOG("LWOTC_IsCurrentMissionIsRetaliation check succeeds.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+		`LOG("IsMissionFirstRetaliation: This is the first LWOTC retaliation mission.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
 		return true;
 	}
 
@@ -85,16 +85,13 @@ static final function bool LWOTC_IsCurrentMissionIsRetaliation()
     local String MissionType;
 
     MissionType = LWOTC_GetCurrentMissionType();
+
     return MissionType == "Terror_LW" || MissionType == "Invasion_LW" || MissionType=="Defend_LW";
 }
 
 static private function bool LWOTC_IsFirstDenmotherSpawn()
 {
-	local XComGameState_HeadquartersXCom XComHQ;
-
-	XComHQ = `XCOMHQ;
-
-	return !XComHQ.HasItemByName('IRI_Denmother_ObjectiveDummyItem');
+	return !`XCOMHQ.HasItemByName('IRI_Denmother_ObjectiveDummyItem');
 }
 
 static function string LWOTC_GetCurrentMissionType()
