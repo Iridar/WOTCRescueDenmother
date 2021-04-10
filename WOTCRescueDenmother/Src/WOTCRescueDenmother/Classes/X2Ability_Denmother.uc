@@ -109,6 +109,8 @@ static function X2AbilityTemplate Create_BandageThrow()
 	BandageThrow.BuildPersistentEffect(default.BandageThrowDuration, false, false, false, eGameRule_PlayerTurnBegin);
 	BandageThrow.DuplicateResponse = eDupe_Allow;
 	BandageThrow.SetDisplayInfo(ePerkBuff_Bonus, Template.LocFriendlyName, Template.GetMyHelpText(), Template.IconImage, true);
+	BandageThrow.bRemoveWhenTargetDies = true;
+	BandageThrow.bRemoveWhenSourceDies = true;
 	
 	HealEffect = new class'X2Effect_ApplyMedikitHeal';
 	HealEffect.PerUseHP = default.BandageThrowHeal;
@@ -323,7 +325,8 @@ static function X2AbilityTemplate PullAlly()
 	//	Target Conditions
 	UnitPropertyCondition = new class'X2Condition_UnitProperty';
 	UnitPropertyCondition.ExcludeDead = true;
-	UnitPropertyCondition.ExcludeRobotic = true;
+	UnitPropertyCondition.ExcludeRobotic = false;
+	UnitPropertyCondition.ExcludeLargeUnits = true;
 	UnitPropertyCondition.ExcludeUnableToAct = true;
 	UnitPropertyCondition.FailOnNonUnits = true;
 	UnitPropertyCondition.ExcludeCivilian = true;
@@ -333,6 +336,7 @@ static function X2AbilityTemplate PullAlly()
 	UnitPropertyCondition.ExcludeFriendlyToSource = false;
 	//UnitPropertyCondition.RequireWithinMinRange = true;
 	Template.AbilityTargetConditions.AddItem(UnitPropertyCondition);
+	Template.AbilityTargetConditions.AddItem(new class'X2Condition_UnitSize');
 
 	Template.AbilityTargetConditions.AddItem(default.GameplayVisibilityCondition);
 	//	prevent various stationary units from being pulled inappropriately
