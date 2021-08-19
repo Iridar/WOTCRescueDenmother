@@ -55,6 +55,7 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 	local XComGameState_Unit SourceUnit;
 	local XComGameState_Unit TargetUnit;
 	local XComGameState_Item PrimaryWeapon;
+	local XComGameState_Item NewPrimaryWeapon;
 	local XComGameState_Effect_TransferAmmo TransferAmmo;
 
 	TargetUnit = XComGameState_Unit(kNewTargetState);
@@ -64,16 +65,25 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 	
 	if (SourceUnit != none && TargetUnit != none)
 	{	
-		PrimaryWeapon = TargetUnit.GetPrimaryWeapon();
+		PrimaryWeapon = TargetUnit.GetItemInSlot(eInvSlot_PrimaryWeapon, NewGameState);
+		if (PrimaryWeapon != none)
+		{
+			NewPrimaryWeapon = XComGameState_Item(NewGameState.GetGameStateForObjectID(PrimaryWeapon.ObjectID));
+			if (NewPrimaryWeapon == none)
+			{
+				NewPrimaryWeapon = XComGameState_Item(NewGameState.ModifyStateObject(PrimaryWeapon.Class, PrimaryWeapon.ObjectID));
+			}
+			if (NewPrimaryWeapon != none)
+			{
+				`LOG("X2Effect_ReloadPrimaryWeapon attempting to transfer special ammo to:" @ PrimaryWeapon.GetMyTemplateName(), class'Denmother'.default.bLog, 'IRIDENMOTHER');
 
-		`LOG("X2Effect_ReloadPrimaryWeapon attempting to transfer special ammo to:" @ PrimaryWeapon.GetMyTemplateName(), class'Denmother'.default.bLog, 'IRIDENMOTHER');
+				TransferAmmo = XComGameState_Effect_TransferAmmo(NewEffectState);
+				TransferAmmo.ApplyNewAmmo(SourceUnit, NewPrimaryWeapon, NewGameState);
 
-		TransferAmmo = XComGameState_Effect_TransferAmmo(NewEffectState);
-		TransferAmmo.ApplyNewAmmo(SourceUnit, PrimaryWeapon, NewGameState);
-
-		PrimaryWeapon.Ammo = PrimaryWeapon.GetClipSize();
+				NewPrimaryWeapon.Ammo = NewPrimaryWeapon.GetClipSize();
+			}
+		}
 	}
-
 	super.OnEffectAdded(ApplyEffectParameters, kNewTargetState, NewGameState, NewEffectState);
 }
 
