@@ -12,12 +12,12 @@ function ApplyNewAmmo(XComGameState_Unit SourceUnit, XComGameState_Item ItemStat
 	local X2AmmoTemplate AmmoTemplate;
 	local X2WeaponTemplate WeaponTemplate;
 
-	`LOG("ApplyNewAmmo begin.", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
+	`LOG("ApplyNewAmmo begin.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
 
 	AmmoTemplate = FindNewAmmo(SourceUnit);
 	if (AmmoTemplate == none)
 	{
-		`LOG("Did not find any ammo on the source unit.", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
+		`LOG("Did not find any ammo on the source unit.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
 		return;
 	}
 	WeaponTemplate = X2WeaponTemplate(ItemState.GetMyTemplate());

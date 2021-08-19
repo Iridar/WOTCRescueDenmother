@@ -1,18 +1,18 @@
-class X2Ability_Denmother extends X2Ability config(DenmotherConfig);
+class X2Ability_Denmother extends X2Ability config(Denmother);
 
 var config int DenmotherBleedoutTurns;
 
-var config(KeeperConfig) float ResupplyAmmoDistanceTiles;
-var config(KeeperConfig) float BandageThrowDistanceTiles;
+var config(Keeper) float ResupplyAmmoDistanceTiles;
+var config(Keeper) float BandageThrowDistanceTiles;
 
-var config(KeeperConfig) int PullAllyCooldown;
-var config(KeeperConfig) int ResupplyAmmoCooldown;
-var config(KeeperConfig) int BandageThrowCooldown;
-var config(KeeperConfig) int BandageThrowHeal;
-var config(KeeperConfig) int BandageThrowDuration;
-var config(KeeperConfig) int BandageThrowCharges;
-var config(KeeperConfig) int BandageThrow_EmpoweredHeal;
-var config(KeeperConfig) name BandageThrow_EmpowerTech;
+var config(Keeper) int PullAllyCooldown;
+var config(Keeper) int ResupplyAmmoCooldown;
+var config(Keeper) int BandageThrowCooldown;
+var config(Keeper) int BandageThrowHeal;
+var config(Keeper) int BandageThrowDuration;
+var config(Keeper) int BandageThrowCharges;
+var config(Keeper) int BandageThrow_EmpoweredHeal;
+var config(Keeper) name BandageThrow_EmpowerTech;
 
 static function array<X2DataTemplate> CreateTemplates()
 {
@@ -109,6 +109,8 @@ static function X2AbilityTemplate Create_BandageThrow()
 	BandageThrow.BuildPersistentEffect(default.BandageThrowDuration, false, false, false, eGameRule_PlayerTurnBegin);
 	BandageThrow.DuplicateResponse = eDupe_Allow;
 	BandageThrow.SetDisplayInfo(ePerkBuff_Bonus, Template.LocFriendlyName, Template.GetMyHelpText(), Template.IconImage, true);
+	BandageThrow.bRemoveWhenTargetDies = true;
+	BandageThrow.bRemoveWhenSourceDies = true;
 	
 	HealEffect = new class'X2Effect_ApplyMedikitHeal';
 	HealEffect.PerUseHP = default.BandageThrowHeal;
@@ -323,7 +325,8 @@ static function X2AbilityTemplate PullAlly()
 	//	Target Conditions
 	UnitPropertyCondition = new class'X2Condition_UnitProperty';
 	UnitPropertyCondition.ExcludeDead = true;
-	UnitPropertyCondition.ExcludeRobotic = true;
+	UnitPropertyCondition.ExcludeRobotic = false;
+	UnitPropertyCondition.ExcludeLargeUnits = true;
 	UnitPropertyCondition.ExcludeUnableToAct = true;
 	UnitPropertyCondition.FailOnNonUnits = true;
 	UnitPropertyCondition.ExcludeCivilian = true;
@@ -333,6 +336,7 @@ static function X2AbilityTemplate PullAlly()
 	UnitPropertyCondition.ExcludeFriendlyToSource = false;
 	//UnitPropertyCondition.RequireWithinMinRange = true;
 	Template.AbilityTargetConditions.AddItem(UnitPropertyCondition);
+	Template.AbilityTargetConditions.AddItem(new class'X2Condition_UnitSize');
 
 	Template.AbilityTargetConditions.AddItem(default.GameplayVisibilityCondition);
 	//	prevent various stationary units from being pulled inappropriately
@@ -605,7 +609,7 @@ static function bool Denmother_Bleedout_EffectTicked(X2Effect_Persistent Persist
 {
 	if (kNewEffectState.FullTurnsTicked == 0)
 	{
-		`LOG("Denmother Bleedout ticking for the first time, increasing turns remaining.", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
+		`LOG("Denmother Bleedout ticking for the first time, increasing turns remaining.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
 		kNewEffectState.iTurnsRemaining++;
 	}
 	// The effect will continue.
@@ -631,7 +635,7 @@ static function Denmother_BleedingOutVisualizationTicked(XComGameState Visualize
 		{
 			if (EffectState.FullTurnsTicked == 0)
 			{
-				`LOG("Skipping bleedout visualization tick for the first turn", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
+				`LOG("Skipping bleedout visualization tick for the first turn", class'Denmother'.default.bLog, 'IRIDENMOTHER');
 				return;
 			}
 		}

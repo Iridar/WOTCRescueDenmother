@@ -11,16 +11,16 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 	UnitState = XComGameState_Unit(NewGameState.GetGameStateForObjectID(ApplyEffectParameters.TargetStateObjectRef.ObjectID));
 	if (UnitState != none)
 	{
-		`LOG("X2Effect_ObjectiveTracker:OnEffectAdded: adding Denmother to squad.", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
+		`LOG("X2Effect_ObjectiveTracker:OnEffectAdded: adding Denmother to squad.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
 
 		// Add her to squad so she doesn't get cleaned up by the game if she's evacuated as a corpse.
 		// Can't do it after she's created, cuz then she gets to deploy in Skyranger matinee :joy:
-		XComHQ = class'X2Denmother'.static.GetAndPrepXComHQ(NewGameState);
+		XComHQ = class'Denmother'.static.GetAndPrepXComHQ(NewGameState);
 		XComHQ.Squad.AddItem(UnitState.GetReference());
 	}
 	else
 	{
-		`LOG("X2Effect_ObjectiveTracker:OnEffectAdded: Error, could not find Denmother's unit state in New Game State.", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
+		`LOG("X2Effect_ObjectiveTracker:OnEffectAdded: Error, could not find Denmother's unit state in New Game State.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
 	}
 
 	super.OnEffectAdded(ApplyEffectParameters, kNewTargetState, NewGameState, NewEffectState);
@@ -29,11 +29,7 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 // Prevent Denmother from being Captured by Chosen
 function bool CanAbilityHitUnit(name AbilityName) 
 { 
-	if (AbilityName == 'ChosenKidnap')
-	{
-		return false;
-	}
-	return true; 
+	return AbilityName != 'ChosenKidnap' && AbilityName != 'ChosenKidnapMove';
 }
 
 function RegisterForEvents(XComGameState_Effect EffectGameState)
@@ -83,8 +79,8 @@ static function EventListenerReturn UnitDied_Listener(Object EventData, Object E
 
 	if (EffectState != none && UnitState != none)
 	{
-		`LOG("X2Effect_ObjectiveTracker: UnitDied_Listener: Denmother is dead, marking objective as failed.", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
-		class'X2Denmother'.static.FailDenmotherObjective(NewGameState);	
+		`LOG("X2Effect_ObjectiveTracker: UnitDied_Listener: Denmother is dead, marking objective as failed.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+		class'Denmother'.static.FailDenmotherObjective(NewGameState);	
 	}
 	
     return ELR_NoInterrupt;
@@ -102,13 +98,13 @@ static function EventListenerReturn UnitEvacuated_Listener(Object EventData, Obj
 	UnitState = XComGameState_Unit(NewGameState.GetGameStateForObjectID(UnitState.ObjectID));
 	EffectState = XComGameState_Effect(CallbackData);
 
-	//`LOG("X2Effect_ObjectiveTracker: UnitEvacuated_Listener running for unit:" @ UnitState.GetFullName() @ "on event:" @ InEventID, class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
+	//`LOG("X2Effect_ObjectiveTracker: UnitEvacuated_Listener running for unit:" @ UnitState.GetFullName() @ "on event:" @ InEventID, class'Denmother'.default.bLog, 'IRIDENMOTHER');
 
 	if (EffectState != none && !EffectState.bRemoved && UnitState != none)
 	{
 		UnitState.SetUnitFloatValue('IRI_Denmother_Evacuated_Value', 1, eCleanup_BeginTactical);
 
-		`LOG("X2Effect_ObjectiveTracker: UnitEvacuated_Listener: Denmother is evacuated, removing the objective tracker effect.", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
+		`LOG("X2Effect_ObjectiveTracker: UnitEvacuated_Listener: Denmother is evacuated, removing the objective tracker effect.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
 		EffectState.RemoveEffect(NewGameState, NewGameState, true);
 	}
 	
@@ -131,7 +127,7 @@ static function EventListenerReturn UnitRemovedFromPlay_Listener(Object EventDat
 	EffectState = XComGameState_Effect(CallbackData);
 	UnitState = XComGameState_Unit(EventData);
 
-	`LOG("X2Effect_ObjectiveTracker: UnitRemovedFromPlay_Listener running for unit:" @ UnitState.GetFullName() @ "on event:" @ InEventID, class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
+	`LOG("X2Effect_ObjectiveTracker: UnitRemovedFromPlay_Listener running for unit:" @ UnitState.GetFullName() @ "on event:" @ InEventID, class'Denmother'.default.bLog, 'IRIDENMOTHER');
 
 	if (EffectState != none && !EffectState.bRemoved && UnitState != none && UnitState.ObjectID == EffectState.ApplyEffectParameters.TargetStateObjectRef.ObjectID)
 	{
@@ -139,15 +135,15 @@ static function EventListenerReturn UnitRemovedFromPlay_Listener(Object EventDat
 
 		if (UnitState.IsAlive())
 		{
-			`LOG("X2Effect_ObjectiveTracker: UnitRemovedFromPlay_Listener: Denmother is alive, marking objective complete.", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
-			class'X2Denmother'.static.SucceedDenmotherObjective(NewGameState);		
+			`LOG("X2Effect_ObjectiveTracker: UnitRemovedFromPlay_Listener: Denmother is alive, marking objective complete.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+			class'Denmother'.static.SucceedDenmotherObjective(NewGameState);		
 		}
 		else
 		{
-			`LOG("X2Effect_ObjectiveTracker: UnitRemovedFromPlay_Listener: Denmother is dead, marking objective as failed.", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
-			class'X2Denmother'.static.FailDenmotherObjective(NewGameState);	
+			`LOG("X2Effect_ObjectiveTracker: UnitRemovedFromPlay_Listener: Denmother is dead, marking objective as failed.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+			class'Denmother'.static.FailDenmotherObjective(NewGameState);	
 		}
-		`LOG("X2Effect_ObjectiveTracker: UnitRemovedFromPlay_Listener: Denmother is removed from play, removing the objective tracker effect.", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
+		`LOG("X2Effect_ObjectiveTracker: UnitRemovedFromPlay_Listener: Denmother is removed from play, removing the objective tracker effect.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
 		EffectState.RemoveEffect(NewGameState, NewGameState, true);
 
 		`XCOMGAME.GameRuleset.SubmitGameState(NewGameState);
@@ -164,7 +160,7 @@ static function EventListenerReturn TacticalGameEnd_Listener(Object EventData, O
 	
 	if (EffectState != none && !EffectState.bRemoved)
 	{
-		`LOG("TacticalGameEnd_Listener: Removing Objective Tracker effect due to Tactical Game End", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
+		`LOG("TacticalGameEnd_Listener: Removing Objective Tracker effect due to Tactical Game End", class'Denmother'.default.bLog, 'IRIDENMOTHER');
 		EffectState.RemoveEffect(NewGameState, NewGameState, true);
 	}
     return ELR_NoInterrupt;
@@ -185,34 +181,34 @@ simulated function OnEffectRemoved(const out EffectAppliedData ApplyEffectParame
 	if (UnitState == none)
 		return;
 
-	XComHQ = class'X2Denmother'.static.GetAndPrepXComHQ(NewGameState);
-	bSweepObjectiveComplete = class'X2Denmother'.static.IsSweepObjectiveComplete();
+	XComHQ = class'Denmother'.static.GetAndPrepXComHQ(NewGameState);
+	bSweepObjectiveComplete = class'Denmother'.static.IsSweepObjectiveComplete();
 	bEvacuated = WasDenmotherEvacuated(UnitState);
 	bBodyRecovered = bEvacuated || bSweepObjectiveComplete;
 	bAlive = UnitState.IsAlive() && bBodyRecovered;
 	
 	if (!bAlive && !bBodyRecovered)
 	{
-		`LOG("Denmother is dead and her body wasn't recovered, removing her from squad.", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
+		`LOG("Denmother is dead and her body wasn't recovered, removing her from squad.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
 		//	Remove her from squad here, otherwise her corpse will get auto-recovered anyway.
 		XComHQ.Squad.RemoveItem(UnitState.GetReference());
 	}
 
-	`LOG("Removing Objective Tracker effect from:" @ UnitState.GetFullName() @ "unit alive:" @ bAlive @ "|| bleeding out:" @ UnitState.IsBleedingOut() @ "|| evacuated:" @ bEvacuated @ "|| Sweep objective complete:" @ bSweepObjectiveComplete, class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
+	`LOG("Removing Objective Tracker effect from:" @ UnitState.GetFullName() @ "unit alive:" @ bAlive @ "|| bleeding out:" @ UnitState.IsBleedingOut() @ "|| evacuated:" @ bEvacuated @ "|| Sweep objective complete:" @ bSweepObjectiveComplete, class'Denmother'.default.bLog, 'IRIDENMOTHER');
 
 	if (bAlive)
 	{
-		class'X2Denmother'.static.SucceedDenmotherObjective(NewGameState);
+		class'Denmother'.static.SucceedDenmotherObjective(NewGameState);
 	}
 	else
 	{
-		class'X2Denmother'.static.FailDenmotherObjective(NewGameState);
+		class'Denmother'.static.FailDenmotherObjective(NewGameState);
 	}
 
 	//	UnitState.IsAlive() cannot be used by itself here, because she will still report as alive even if XCOM evacuated, leaving her bleeding out and surrounded by enemies
 	if (bBodyRecovered)
 	{
-		`LOG("Denmother is alive or body recovered, adding her to Reward Units.", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
+		`LOG("Denmother is alive or body recovered, adding her to Reward Units.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
 
 		// This will display Denmother on the mission end screen
 		BattleData = XComGameState_BattleData(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_BattleData'));
@@ -220,7 +216,7 @@ simulated function OnEffectRemoved(const out EffectAppliedData ApplyEffectParame
 		BattleData.RewardUnits.AddItem(UnitState.GetReference());	
 
 		// Add supply pack even is she's recovered dead in case player has means to bring her back to life, e.g. Infirmaria Ex Mortis
-		//class'X2Denmother'.static.AddItemToHQInventory('IRI_Keeper_SupplyPack', NewGameState);	
+		//class'Denmother'.static.AddItemToHQInventory('IRI_Keeper_SupplyPack', NewGameState);	
 		
 		if (!bAlive)
 		{
@@ -232,7 +228,7 @@ simulated function OnEffectRemoved(const out EffectAppliedData ApplyEffectParame
 				BattleData.CarriedOutLootBucket.AddItem(ItemState.GetMyTemplateName());
 
 				//	This is required to make it show up on the post mission screen
-				`LOG("Adding Denmother's rifle to XCOM HQ Loot Recovered:" @ ItemState.GetMyTemplateName(), class'X2Denmother'.default.bLog, 'IRIDENMOTHER');		
+				`LOG("Adding Denmother's rifle to XCOM HQ Loot Recovered:" @ ItemState.GetMyTemplateName(), class'Denmother'.default.bLog, 'IRIDENMOTHER');		
 				
 				XComHQ.LootRecovered.AddItem(ItemState.GetReference());
 			}
@@ -241,8 +237,8 @@ simulated function OnEffectRemoved(const out EffectAppliedData ApplyEffectParame
 		//{
 			//	If Denmother is dead and her body wasn't recovered then move her to resistance team.
 			//-- Pointless, she still counts as XCOM soldier killed on the mission end screen.
-			//`LOG("Denmother is dead and her body was not recovered, moving her to the neutral team.", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');		
-			//class'X2Denmother'.static.SetGroupAndPlayer(UnitState, eTeam_Resistance, NewGameState);
+			//`LOG("Denmother is dead and her body was not recovered, moving her to the neutral team.", class'Denmother'.default.bLog, 'IRIDENMOTHER');		
+			//class'Denmother'.static.SetGroupAndPlayer(UnitState, eTeam_Resistance, NewGameState);
 		//}
 	}
 
@@ -270,11 +266,11 @@ static function EventListenerReturn ObjectiveComplete_Listener(Object EventData,
 	ObjectiveState = XComGameState_Objective(EventData);
 	ObjectiveState = XComGameState_Objective(NewGameState.GetGameStateForObjectID(ObjectiveState.ObjectID));
 
-	`LOG("Running ObjectiveComplete_Listener for objective:" @ ObjectiveState.GetMyTemplateName(), class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
+	`LOG("Running ObjectiveComplete_Listener for objective:" @ ObjectiveState.GetMyTemplateName(), class'Denmother'.default.bLog, 'IRIDENMOTHER');
 
 	//if (ObjectiveState.)
 	//{
-	//	`LOG("ObjectiveComplete_Listener:: sweep objective complete, removing effect Objective Tracker effect from Denmother", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
+	//	`LOG("ObjectiveComplete_Listener:: sweep objective complete, removing effect Objective Tracker effect from Denmother", class'Denmother'.default.bLog, 'IRIDENMOTHER');
 	//	EffectState.RemoveEffect(NewGameState, NewGameState, true);
 	//}
 	

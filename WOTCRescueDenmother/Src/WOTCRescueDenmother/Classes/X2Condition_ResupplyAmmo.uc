@@ -1,4 +1,4 @@
-class X2Condition_ResupplyAmmo extends X2Condition;
+class X2Condition_ResupplyAmmo extends X2Condition config(Denmother);
 
 /*
 return 'AA_TileIsBlocked';

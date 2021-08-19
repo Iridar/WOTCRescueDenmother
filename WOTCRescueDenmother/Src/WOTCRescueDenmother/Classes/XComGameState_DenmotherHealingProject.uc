@@ -1,4 +1,5 @@
-class XComGameState_DenmotherHealingProject extends XComGameState_HeadquartersProjectHealSoldier config(DenmotherConfig);
+class XComGameState_DenmotherHealingProject extends XComGameState_HeadquartersProjectHealSoldier config(Denmother);
+
 var config float HealingRateMultiplier;
 
 function int CalculateWorkPerHour(optional XComGameState StartState = none, optional bool bAssumeActive = false)

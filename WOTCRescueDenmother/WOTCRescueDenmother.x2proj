@@ -9,6 +9,7 @@ tags= war of the chosen, soldier class, soldier customization, weapon</Descripti
     <SteamPublishID>0</SteamPublishID>
     <AssemblyName>WOTCRescueDenmother</AssemblyName>
     <RootNamespace>WOTCRescueDenmother</RootNamespace>
+    <ProjectGuid>{2d9fd775-d6c5-459e-89cc-fc136930c74e}</ProjectGuid>
   </PropertyGroup>
   <ItemGroup>
     <Folder Include="Config\" />
@@ -17,6 +18,8 @@ tags= war of the chosen, soldier class, soldier customization, weapon</Descripti
     <Folder Include="Localization\" />
     <Folder Include="Content" />
     <Folder Include="Src\" />
+    <Folder Include="Src\WOTCRescueDenmother2" />
+    <Folder Include="Src\WOTCRescueDenmother2\Classes" />
     <Folder Include="Src\WOTCRescueDenmother\" />
     <Folder Include="Src\WOTCRescueDenmother\Classes\" />
   </ItemGroup>
@@ -39,7 +42,7 @@ tags= war of the chosen, soldier class, soldier customization, weapon</Descripti
     <Content Include="Config\XComContent.ini">
       <SubType>Content</SubType>
     </Content>
-    <Content Include="Config\XComDenmotherConfig.ini">
+    <Content Include="Config\XComDenmother.ini">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Config\XComEncyclopedia.ini">
@@ -51,7 +54,7 @@ tags= war of the chosen, soldier class, soldier customization, weapon</Descripti
     <Content Include="Config\XComGameData_SoldierSkills.ini">
       <SubType>Content</SubType>
     </Content>
-    <Content Include="Config\XComKeeperConfig.ini">
+    <Content Include="Config\XComKeeper.ini">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Config\XComStrategyTuning.ini">
@@ -84,9 +87,21 @@ tags= war of the chosen, soldier class, soldier customization, weapon</Descripti
     <Content Include="Localization\WOTCRescueDenmother.int">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Localization\WOTCRescueDenmother.kor">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Localization\XComGame.kor">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="ReadMe.txt" />
     <Content Include="ModPreview.jpg" />
     <Content Include="Localization\XComGame.int" />
+    <Content Include="Src\WOTCRescueDenmother2\Classes\X2UnifiedProjectile_ResupplyAmmo2.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTCRescueDenmother\Classes\Denmother.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\WOTCRescueDenmother\Classes\UIScreenListener_Denmother.uc">
       <SubType>Content</SubType>
     </Content>
@@ -111,10 +126,13 @@ tags= war of the chosen, soldier class, soldier customization, weapon</Descripti
     <Content Include="Src\WOTCRescueDenmother\Classes\X2Condition_ResupplyAmmo.uc">
       <SubType>Content</SubType>
     </Content>
-    <Content Include="Src\WOTCRescueDenmother\Classes\X2Denmother.uc">
+    <Content Include="Src\WOTCRescueDenmother\Classes\X2Condition_UnitSize.uc">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\WOTCRescueDenmother\Classes\X2DownloadableContentInfo_WOTCRescueDenmother.uc" />
+    <Content Include="Src\WOTCRescueDenmother\Classes\X2Effect_AddOverwatchActionPoint.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\WOTCRescueDenmother\Classes\X2Effect_BandageThrow.uc">
       <SubType>Content</SubType>
     </Content>

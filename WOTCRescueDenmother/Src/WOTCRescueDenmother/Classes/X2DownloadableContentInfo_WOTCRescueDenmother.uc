@@ -83,22 +83,22 @@ static event OnPostMission()
 	local XComGameState				NewGameState;
 	local XComGameState_Objective	ObjectiveState;
 
-	if (!class'X2Denmother'.static.IsMissionFirstRetaliation('OnPostMission'))
+	if (!class'Denmother'.static.IsMissionFirstRetaliation('OnPostMission'))
 		return;
 
-	`LOG("On Post Mission", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
+	`LOG("On Post Mission", class'Denmother'.default.bLog, 'IRIDENMOTHER');
 
 	NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Remove Denmother Objective");
 
 	//	Hide the objective so it doesn't appear on the Geoscape anymore
-	ObjectiveState = class'X2Denmother'.static.GetDenmotherObjectiveState();
+	ObjectiveState = class'Denmother'.static.GetDenmotherObjectiveState();
 	if (ObjectiveState != none)
 	{
-		`LOG("On Post Mission: Hiding denmother objective. Current status:" @ ObjectiveState.ObjState, class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
+		`LOG("On Post Mission: Hiding denmother objective. Current status:" @ ObjectiveState.ObjState, class'Denmother'.default.bLog, 'IRIDENMOTHER');
 		ObjectiveState.CompleteObjective(NewGameState);
 		NewGameState.RemoveStateObject(ObjectiveState.ObjectID);
 	}
-	class'X2Denmother'.static.HideDenmotherObjective(NewGameState);
+	class'Denmother'.static.HideDenmotherObjective(NewGameState);
 
 	if (NewGameState.GetNumGameStateObjects() > 0)
 	{
@@ -117,15 +117,15 @@ static event OnExitPostMissionSequence()
 {
 	local XComGameState NewGameState;
 
-	if (class'X2Denmother'.static.IsMissionFirstRetaliation('OnExitPostMissionSequence'))
+	if (class'Denmother'.static.IsMissionFirstRetaliation('OnExitPostMissionSequence'))
 	{
-		class'X2Denmother'.static.FinalizeDenmotherUnitForCrew();
+		class'Denmother'.static.FinalizeDenmotherUnitForCrew();
 	}
 
-	if (class'X2Denmother'.static.LWOTC_IsCurrentMissionIsRetaliation())
+	if (class'Denmother'.static.LWOTC_IsCurrentMissionIsRetaliation())
 	{
 		NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Denmother: Marking First Retalliation Complete.");
-		class'X2Denmother'.static.AddItemToHQInventory('IRI_Denmother_ObjectiveDummyItem', NewGameState);
+		class'Denmother'.static.AddItemToHQInventory('IRI_Denmother_ObjectiveDummyItem', NewGameState);
 		`XCOMGAME.GameRuleset.SubmitGameState(NewGameState);
 	}
 }
@@ -138,29 +138,29 @@ exec function GiveDenmother()
 
 	NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Give Denmother");
 
-	UnitState = class'X2Denmother'.static.CreateDenmotherUnit(NewGameState, true);
+	UnitState = class'Denmother'.static.CreateDenmotherUnit(NewGameState, true);
 
-	class'X2Denmother'.static.GiveOneGoodEyeAbility(UnitState, NewGameState);
+	class'Denmother'.static.GiveOneGoodEyeAbility(UnitState, NewGameState);
 
-	UnitState.SetCharacterName(class'X2Denmother'.default.strDenmotherFirstName, class'X2Denmother'.default.strDenmotherLastName, class'X2Denmother'.default.strDenmotherNickName);
+	UnitState.SetCharacterName(class'Denmother'.default.strDenmotherFirstName, class'Denmother'.default.strDenmotherLastName, class'Denmother'.default.strDenmotherNickName);
 
-	UnitState.kAppearance = class'X2Denmother'.default.AvengerAppearance;
-	if (class'X2Denmother'.static.DLCLoaded('DLC_2'))
+	UnitState.kAppearance = class'Denmother'.default.AvengerAppearance;
+	if (class'Denmother'.static.DLCLoaded('DLC_2'))
 	{
-		UnitState.kAppearance.nmScars = class'X2Denmother'.default.AlienHuntersScar;
+		UnitState.kAppearance.nmScars = class'Denmother'.default.AlienHuntersScar;
 	}
 	else
 	{
-		UnitState.kAppearance.nmScars = class'X2Denmother'.default.VanillaScar;
+		UnitState.kAppearance.nmScars = class'Denmother'.default.VanillaScar;
 	}
 	UnitState.StoreAppearance(); 
 
-	UnitState.SetBackground(class'X2Denmother'.default.strDenmother_Background_Good);
+	UnitState.SetBackground(class'Denmother'.default.strDenmother_Background_Good);
 	
-	class'X2Denmother'.static.AddItemToHQInventory('IRI_Denmother_ObjectiveDummyItem_Good', NewGameState);
-	//class'X2Denmother'.static.AddItemToHQInventory('IRI_Keeper_SupplyPack', NewGameState);	
+	class'Denmother'.static.AddItemToHQInventory('IRI_Denmother_ObjectiveDummyItem_Good', NewGameState);
+	//class'Denmother'.static.AddItemToHQInventory('IRI_Keeper_SupplyPack', NewGameState);	
 
-	XComHQ = class'X2Denmother'.static.GetAndPrepXComHQ(NewGameState);
+	XComHQ = class'Denmother'.static.GetAndPrepXComHQ(NewGameState);
 	XComHQ.AddToCrew(NewGameState, UnitState);
 
 	`GAMERULES.SubmitGameState(NewGameState);
@@ -307,7 +307,7 @@ static function AddFreeKillUpgrade(X2ItemTemplateManager ItemTemplateManager, Na
 
 static event InstallNewCampaign(XComGameState StartState)
 {
-	if (class'X2Denmother'.default.NoDenmotherCosmeticsOnRandomlyGeneratedSoldiers)
+	if (class'Denmother'.default.NoDenmotherCosmeticsOnRandomlyGeneratedSoldiers)
 	{
 		RemoveCosmeticsFromThisModFromRandomGeneration();
 	}

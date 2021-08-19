@@ -10,9 +10,9 @@ event OnInit(UIScreen Screen)
 	local string								DisplayText;
 
 	LootRecovered = UIInventory_LootRecovered(Screen);
-	if (LootRecovered != none && class'X2Denmother'.static.IsMissionFirstRetaliation('UISL'))
+	if (LootRecovered != none && class'Denmother'.static.IsMissionFirstRetaliation('UISL'))
 	{
-		UnitState = class'X2Denmother'.static.GetDenmotherHistoryUnitState();
+		UnitState = class'Denmother'.static.GetDenmotherHistoryUnitState();
 
 		if (LootRecovered.VIPPanel == none)
 		{
@@ -22,19 +22,19 @@ event OnInit(UIScreen Screen)
 
 		if (UnitState != none && UnitState.IsAlive())
 		{
-			`LOG("UIScreenListener_Denmother: Denmother is alive, creating actor pawn", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
+			`LOG("UIScreenListener_Denmother: Denmother is alive, creating actor pawn", class'Denmother'.default.bLog, 'IRIDENMOTHER');
 			LootRecovered.VIPPanel.CreateVIPPawn(UnitState);
 
 			StatusLabel = LootRecovered.VIPPanel.m_strVIPStatus[eVIPStatus_Awarded];
 			VIPState = eUIState_Good;
-			DisplayText = class'X2Denmother'.default.strDenmotherFirstName @ "\"" $ class'X2Denmother'.default.strDenmotherNickName $ "\"" @ class'X2Denmother'.default.strDenmotherLastName;
+			DisplayText = class'Denmother'.default.strDenmotherFirstName @ "\"" $ class'Denmother'.default.strDenmotherNickName $ "\"" @ class'Denmother'.default.strDenmotherLastName;
 		}
 		else	// If she was dead by the end of the mission, she gets cleaned up and doesn't exist anymore.
 		{
-			`LOG("UIScreenListener_Denmother: Denmother is dead or doesn't exist, marking VIP dead", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
+			`LOG("UIScreenListener_Denmother: Denmother is dead or doesn't exist, marking VIP dead", class'Denmother'.default.bLog, 'IRIDENMOTHER');
 			StatusLabel = LootRecovered.VIPPanel.m_strVIPStatus[eVIPStatus_Killed];
 			VIPState = eUIState_Bad;
-			DisplayText = class'X2Denmother'.default.strDenmotherFirstName @ "\"" $ class'X2Denmother'.default.strDenmotherNickName $ "\"" @ class'X2Denmother'.default.strDenmotherLastName;
+			DisplayText = class'Denmother'.default.strDenmotherFirstName @ "\"" $ class'Denmother'.default.strDenmotherNickName $ "\"" @ class'Denmother'.default.strDenmotherLastName;
 		}
 
 		ResistanceHQ = class'UIUtilities_Strategy'.static.GetResistanceHQ();

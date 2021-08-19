@@ -55,25 +55,35 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 	local XComGameState_Unit SourceUnit;
 	local XComGameState_Unit TargetUnit;
 	local XComGameState_Item PrimaryWeapon;
+	local XComGameState_Item NewPrimaryWeapon;
 	local XComGameState_Effect_TransferAmmo TransferAmmo;
 
 	TargetUnit = XComGameState_Unit(kNewTargetState);
 	SourceUnit = XComGameState_Unit(`XCOMHISTORY.GetGameStateForObjectID(ApplyEffectParameters.SourceStateObjectRef.ObjectID));
 
-	`LOG("X2Effect_ReloadPrimaryWeapon applied to:" @ TargetUnit.GetFullName() @ TargetUnit.GetSoldierClassTemplateName(), class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
+	`LOG("X2Effect_ReloadPrimaryWeapon applied to:" @ TargetUnit.GetFullName() @ TargetUnit.GetSoldierClassTemplateName(), class'Denmother'.default.bLog, 'IRIDENMOTHER');
 	
 	if (SourceUnit != none && TargetUnit != none)
 	{	
-		PrimaryWeapon = TargetUnit.GetPrimaryWeapon();
+		PrimaryWeapon = TargetUnit.GetItemInSlot(eInvSlot_PrimaryWeapon, NewGameState);
+		if (PrimaryWeapon != none)
+		{
+			NewPrimaryWeapon = XComGameState_Item(NewGameState.GetGameStateForObjectID(PrimaryWeapon.ObjectID));
+			if (NewPrimaryWeapon == none)
+			{
+				NewPrimaryWeapon = XComGameState_Item(NewGameState.ModifyStateObject(PrimaryWeapon.Class, PrimaryWeapon.ObjectID));
+			}
+			if (NewPrimaryWeapon != none)
+			{
+				`LOG("X2Effect_ReloadPrimaryWeapon attempting to transfer special ammo to:" @ PrimaryWeapon.GetMyTemplateName(), class'Denmother'.default.bLog, 'IRIDENMOTHER');
 
-		`LOG("X2Effect_ReloadPrimaryWeapon attempting to transfer special ammo to:" @ PrimaryWeapon.GetMyTemplateName(), class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
+				TransferAmmo = XComGameState_Effect_TransferAmmo(NewEffectState);
+				TransferAmmo.ApplyNewAmmo(SourceUnit, NewPrimaryWeapon, NewGameState);
 
-		TransferAmmo = XComGameState_Effect_TransferAmmo(NewEffectState);
-		TransferAmmo.ApplyNewAmmo(SourceUnit, PrimaryWeapon, NewGameState);
-
-		PrimaryWeapon.Ammo = PrimaryWeapon.GetClipSize();
+				NewPrimaryWeapon.Ammo = NewPrimaryWeapon.GetClipSize();
+			}
+		}
 	}
-
 	super.OnEffectAdded(ApplyEffectParameters, kNewTargetState, NewGameState, NewEffectState);
 }
 
@@ -81,7 +91,7 @@ simulated function OnEffectRemoved(const out EffectAppliedData ApplyEffectParame
 {
 	local XComGameState_Effect_TransferAmmo TransferAmmo;
 
-	`LOG("X2Effect_ReloadPrimaryWeapon removing effect.", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
+	`LOG("X2Effect_ReloadPrimaryWeapon removing effect.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
 
 	TransferAmmo = XComGameState_Effect_TransferAmmo(RemovedEffectState);
 
@@ -110,13 +120,13 @@ simulated function AddX2ActionsForVisualization(XComGameState VisualizeGameState
 		TargetUnit = XComGameState_Unit(ActionMetadata.StateObject_NewState);
 		if (TargetUnit == none)
 		{
-			`LOG("X2Effect_ReloadPrimaryWeapon no target unit state.", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
+			`LOG("X2Effect_ReloadPrimaryWeapon no target unit state.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
 			return;
 		}
 		TransferAmmo = XComGameState_Effect_TransferAmmo(TargetUnit.GetUnitAffectedByEffectState(EffectName));
 		if (TransferAmmo == none)
 		{
-			`LOG("X2Effect_ReloadPrimaryWeapon no effect state.", class'X2Denmother'.default.bLog, 'IRIDENMOTHER');
+			`LOG("X2Effect_ReloadPrimaryWeapon no effect state.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
 			return;
 		}
 		PlayAnimation = X2Action_PlayAnimation(class'X2Action_PlayAnimation'.static.AddToVisualizationTree(ActionMetadata, Context, false, ActionMetadata.LastActionAdded));
