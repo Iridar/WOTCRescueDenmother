@@ -173,6 +173,7 @@ static function OnPostTemplatesCreated()
 	local X2ItemTemplateManager ItemTemplateManager;
 
 	PatchCharacterTemplates();
+	PatchAbilityTemplates();
 
 	ItemTemplateManager = class'X2ItemTemplateManager'.static.GetItemTemplateManager();
 
@@ -234,6 +235,30 @@ static private function PatchCharacterTemplates()
 	}
 }
 
+static private function PatchAbilityTemplates()
+{
+    local X2AbilityTemplateManager	AbilityTemplateManager;
+    local X2AbilityTemplate			Template;
+	local X2Condition_UnitEffects	ExcludeEffects;
+
+	// Prevent Denmother from being Captured by Chosen while she's unconscious on the first terror mission.
+
+    AbilityTemplateManager = class'X2AbilityTemplateManager'.static.GetAbilityTemplateManager();
+
+	ExcludeEffects = new class'X2Condition_UnitEffects';
+	ExcludeEffects.AddExcludeEffect(class'X2Effect_ObjectiveTracker'.default.EffectName, 'AA_UnitIsImmune');
+
+	Template = AbilityTemplateManager.FindAbilityTemplate('ChosenKidnap');
+	if (Template != none)
+	{
+		Template.AbilityTargetConditions.AddItem(ExcludeEffects);
+	}
+	Template = AbilityTemplateManager.FindAbilityTemplate('ChosenKidnapMove');
+	if (Template != none)
+	{
+		Template.AbilityTargetConditions.AddItem(ExcludeEffects);
+	}
+}
 
 //	LASER SIGHT
 static function AddCritUpgrade(X2ItemTemplateManager ItemTemplateManager, Name TemplateName)

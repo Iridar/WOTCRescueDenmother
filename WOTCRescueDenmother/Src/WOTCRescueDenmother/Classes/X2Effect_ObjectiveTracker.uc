@@ -26,12 +26,6 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 	super.OnEffectAdded(ApplyEffectParameters, kNewTargetState, NewGameState, NewEffectState);
 }
 
-// Prevent Denmother from being Captured by Chosen
-function bool CanAbilityHitUnit(name AbilityName) 
-{ 
-	return AbilityName != 'ChosenKidnap' && AbilityName != 'ChosenKidnapMove';
-}
-
 function RegisterForEvents(XComGameState_Effect EffectGameState)
 {
 	local X2EventManager		EventMgr;
