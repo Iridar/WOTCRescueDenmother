@@ -8,7 +8,9 @@ Denmother spawns standing?
 LWOTC tests?
 
 TODO:
-PullAlly prefer into cover
+PullAlly prefer into cover - Didn't I do that already?
+
+Use Tag Expand Handler to show what ammo was applied to the target soldier by Resupply Ammo.
 
 Additional abilities: 
 - Belt Feed: Resupplying adjacent allies makes their attacks non-turn ending, but only while Keeper remains adjacent. Also grants infinite ammo?

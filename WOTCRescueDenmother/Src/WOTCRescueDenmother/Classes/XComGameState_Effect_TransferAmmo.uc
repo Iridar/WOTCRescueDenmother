@@ -7,7 +7,7 @@ var StateObjectReference WeaponRef;
 var StateObjectReference OldAmmoRef;
 var bool bAmmoApplied;
 
-function ApplyNewAmmo(XComGameState_Unit SourceUnit, XComGameState_Item ItemState, XComGameState NewGameState)
+final function bool ApplyNewAmmo(XComGameState_Unit SourceUnit, XComGameState_Item ItemState, XComGameState NewGameState)
 {
 	local X2AmmoTemplate AmmoTemplate;
 	local X2WeaponTemplate WeaponTemplate;
@@ -18,7 +18,7 @@ function ApplyNewAmmo(XComGameState_Unit SourceUnit, XComGameState_Item ItemStat
 	if (AmmoTemplate == none)
 	{
 		`LOG("Did not find any ammo on the source unit.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
-		return;
+		return false;
 	}
 	WeaponTemplate = X2WeaponTemplate(ItemState.GetMyTemplate());
 
@@ -28,7 +28,9 @@ function ApplyNewAmmo(XComGameState_Unit SourceUnit, XComGameState_Item ItemStat
 		OldAmmoRef = ItemState.LoadedAmmo;
 		ItemState.LoadedAmmo = NewAmmoRef;
 		bAmmoApplied = true;
+		return true;
 	}
+	return false;
 }
 
 function string GetFlyoverString()
@@ -46,7 +48,7 @@ function string GetFlyoverString()
 	return strWeaponReloaded;
 }
 
-function ApplyOldAmmo(XComGameState NewGameState)
+final function ApplyOldAmmo(XComGameState NewGameState)
 {
 	local XComGameState_Item ItemState;
 
@@ -79,7 +81,7 @@ function GatherAffectedWeapons(XComGameState_Unit TargetUnit, XComGameState NewG
 	}
 }*/
 
-function X2AmmoTemplate FindNewAmmo(XComGameState_Unit UnitState)
+final function X2AmmoTemplate FindNewAmmo(XComGameState_Unit UnitState)
 {
 	local XComGameState_Item		AmmoState;
 	local array<XComGameState_Item> InventoryItems;

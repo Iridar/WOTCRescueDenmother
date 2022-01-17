@@ -57,6 +57,7 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 	local XComGameState_Item PrimaryWeapon;
 	local XComGameState_Item NewPrimaryWeapon;
 	local XComGameState_Effect_TransferAmmo TransferAmmo;
+	local bool bAmmoApplied;
 
 	TargetUnit = XComGameState_Unit(kNewTargetState);
 	SourceUnit = XComGameState_Unit(`XCOMHISTORY.GetGameStateForObjectID(ApplyEffectParameters.SourceStateObjectRef.ObjectID));
@@ -78,13 +79,20 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 				`LOG("X2Effect_ReloadPrimaryWeapon attempting to transfer special ammo to:" @ PrimaryWeapon.GetMyTemplateName(), class'Denmother'.default.bLog, 'IRIDENMOTHER');
 
 				TransferAmmo = XComGameState_Effect_TransferAmmo(NewEffectState);
-				TransferAmmo.ApplyNewAmmo(SourceUnit, NewPrimaryWeapon, NewGameState);
+				bAmmoApplied = TransferAmmo.ApplyNewAmmo(SourceUnit, NewPrimaryWeapon, NewGameState);
 
 				NewPrimaryWeapon.Ammo = NewPrimaryWeapon.GetClipSize();
 			}
 		}
 	}
+
 	super.OnEffectAdded(ApplyEffectParameters, kNewTargetState, NewGameState, NewEffectState);
+
+	// If there was no special ammo to transfer, then there's no reason to keep the effect on the unit.
+	if (!bAmmoApplied)
+	{
+		NewEffectState.RemoveEffect(NewGameState, NewGameState, true);
+	}
 }
 
 simulated function OnEffectRemoved(const out EffectAppliedData ApplyEffectParameters, XComGameState NewGameState, bool bCleansed, XComGameState_Effect RemovedEffectState)
@@ -111,6 +119,7 @@ simulated function AddX2ActionsForVisualization(XComGameState VisualizeGameState
 	local X2AbilityTemplate					AbilityTemplate;
 	local VisualizationActionMetadata		ShooterMetadata;
 	local XComGameStateHistory				History;
+	local string							FlyoverString;
 
 	if (EffectApplyResult == 'AA_Success')
 	{	
@@ -127,8 +136,13 @@ simulated function AddX2ActionsForVisualization(XComGameState VisualizeGameState
 		if (TransferAmmo == none)
 		{
 			`LOG("X2Effect_ReloadPrimaryWeapon no effect state.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
-			return;
+			FlyoverString = class'XComGameState_Effect_TransferAmmo'.default.strWeaponReloaded;
 		}
+		else
+		{
+			FlyoverString = TransferAmmo.GetFlyoverString();
+		}
+
 		PlayAnimation = X2Action_PlayAnimation(class'X2Action_PlayAnimation'.static.AddToVisualizationTree(ActionMetadata, Context, false, ActionMetadata.LastActionAdded));
 		PlayAnimation.Params.AnimName = 'HL_CatchSupplies';
 
@@ -136,7 +150,7 @@ simulated function AddX2ActionsForVisualization(XComGameState VisualizeGameState
 		PlayAnimation.Params.AnimName = 'HL_Reload';
 
 		SoundAndFlyOver = X2Action_PlaySoundAndFlyOver(class'X2Action_PlaySoundAndFlyOver'.static.AddToVisualizationTree(ActionMetadata, Context, false, ActionMetadata.LastActionAdded));
-		SoundAndFlyOver.SetSoundAndFlyOverParameters(None, TransferAmmo.GetFlyoverString(), 'Reloading', eColor_Good, "img:///UILibrary_PerkIcons.UIPerk_reload");
+		SoundAndFlyOver.SetSoundAndFlyOverParameters(None, FlyoverString, 'Reloading', eColor_Good, "img:///UILibrary_PerkIcons.UIPerk_reload");
 
 		// Handle Supply Run flyover.
 		SourceUnit = XComGameState_Unit(History.GetGameStateForObjectID(Context.InputContext.SourceObject.ObjectID));
