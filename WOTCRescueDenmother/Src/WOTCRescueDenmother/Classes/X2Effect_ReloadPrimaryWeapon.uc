@@ -79,7 +79,7 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 				`LOG("X2Effect_ReloadPrimaryWeapon attempting to transfer special ammo to:" @ PrimaryWeapon.GetMyTemplateName(), class'Denmother'.default.bLog, 'IRIDENMOTHER');
 
 				TransferAmmo = XComGameState_Effect_TransferAmmo(NewEffectState);
-				bAmmoApplied = TransferAmmo.ApplyNewAmmo(SourceUnit, TargetUnit, NewPrimaryWeapon, NewGameState);
+				bAmmoApplied = TransferAmmo.ApplyNewAmmo(SourceUnit, NewPrimaryWeapon, NewGameState);
 
 				NewPrimaryWeapon.Ammo = NewPrimaryWeapon.GetClipSize();
 			}
