@@ -1,5 +1,8 @@
 ﻿Created by Iridar and kexx
 
+Added custom image for Denmother's encyclopedia entry.
+Resupply Ammo interaction with Experimental Ammo improved and made more reliable. Should work with more (all) ammo types now, including AP Rounds.
+
 
 [WOTC] Rescue Denmother
 

@@ -25,7 +25,7 @@ return 'AA_NoTargets';
 return 'AA_NotVisible';
 */
 
-static private function bool UnitHasValidExperimentalAmmo(const XComGameState_Unit UnitState, const XComGameState_Item ItemState)
+static private function X2AmmoTemplate GetExperimentalAmmoTemplate(const XComGameState_Unit UnitState, const XComGameState_Item ItemState)
 {
 	local XComGameState_Item		AmmoState;
 	local array<XComGameState_Item> InventoryItems;
@@ -34,7 +34,7 @@ static private function bool UnitHasValidExperimentalAmmo(const XComGameState_Un
 
 	WeaponTemplate = X2WeaponTemplate(ItemState.GetMyTemplate());
 	if (WeaponTemplate == none || WeaponTemplate.Abilities.Find('HotLoadAmmo') == INDEX_NONE)
-		return false;
+		return none;
 
 	InventoryItems = UnitState.GetAllInventoryItems(, true);
 	foreach InventoryItems(AmmoState)
@@ -42,17 +42,21 @@ static private function bool UnitHasValidExperimentalAmmo(const XComGameState_Un
 		AmmoTemplate = X2AmmoTemplate(AmmoState.GetMyTemplate());
 		if (AmmoTemplate != none && AmmoState.InventorySlot != eInvSlot_Backpack && AmmoState.InventorySlot != eInvSlot_Loot && AmmoTemplate.IsWeaponValidForAmmo(WeaponTemplate))
 		{
-			return true;
+			return AmmoTemplate;
 		}
 	}
-	return false;
+	return none;
 }
+
 
 event name CallMeetsConditionWithSource(XComGameState_BaseObject kTarget, XComGameState_BaseObject kSource) 
 { 
 	local XComGameState_Unit	SourceUnit;
 	local XComGameState_Unit	TargetUnit;
 	local XComGameState_Item	PrimaryWeapon;
+	local X2AmmoTemplate		AmmoTemplate;
+	local X2AmmoTemplate		TargetAmmoTemplate;
+
 	
 	SourceUnit = XComGameState_Unit(kSource);
 	TargetUnit = XComGameState_Unit(kTarget);
@@ -62,14 +66,24 @@ event name CallMeetsConditionWithSource(XComGameState_BaseObject kTarget, XComGa
 		PrimaryWeapon = TargetUnit.GetPrimaryWeapon();
 		if (PrimaryWeapon == none)
 			return 'AA_WeaponIncompatible';	
-
-		if (UnitHasValidExperimentalAmmo(SourceUnit, PrimaryWeapon) || PrimaryWeapon.Ammo < PrimaryWeapon.GetClipSize())
+		
+		if (PrimaryWeapon.Ammo < PrimaryWeapon.GetClipSize())
 		{
+			// Always allow resupply ammo if the target's weapon wants reload.
 			return 'AA_Success';
 		}
 		else
 		{
-			return 'AA_WeaponIncompatible';	
+			AmmoTemplate = GetExperimentalAmmoTemplate(SourceUnit, PrimaryWeapon);
+			if (AmmoTemplate == none)
+				return 'AA_AmmoAlreadyFull';
+
+			TargetAmmoTemplate = X2AmmoTemplate(PrimaryWeapon.GetLoadedAmmoTemplate(none));
+			if (TargetAmmoTemplate == none || TargetAmmoTemplate.DataName == AmmoTemplate.DataName)
+				return 'AA_AmmoAlreadyFull';
+
+			// If we're still here, shooter has experimental ammo, and the target has no experimental ammo, or at least it is different from our experimental ammo.
+			return 'AA_Success';
 		}
 	}
 	

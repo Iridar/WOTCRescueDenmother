@@ -16,6 +16,7 @@ var bool bAmmoApplied;
 final function bool ApplyNewAmmo(XComGameState_Unit SourceUnit, XComGameState_Unit TargetUnit, XComGameState_Item ItemState, XComGameState NewGameState)
 {
 	local X2AmmoTemplate			AmmoTemplate;
+	local XComGameState_Item		OldAmmoState;
 	local X2WeaponTemplate			WeaponTemplate;
 	local XComGameState_Item		NewAmmoState;
 	local bool						bOriginalIgnoreRestrictions;
@@ -34,23 +35,41 @@ final function bool ApplyNewAmmo(XComGameState_Unit SourceUnit, XComGameState_Un
 		`LOG("Did not find any ammo on the source unit.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
 		return false;
 	}
+
+	// 2. Abort if the soldier already has the same experimental ammo, 
+	// or if we fail to unequip it.
+	if (ItemState.LoadedAmmo.ObjectID != 0)
+	{	
+		OldAmmoState = XComGameState_Item(`XCOMHISTORY.GetGameStateForObjectID(ItemState.LoadedAmmo.ObjectID));
+		if (OldAmmoState != none)
+		{
+			if (OldAmmoState.GetMyTemplateName() == AmmoTemplate.DataName)
+			{
+				`LOG("Target already has the same ammo equipped, exiting.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+				return false;
+			}
+			else if (!MaybeUnequipOldAmmo(OldAmmoState, TargetUnit, NewGameState)) 
+			{
+				`LOG("Failed to resolve already equipped ammo, aborting ammo transfer.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+				return false;
+			}
+		}
+	}
+
+
+
+
 	WeaponTemplate = X2WeaponTemplate(ItemState.GetMyTemplate());
 	if (WeaponTemplate == none || !AmmoTemplate.IsWeaponValidForAmmo(WeaponTemplate) || WeaponTemplate.Abilities.Find('HotLoadAmmo') == INDEX_NONE)
 	{
 		`LOG(WeaponTemplate.DataName @ "Does not support ammo:" @ AmmoTemplate.DataName, class'Denmother'.default.bLog, 'IRIDENMOTHER');
 		return false;
 	}
-	WeaponRef = ItemState.GetReference();
-	OldAmmoRef = ItemState.LoadedAmmo;
-
-	// 2. Unequip existing experimental ammo from the target, if any present.
-	if (!MaybeUnequipOldAmmo(TargetUnit, NewGameState))
-	{
-		`LOG("Failed to resolve already equipped ammo, aborting ammo transfer.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
-		return false;
-	}
+	
+	
 
 	// 3. Create new ammo item state and attempt to equip it.
+	WeaponRef = ItemState.GetReference();
 	NewAmmoState = AmmoTemplate.CreateInstanceFromTemplate(NewGameState);
 	if (OldAmmoSlot != eInvSlot_Unknown)
 	{
@@ -99,32 +118,22 @@ final function bool ApplyNewAmmo(XComGameState_Unit SourceUnit, XComGameState_Un
 	return true;
 }
 
-private function bool MaybeUnequipOldAmmo(XComGameState_Unit TargetUnit, XComGameState NewGameState)
+private function bool MaybeUnequipOldAmmo(XComGameState_Item OldAmmoState, XComGameState_Unit TargetUnit, XComGameState NewGameState)
 {
-	local XComGameState_Item	OldAmmoState;
-	local XComGameStateHistory	History;
-
-	if (OldAmmoRef.ObjectID == 0)
-		return true;
-
-	History = `XCOMHISTORY;
-	OldAmmoState = XComGameState_Item(History.GetGameStateForObjectID(OldAmmoRef.ObjectID));
-	if (OldAmmoState == none)
-		return true;
-
+	OldAmmoRef = OldAmmoState.GetReference();
 	OldAmmoSlot = OldAmmoState.InventorySlot;
+
 	`LOG("Target unit already has ammo equipped:" @ OldAmmoState.GetMyTemplateName() @ "in slot:" @ OldAmmoSlot, class'Denmother'.default.bLog, 'IRIDENMOTHER');
 
 	OldAmmoState = XComGameState_Item(NewGameState.ModifyStateObject(OldAmmoState.Class, OldAmmoState.ObjectID));
-	if (!TargetUnit.RemoveItemFromInventory(OldAmmoState, NewGameState))
-	{
-		`LOG("Failed to unequip existing ammo:" @ OldAmmoState.GetMyTemplateName(), class'Denmother'.default.bLog, 'IRIDENMOTHER');
-		return false;
+	if (TargetUnit.RemoveItemFromInventory(OldAmmoState, NewGameState))
+	{	
+		`LOG("Successfully unequipped existing ammo:" @ OldAmmoState.GetMyTemplateName(), class'Denmother'.default.bLog, 'IRIDENMOTHER');
+		return true;
 	}
 	
-	`LOG("Successfully unequipped existing ammo:" @ OldAmmoState.GetMyTemplateName(), class'Denmother'.default.bLog, 'IRIDENMOTHER');
-	
-	return true;
+	`LOG("Failed to unequip existing ammo:" @ OldAmmoState.GetMyTemplateName(), class'Denmother'.default.bLog, 'IRIDENMOTHER');
+	return false;
 }
 
 private function bool MaybeEquipOldAmmo(XComGameState_Unit TargetUnit, XComGameState NewGameState)
