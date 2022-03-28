@@ -1,12 +1,10 @@
 ﻿Created by Iridar and kexx
 
-Added custom image for Denmother's encyclopedia entry.
-Resupply Ammo interaction with Experimental Ammo improved and made more reliable. Should work with more (all) ammo types now, including AP Rounds.
 
-Mec Troopers are eligible targets for Denmother's pull ally ability
-- Asked RM to handle it on the side of MEC Troopers.
-
-Now using AI Spawn Manager to select a spawn location for Denmother on the first retaliation mission. Should make it more consistent, less spawning inside walls or inaccessible areas.
+Denmother's spawn position on the first retaliation should now be more consistent, with no possibility of spawning inside inaccessible areas.
+Tentative fix for the bug that prevented the intended functionality of Denmother being concealed with 0 detection radius after being spawned on the first retaliation mission, which caused enemy pods to activate when they saw Denmother. Keep an eye out and let me know if it finally works now.
+Resupply Ammo interaction with Experimental Ammo improved and made more reliable. Should work with more (all) ammo types now, including AP Rounds that were previously broken.
+Added custom image by RustyDios for Denmother's encyclopedia entry, though it won't be visible in-game just yet.
 
 [WOTC] Rescue Denmother
 

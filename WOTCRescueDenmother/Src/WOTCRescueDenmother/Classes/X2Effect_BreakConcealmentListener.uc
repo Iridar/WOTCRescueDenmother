@@ -52,7 +52,7 @@ static function EventListenerReturn AbilityActivated_Listener(Object EventData, 
         return ELR_NoInterrupt;
 
 	EffectState = XComGameState_Effect(CallbackData);
-	if (EffectState == none)
+	if (EffectState == none || EffectState.bRemoved)
 		return ELR_NoInterrupt;
 
 	// Don't trigger for "abilities" Denmother activates herself.
@@ -71,15 +71,13 @@ static function EventListenerReturn AbilityActivated_Listener(Object EventData, 
 	// Break Denmother's concealment the moment she's targeted by an XCOM Ability.
 	if (bDenmotherMultiTarget || AbilityContext.InputContext.PrimaryTarget == EffectState.ApplyEffectParameters.TargetStateObjectRef)
 	{
-		`LOG("X2Effect_BreakConcealmentListener:AbilityActivated_Listener: breking Denmother's concealment.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+		`LOG("X2Effect_BreakConcealmentListener:AbilityActivated_Listener: breking Denmother's concealment by ability:" @ AbilityContext.InputContext.AbilityTemplateName, class'Denmother'.default.bLog, 'IRIDENMOTHER');
 		NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Breaking Denmother Concealment");
-		UnitState = XComGameState_Unit(NewGameState.ModifyStateObject(class'XComGameState_Unit', EffectState.ApplyEffectParameters.TargetStateObjectRef.ObjectID));
-		UnitState.SetIndividualConcealment(false, NewGameState);
 
-		if (!EffectState.bRemoved)
-		{
-			EffectState.RemoveEffect(NewGameState, NewGameState, true);
-		}
+		UnitState = XComGameState_Unit(NewGameState.ModifyStateObject(class'XComGameState_Unit', EffectState.ApplyEffectParameters.TargetStateObjectRef.ObjectID));
+		EffectState.RemoveEffect(NewGameState, NewGameState, true);
+		UnitState.SetIndividualConcealment(false, NewGameState);
+		UnitState.bRequiresVisibilityUpdate = true;
 
 		`GAMERULES.SubmitGameState(NewGameState);
 	}
