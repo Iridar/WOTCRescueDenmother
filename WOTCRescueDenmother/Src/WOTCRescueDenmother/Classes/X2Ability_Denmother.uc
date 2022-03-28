@@ -21,7 +21,7 @@ static function array<X2DataTemplate> CreateTemplates()
 	Templates.AddItem(Create_GrappleGun());
 	Templates.AddItem(Create_ResupplyAmmo());
 	Templates.AddItem(Create_BandageThrow());
-	Templates.AddItem(PurePassive('IRI_SupplyRun', "img:///IRIKeeperBackpack.UI.UIPerk_SupplyRun", false, 'eAbilitySource_Perk', true));
+	Templates.AddItem(PurePassive('IRI_SupplyRun', "img:///IRIDenmotherUI.UIPerk_SupplyRun", false, 'eAbilitySource_Perk', true));
 
 	Templates.AddItem(PullAlly());
 	Templates.AddItem(PullLoot());
@@ -157,7 +157,7 @@ static function X2AbilityTemplate Create_ResupplyAmmo()
 	`CREATE_X2ABILITY_TEMPLATE(Template, 'IRI_ResupplyAmmo');
 
 	//	Icon Setup
-	Template.IconImage = "img:///IRIKeeperBackpack.UI.UIPerk_ResupplyAmmo";
+	Template.IconImage = "img:///IRIDenmotherUI.UIPerk_ResupplyAmmo";
 	Template.bDontDisplayInAbilitySummary = false;
 	Template.AbilitySourceName = 'eAbilitySource_Perk';
 	Template.eAbilityIconBehaviorHUD = eAbilityIconBehavior_AlwaysShow;

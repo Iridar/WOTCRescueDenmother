@@ -16,7 +16,7 @@ tags= war of the chosen, soldier class, soldier customization, weapon</Descripti
     <Folder Include="Config\Compatibility" />
     <Folder Include="Config\Base" />
     <Folder Include="Localization\" />
-    <Folder Include="Content" />
+    <Folder Include="ContentForCook" />
     <Folder Include="Src\" />
     <Folder Include="Src\WOTCRescueDenmother2" />
     <Folder Include="Src\WOTCRescueDenmother2\Classes" />
@@ -69,22 +69,25 @@ tags= war of the chosen, soldier class, soldier customization, weapon</Descripti
     <Content Include="Config\XComTemplateEditor.ini">
       <SubType>Content</SubType>
     </Content>
-    <Content Include="Content\Iridar_Denmother_Assets.upk">
+    <Content Include="ContentForCook\Iridar_Denmother_Assets.upk">
       <SubType>Content</SubType>
     </Content>
-    <Content Include="Content\Iridar_Denmother_GD.upk">
+    <Content Include="ContentForCook\Iridar_Denmother_GD.upk">
       <SubType>Content</SubType>
     </Content>
-    <Content Include="Content\IRIDenmotherRifle.upk">
+    <Content Include="ContentForCook\IRIDenmotherRifle.upk">
       <SubType>Content</SubType>
     </Content>
-    <Content Include="Content\IRIDenmotherUI.upk">
+    <Content Include="ContentForCook\IRIDenmotherUI.upk">
       <SubType>Content</SubType>
     </Content>
-    <Content Include="Content\IRIKeeperBackpack.upk">
+    <Content Include="ContentForCook\IRIKeeperBackpack.upk">
       <SubType>Content</SubType>
     </Content>
-    <Content Include="Content\IRIKeeperPullPerk.upk">
+    <Content Include="ContentForCook\IRIKeeperPullPerk.upk">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="ContentOptions.json">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Localization\WOTCRescueDenmother.int">

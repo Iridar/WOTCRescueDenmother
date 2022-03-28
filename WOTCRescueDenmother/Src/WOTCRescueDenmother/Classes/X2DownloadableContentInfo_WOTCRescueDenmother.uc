@@ -267,7 +267,7 @@ static function AddCritUpgrade(X2ItemTemplateManager ItemTemplateManager, Name T
 
 	Template = X2WeaponUpgradeTemplate(ItemTemplateManager.FindItemTemplate(TemplateName));
 
-	Template.AddUpgradeAttachment('SOCKET_LaserSightHIGH', 'UIPawnLocation_WeaponUpgrade_AssaultRifle_Optic', "IRIDenmotherRifle.Meshes.SM_LaserSight", "", 'IRI_DenmotherRifle', , "", "img:///IRIDenmotherRifle.UI.Inv_DenmotherRifle_LaserSight", "img:///UILibrary_StrategyImages.X2InventoryIcons.Inv_weaponIcon_scope");
+	Template.AddUpgradeAttachment('SOCKET_LaserSightHIGH', 'UIPawnLocation_WeaponUpgrade_AssaultRifle_Optic', "IRIDenmotherRifle.Meshes.SM_LaserSight", "", 'IRI_DenmotherRifle', , "", "img:///IRIDenmotherRifle.Inv_DenmotherRifle_LaserSight", "img:///UILibrary_StrategyImages.X2InventoryIcons.Inv_weaponIcon_scope");
 	Template.AddUpgradeAttachment('Laser', 'UIPawnLocation_WeaponUpgrade_AssaultRifle_Optic', "IRIDenmotherRifle.Meshes.SM_Laser", "", 'IRI_DenmotherRifle', , "", "", "");
 }
 
@@ -278,7 +278,7 @@ static function AddAimBonusUpgrade(X2ItemTemplateManager ItemTemplateManager, Na
 
 	Template = X2WeaponUpgradeTemplate(ItemTemplateManager.FindItemTemplate(TemplateName));
 
-	Template.AddUpgradeAttachment('SOCKET_ScopeHIGH', 'UIPawnLocation_WeaponUpgrade_AssaultRifle_Optic', "IRIDenmotherRifle.Meshes.SM_Scope", "", 'IRI_DenmotherRifle', , "", "img:///IRIDenmotherRifle.UI.Inv_DenmotherRifle_Scope", "img:///UILibrary_StrategyImages.X2InventoryIcons.Inv_weaponIcon_scope");	
+	Template.AddUpgradeAttachment('SOCKET_ScopeHIGH', 'UIPawnLocation_WeaponUpgrade_AssaultRifle_Optic', "IRIDenmotherRifle.Meshes.SM_Scope", "", 'IRI_DenmotherRifle', , "", "img:///IRIDenmotherRifle.Inv_DenmotherRifle_Scope", "img:///UILibrary_StrategyImages.X2InventoryIcons.Inv_weaponIcon_scope");	
 }
 
 
@@ -289,7 +289,7 @@ static function AddFreeFireBonusUpgrade(X2ItemTemplateManager ItemTemplateManage
 
 	Template = X2WeaponUpgradeTemplate(ItemTemplateManager.FindItemTemplate(TemplateName));
 
-	Template.AddUpgradeAttachment('Trigger', 'UIPawnLocation_WeaponUpgrade_AssaultRifle_Mag', "ConvAttachments.Meshes.SM_ConvTriggerB", "", 'IRI_DenmotherRifle', , "", "img:///IRIDenmotherRifle.UI.Inv_DenmotherRifle_Trigger", "img:///UILibrary_StrategyImages.X2InventoryIcons.Inv_weaponIcon_trigger");
+	Template.AddUpgradeAttachment('Trigger', 'UIPawnLocation_WeaponUpgrade_AssaultRifle_Mag', "ConvAttachments.Meshes.SM_ConvTriggerB", "", 'IRI_DenmotherRifle', , "", "img:///IRIDenmotherRifle.Inv_DenmotherRifle_Trigger", "img:///UILibrary_StrategyImages.X2InventoryIcons.Inv_weaponIcon_trigger");
 }
 
 //	EX MAG
@@ -299,7 +299,7 @@ static function AddClipSizeBonusUpgrade(X2ItemTemplateManager ItemTemplateManage
 
 	Template = X2WeaponUpgradeTemplate(ItemTemplateManager.FindItemTemplate(TemplateName));
 
-	Template.AddUpgradeAttachment('SOCKET_AmmoFeederHIGH', 'UIPawnLocation_WeaponUpgrade_Shotgun_Mag', "IRIDenmotherRifle.Meshes.SM_AmmoFeeder", "", 'IRI_DenmotherRifle', , "", "img:///IRIDenmotherRifle.UI.Inv_DenmotherRifle_Magazine", "img:///UILibrary_StrategyImages.X2InventoryIcons.Inv_weaponIcon_clip", class'X2Item_DefaultUpgrades'.static.NoReloadUpgradePresent);	
+	Template.AddUpgradeAttachment('SOCKET_AmmoFeederHIGH', 'UIPawnLocation_WeaponUpgrade_Shotgun_Mag', "IRIDenmotherRifle.Meshes.SM_AmmoFeeder", "", 'IRI_DenmotherRifle', , "", "img:///IRIDenmotherRifle.Inv_DenmotherRifle_Magazine", "img:///UILibrary_StrategyImages.X2InventoryIcons.Inv_weaponIcon_clip", class'X2Item_DefaultUpgrades'.static.NoReloadUpgradePresent);	
 }
 
 //	AUTO LOADER
@@ -309,7 +309,7 @@ static function AddReloadUpgrade(X2ItemTemplateManager ItemTemplateManager, Name
 
 	Template = X2WeaponUpgradeTemplate(ItemTemplateManager.FindItemTemplate(TemplateName));
 
-	Template.AddUpgradeAttachment('SOCKET_AmmoFeederHIGH', 'UIPawnLocation_WeaponUpgrade_AssaultRifle_Mag', "IRIDenmotherRifle.Meshes.SM_AmmoFeeder", "", 'IRI_DenmotherRifle', , "", "img:///IRIDenmotherRifle.UI.Inv_DenmotherRifle_Magazine", "img:///UILibrary_StrategyImages.X2InventoryIcons.Inv_weaponIcon_clip");
+	Template.AddUpgradeAttachment('SOCKET_AmmoFeederHIGH', 'UIPawnLocation_WeaponUpgrade_AssaultRifle_Mag', "IRIDenmotherRifle.Meshes.SM_AmmoFeeder", "", 'IRI_DenmotherRifle', , "", "img:///IRIDenmotherRifle.Inv_DenmotherRifle_Magazine", "img:///UILibrary_StrategyImages.X2InventoryIcons.Inv_weaponIcon_clip");
 }
 
 //	STOCK
@@ -319,7 +319,7 @@ static function AddMissDamageUpgrade(X2ItemTemplateManager ItemTemplateManager, 
 
 	Template = X2WeaponUpgradeTemplate(ItemTemplateManager.FindItemTemplate(TemplateName));
 	
-	Template.AddUpgradeAttachment('', 'UIPawnLocation_WeaponUpgrade_AssaultRifle_Stock', "", "", 'IRI_DenmotherRifle', , "", "img:///IRIDenmotherRifle.UI.Inv_DenmotherRifle_Stock", "img:///UILibrary_StrategyImages.X2InventoryIcons.Inv_weaponIcon_stock");
+	Template.AddUpgradeAttachment('', 'UIPawnLocation_WeaponUpgrade_AssaultRifle_Stock', "", "", 'IRI_DenmotherRifle', , "", "img:///IRIDenmotherRifle.Inv_DenmotherRifle_Stock", "img:///UILibrary_StrategyImages.X2InventoryIcons.Inv_weaponIcon_stock");
 }
 
 //	SUPPRESSOR
@@ -329,7 +329,7 @@ static function AddFreeKillUpgrade(X2ItemTemplateManager ItemTemplateManager, Na
 
 	Template = X2WeaponUpgradeTemplate(ItemTemplateManager.FindItemTemplate(TemplateName));
 
-	Template.AddUpgradeAttachment('SOCKET_SuppressorHIGH', 'UIPawnLocation_WeaponUpgrade_AssaultRifle_Suppressor', "IRIDenmotherRifle.Meshes.SM_Suppressor", "", 'IRI_DenmotherRifle', , "", "img:///IRIDenmotherRifle.UI.Inv_DenmotherRifle_Suppressor", "img:///UILibrary_StrategyImages.X2InventoryIcons.Inv_weaponIcon_barrel");	
+	Template.AddUpgradeAttachment('SOCKET_SuppressorHIGH', 'UIPawnLocation_WeaponUpgrade_AssaultRifle_Suppressor', "IRIDenmotherRifle.Meshes.SM_Suppressor", "", 'IRI_DenmotherRifle', , "", "img:///IRIDenmotherRifle.Inv_DenmotherRifle_Suppressor", "img:///UILibrary_StrategyImages.X2InventoryIcons.Inv_weaponIcon_barrel");	
 }
 
 static event InstallNewCampaign(XComGameState StartState)

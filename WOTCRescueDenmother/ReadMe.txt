@@ -5,6 +5,7 @@ Denmother's spawn position on the first retaliation should now be more consisten
 Tentative fix for the bug that prevented the intended functionality of Denmother being concealed with 0 detection radius after being spawned on the first retaliation mission, which caused enemy pods to activate when they saw Denmother. Keep an eye out and let me know if it finally works now.
 Resupply Ammo interaction with Experimental Ammo improved and made more reliable. Should work with more (all) ammo types now, including AP Rounds that were previously broken.
 Added custom image by RustyDios for Denmother's encyclopedia entry, though it won't be visible in-game just yet.
+The mod is now cooked, reducing mod size and optimizing loading times.
 
 [WOTC] Rescue Denmother
 
@@ -129,6 +130,11 @@ The mod is highly configurable through various configuration files in:
 
 You can use this console command to add Denmother to your crew at any point during the campaign:
 [code]GiveDenmother[/code]
+
+[h1]COOKED ASSETS[/h1]
+
+This mod's packages are cooked to reduce their size and improve loading times. However, Unreal Editor is unable to open cooked packages, so if for whatever reason you need to inspect this mod's packages, you can find the uncooked version of the mod on [b][url=https://github.com/Iridar/WOTCRescueDenmother]GitHub[/url][/b].
+
 
 [h1]CREDITS[/h1]
 
