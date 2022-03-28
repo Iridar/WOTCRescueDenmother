@@ -9,7 +9,6 @@ var array<StateObjectReference>	NewAmmoAbilities;
 var EInventorySlot				NewAmmoSlot;
 
 var StateObjectReference		OldAmmoRef;
-//var array<StateObjectReference>	OldAmmoAbilities;
 var EInventorySlot				OldAmmoSlot;
 
 var bool bAmmoApplied;
@@ -18,11 +17,8 @@ final function bool ApplyNewAmmo(XComGameState_Unit SourceUnit, XComGameState_Un
 {
 	local X2AmmoTemplate			AmmoTemplate;
 	local X2WeaponTemplate			WeaponTemplate;
-	
 	local XComGameState_Item		NewAmmoState;
-
 	local bool						bOriginalIgnoreRestrictions;
-
 	local XComGameState_Player		PlayerState;
 	local StateObjectReference		AbilityRef;
 	local array<AbilitySetupData>	AbilityData;
@@ -31,29 +27,31 @@ final function bool ApplyNewAmmo(XComGameState_Unit SourceUnit, XComGameState_Un
 
 	`LOG("ApplyNewAmmo begin.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
 
+	// 1. Init stuff we need.
 	AmmoTemplate = FindNewAmmo(SourceUnit);
 	if (AmmoTemplate == none)
 	{
 		`LOG("Did not find any ammo on the source unit.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
 		return false;
 	}
-
 	WeaponTemplate = X2WeaponTemplate(ItemState.GetMyTemplate());
 	if (WeaponTemplate == none || !AmmoTemplate.IsWeaponValidForAmmo(WeaponTemplate) || WeaponTemplate.Abilities.Find('HotLoadAmmo') == INDEX_NONE)
 	{
 		`LOG(WeaponTemplate.DataName @ "Does not support ammo:" @ AmmoTemplate.DataName, class'Denmother'.default.bLog, 'IRIDENMOTHER');
 		return false;
 	}
-
 	WeaponRef = ItemState.GetReference();
 	OldAmmoRef = ItemState.LoadedAmmo;
+
+	// 2. Unequip existing experimental ammo from the target, if any present.
 	if (!MaybeUnequipOldAmmo(TargetUnit, NewGameState))
 	{
 		`LOG("Failed to resolve already equipped ammo, aborting ammo transfer.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
+		return false;
 	}
 
+	// 3. Create new ammo item state and attempt to equip it.
 	NewAmmoState = AmmoTemplate.CreateInstanceFromTemplate(NewGameState);
-
 	if (OldAmmoSlot != eInvSlot_Unknown)
 	{
 		NewAmmoSlot = OldAmmoSlot;
@@ -75,12 +73,14 @@ final function bool ApplyNewAmmo(XComGameState_Unit SourceUnit, XComGameState_Un
 	}
 	else
 	{
+		// If we fail, attempt to equip the old ammo back.
 		`LOG("Failed to equip new ammo into slot:" @ NewAmmoSlot, class'Denmother'.default.bLog, 'IRIDENMOTHER');
 		MaybeEquipOldAmmo(TargetUnit, NewGameState);
+		return false;
 	}
 	TargetUnit.bIgnoreItemEquipRestrictions = bOriginalIgnoreRestrictions;
 	
-	
+	// 4. If new ammo is equipped, init all abilities attached to it so that stuff like AP Rounds that works via persistent effect can work.
 	PlayerState = XComGameState_Player(`XCOMHISTORY.GetGameStateForObjectID(TargetUnit.ControllingPlayer.ObjectID));			
 	AbilityData = TargetUnit.GatherUnitAbilitiesForInit(/*NewGameState*/, PlayerState); // Passing StartState to it causes a bug in LWOTC where it restores ammo for some weapons.
 	TacticalRules = `TACTICALRULES;
@@ -93,8 +93,6 @@ final function bool ApplyNewAmmo(XComGameState_Unit SourceUnit, XComGameState_Un
 					
 			AbilityRef = TacticalRules.InitAbilityForUnit(AbilityData[i].Template, TargetUnit, NewGameState, NewAmmoRef);
 			NewAmmoAbilities.AddItem(AbilityRef);
-			//AbilityState = XComGameState_Ability(NewGameState.GetGameStateForObjectID(AbilityRef.ObjectID));
-			//RestoreAbilityChargeCooldownData(AbilityState);
 		}
 	}
 		
@@ -103,10 +101,8 @@ final function bool ApplyNewAmmo(XComGameState_Unit SourceUnit, XComGameState_Un
 
 private function bool MaybeUnequipOldAmmo(XComGameState_Unit TargetUnit, XComGameState NewGameState)
 {
-	//local XComGameState_Ability		AbilityState;	
-	local XComGameState_Item		OldAmmoState;
-	local XComGameStateHistory		History;
-	//local int i;
+	local XComGameState_Item	OldAmmoState;
+	local XComGameStateHistory	History;
 
 	if (OldAmmoRef.ObjectID == 0)
 		return true;
@@ -128,27 +124,11 @@ private function bool MaybeUnequipOldAmmo(XComGameState_Unit TargetUnit, XComGam
 	
 	`LOG("Successfully unequipped existing ammo:" @ OldAmmoState.GetMyTemplateName(), class'Denmother'.default.bLog, 'IRIDENMOTHER');
 	
-	/*
-	for (i = TargetUnit.Abilities.Length - 1; i >= 0; i--)
-	{
-		AbilityState = XComGameState_Ability(History.GetGameStateForObjectID(TargetUnit.Abilities[i].ObjectID));
-		if (AbilityState == none)
-			continue;
-
-		if (AbilityState.SourceWeapon == OldAmmoRef)
-		{
-			`LOG("Found ability attached to ammo:" @ AbilityState.GetMyTemplateName() @ ", removing", class'Denmother'.default.bLog, 'IRIDENMOTHER'); 
-			OldAmmoAbilities.AddItem(TargetUnit.Abilities[i]);
-			TargetUnit.Abilities.Remove(i, 1);
-		}
-	}
-	*/	
 	return true;
 }
 
 private function bool MaybeEquipOldAmmo(XComGameState_Unit TargetUnit, XComGameState NewGameState)
 {
-//	local XComGameState_Ability		AbilityState;	
 	local XComGameState_Item		OldAmmoState;
 	local XComGameStateHistory		History;
 	local bool						bOriginalIgnoreRestrictions;
@@ -212,7 +192,6 @@ private function RemoveNewAmmoEffectsAndAbilities(XComGameState_Unit TargetUnit,
 	local XComGameState_Effect		EffectState;
 	local StateObjectReference		Ref;
 	local XComGameStateHistory		History;
-//	local int i;
 	
 	History = `XCOMHISTORY;
 	
@@ -261,7 +240,7 @@ function GatherAffectedWeapons(XComGameState_Unit TargetUnit, XComGameState NewG
 	}
 }*/
 
-function string GetFlyoverString()
+final function string GetFlyoverString()
 {	
 	local XComGameState_Item ItemState;
 
@@ -291,7 +270,7 @@ static private function XComGameState_BaseObject GetGameStateForObjectID(XComGam
 	return BaseObject;
 }
 
-final function X2AmmoTemplate FindNewAmmo(XComGameState_Unit UnitState)
+private function X2AmmoTemplate FindNewAmmo(XComGameState_Unit UnitState)
 {
 	local XComGameState_Item		AmmoState;
 	local array<XComGameState_Item> InventoryItems;

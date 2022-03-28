@@ -7,9 +7,10 @@ function RegisterForEvents(XComGameState_Effect EffectGameState)
 
 	EventMgr = `XEVENTMGR;
 	EffectObj = EffectGameState;
-	EventMgr.RegisterForEvent(EffectObj, 'AbilityActivated', AbilityActivated_Listener, ELD_OnStateSubmitted,, `XCOMHISTORY.GetGameStateForObjectID(EffectGameState.ApplyEffectParameters.TargetStateObjectRef.ObjectID),, EffectObj);
+	EventMgr.RegisterForEvent(EffectObj, 'AbilityActivated', AbilityActivated_Listener, ELD_OnStateSubmitted,, /*`XCOMHISTORY.GetGameStateForObjectID(EffectGameState.ApplyEffectParameters.TargetStateObjectRef.ObjectID)*/,, EffectObj);
 }
 
+// This listener removes the Effect if the activated ability has restored any ammo for the weapon with which this effect is associated with.
 static function EventListenerReturn AbilityActivated_Listener(Object EventData, Object EventSource, XComGameState GameState, Name EventID, Object CallbackData)
 {
     local XComGameStateContext_Ability		AbilityContext;
@@ -17,36 +18,54 @@ static function EventListenerReturn AbilityActivated_Listener(Object EventData, 
 	local XComGameState_Item				OldWeaponState;
 	local XComGameState_Effect_TransferAmmo	EffectState;
 	local XComGameState						NewGameState;
+	local XComGameStateHistory				History;
+	local int ClipSize;
+	local int NewClipSize;
+	local bool bWeaponWasFullyLoaded;
 
     AbilityContext = XComGameStateContext_Ability(GameState.GetContext());
-    if (AbilityContext == none || AbilityContext.InterruptionStatus == eInterruptionStatus_Interrupt)
+    if (AbilityContext == none || AbilityContext.InterruptionStatus == eInterruptionStatus_Interrupt || 
+		AbilityContext.InputContext.AbilityTemplateName == 'IRI_ResupplyAmmo') // Don't run the listener for other Resupply Ammo itself, it handles removing existing effects of this type automatically.
         return ELR_NoInterrupt;
 
 	EffectState = XComGameState_Effect_TransferAmmo(CallbackData);
-	if (EffectState == none)
+	if (EffectState == none || EffectState.bRemoved)
 		return ELR_NoInterrupt;
 
 	// Continue only if the weapon used for the activated ability is the one whose ammo we have fiddled with.
-	if (AbilityContext.InputContext.ItemObject != EffectState.WeaponRef)
-		return ELR_NoInterrupt;
+	//	Edit: check disabled so that we don't filter out abilities activated by others.
+	//if (AbilityContext.InputContext.ItemObject != EffectState.WeaponRef)
+	//	return ELR_NoInterrupt;
 
+	History = `XCOMHISTORY;
 	WeaponState = XComGameState_Item(GameState.GetGameStateForObjectID(EffectState.WeaponRef.ObjectID));
-	OldWeaponState = XComGameState_Item(`XCOMHISTORY.GetGameStateForObjectID(EffectState.WeaponRef.ObjectID,, GameState.HistoryIndex - 1));
-
-	if (WeaponState == none || OldWeaponState == none)
+	OldWeaponState = XComGameState_Item(History.GetGameStateForObjectID(EffectState.WeaponRef.ObjectID,, GameState.HistoryIndex - 1));
+	
+	if (WeaponState == none || OldWeaponState == none || OldWeaponState.Ammo >= WeaponState.Ammo)
 		return ELR_NoInterrupt;
 
-	// Remove effect if the weapon has gained ammo from any source.
-	if (OldWeaponState.Ammo < WeaponState.Ammo)
+	// If we're still here, it means the weapon has gained ammo from one source or another. Remove the effect.
+
+	// Removing the effect may change weapon's clip size, so record the clipsize and whether the weapon was at full capacity.
+	ClipSize = WeaponState.GetClipSize();
+	bWeaponWasFullyLoaded = WeaponState.Ammo == ClipSize;
+
+	NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Removing Transfer Ammo Effect");
+	EffectState.RemoveEffect(NewGameState, NewGameState, true);
+	`GAMERULES.SubmitGameState(NewGameState);
+
+	WeaponState = XComGameState_Item(History.GetGameStateForObjectID(EffectState.WeaponRef.ObjectID));
+	NewClipSize = WeaponState.GetClipSize();
+
+	// If after removing the effect the weapon has less or more ammo than it's supposed to, address it.
+	if (WeaponState.Ammo > NewClipSize || bWeaponWasFullyLoaded && WeaponState.Ammo != NewClipSize)
 	{
 		NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Removing Transfer Ammo Effect");
-		if (!EffectState.bRemoved)
-		{
-			EffectState.RemoveEffect(NewGameState, NewGameState, true);
-		}
-
+		WeaponState = XComGameState_Item(NewGameState.ModifyStateObject(WeaponState.Class, WeaponState.ObjectID));
+		WeaponState.Ammo = NewClipSize;
 		`GAMERULES.SubmitGameState(NewGameState);
 	}
+	
     return ELR_NoInterrupt;
 }
 
