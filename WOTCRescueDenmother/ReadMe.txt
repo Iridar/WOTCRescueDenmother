@@ -3,6 +3,10 @@
 Added custom image for Denmother's encyclopedia entry.
 Resupply Ammo interaction with Experimental Ammo improved and made more reliable. Should work with more (all) ammo types now, including AP Rounds.
 
+Mec Troopers are eligible targets for Denmother's pull ally ability
+- Asked RM to handle it on the side of MEC Troopers.
+
+Now using AI Spawn Manager to select a spawn location for Denmother on the first retaliation mission. Should make it more consistent, less spawning inside walls or inaccessible areas.
 
 [WOTC] Rescue Denmother
 

@@ -77,6 +77,23 @@ static function EventListenerReturn ListenerEventFunction_Immediate(Object Event
 
 static private function vector GetDenmotherSpawnPosition()
 {
+	local XComAISpawnManager SpawnManager;
+	local Vector EmptyVector;
+
+	SpawnManager = `SPAWNMGR;
+
+	return SpawnManager.SelectReinforcementsLocation(
+		none /*const XComGameState_AIReinforcementSpawner InstigatingSpawner*/,
+		EmptyVector /*const out Vector TargetLocation*/,
+		0 /*int IdealSpawnTilesOffset*/,
+		false /*bool bSpawnInXComLOS*/,
+		true /*bool bDontSpawnInXComLOS*/,
+		true /*bool bRequiresVerticalClearance*/,
+		true /*bool bAlwaysOrientAlongLOP*/);
+}
+
+static private function vector GetDenmotherSpawnPositionOld()
+{
 	local vector				Position;
 	local int					i;
 	local XComGameState_Unit	UnitState;
