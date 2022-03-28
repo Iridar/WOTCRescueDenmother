@@ -29,7 +29,7 @@ final function bool ApplyNewAmmo(XComGameState_Unit SourceUnit, XComGameState_Un
 	`LOG("ApplyNewAmmo begin.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
 
 	// 1. Init stuff we need.
-	AmmoTemplate = FindNewAmmo(SourceUnit);
+	AmmoTemplate = class'X2Condition_ResupplyAmmo'.static.GetExperimentalAmmoTemplate(SourceUnit, ItemState);
 	if (AmmoTemplate == none)
 	{
 		`LOG("Did not find any ammo on the source unit.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
@@ -279,6 +279,7 @@ static private function XComGameState_BaseObject GetGameStateForObjectID(XComGam
 	return BaseObject;
 }
 
+/*
 private function X2AmmoTemplate FindNewAmmo(XComGameState_Unit UnitState)
 {
 	local XComGameState_Item		AmmoState;
@@ -296,4 +297,4 @@ private function X2AmmoTemplate FindNewAmmo(XComGameState_Unit UnitState)
 		}
 	}
 	return none;
-}
+}*/

@@ -25,18 +25,39 @@ return 'AA_NoTargets';
 return 'AA_NotVisible';
 */
 
-static private function X2AmmoTemplate GetExperimentalAmmoTemplate(const XComGameState_Unit UnitState, const XComGameState_Item ItemState)
+static final function X2AmmoTemplate GetExperimentalAmmoTemplate(const XComGameState_Unit SourceUnit, const XComGameState_Item ItemState)
 {
-	local XComGameState_Item		AmmoState;
-	local array<XComGameState_Item> InventoryItems;
-	local X2AmmoTemplate			AmmoTemplate;
-	local X2WeaponTemplate			WeaponTemplate;
-
+	local XComGameState_Item				AmmoState;
+	local array<XComGameState_Item>			InventoryItems;
+	local X2AmmoTemplate					AmmoTemplate;
+	local X2WeaponTemplate					WeaponTemplate;
+	local XComGameState_Effect_TransferAmmo TransferAmmo;
+	
 	WeaponTemplate = X2WeaponTemplate(ItemState.GetMyTemplate());
 	if (WeaponTemplate == none || WeaponTemplate.Abilities.Find('HotLoadAmmo') == INDEX_NONE)
 		return none;
 
-	InventoryItems = UnitState.GetAllInventoryItems(, true);
+	// Prevent the following:
+		//several keepers can multiply some experimental ammo by resupply each other with it.
+		//I.e. Keeper A has Explosive Ammo, and gives it to Keeper B who had Bluescreen Rounds, and now Keeper B will both shoot and give out Explosive Ammo, at least until they reload themselves.
+	// If this source unit Keeper has been given different Experimental Ammo by another Keeper, then this Keeper will still give out the Experimental Ammo they had equipped previously.
+	// While they have the resupply effect on them, the ammo is not actually in their inventory, so we have to get it manually.
+	TransferAmmo = XComGameState_Effect_TransferAmmo(SourceUnit.GetUnitAffectedByEffectState('IRI_ResupplyAmmo_Effect'));
+	if (TransferAmmo != none)
+	{
+		AmmoState = XComGameState_Item(`XCOMHISTORY.GetGameStateForObjectID(TransferAmmo.OldAmmoRef.ObjectID));
+		if (AmmoState != none)
+		{
+			AmmoTemplate = X2AmmoTemplate(AmmoState.GetMyTemplate());
+			if (AmmoTemplate != none && AmmoTemplate.IsWeaponValidForAmmo(WeaponTemplate))
+			{
+				return AmmoTemplate;
+			}
+		}
+	}
+
+
+	InventoryItems = SourceUnit.GetAllInventoryItems(, true);
 	foreach InventoryItems(AmmoState)
 	{
 		AmmoTemplate = X2AmmoTemplate(AmmoState.GetMyTemplate());

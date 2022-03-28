@@ -20,6 +20,7 @@ static function CHEventListenerTemplate Create_TacticalListenerTemplate()
 	Template.RegisterInStrategy = false;
 
 	Template.AddCHEvent('PostAliensSpawned', ListenerEventFunction_Immediate, ELD_Immediate);
+	Template.AddCHEvent('CleanupTacticalMission', OnCleanupTacticalMission, ELD_Immediate);	
 	
 	return Template;
 }
@@ -252,4 +253,20 @@ static private function bool IsSoldierUnlockTemplatePurchased(const name Soldier
 		}
 	}
 	return false;
+}
+
+// Remove all Transfer Ammo effects at the end of tactical. This does not happen automatically, because `UnitRemovedFromPlay` is not called for XCOM units.
+static private function EventListenerReturn OnCleanupTacticalMission(Object EventData, Object EventSource, XComGameState NewGameState, Name Event, Object CallbackData)
+{
+	local XComGameStateHistory					History;
+	local XComGameState_Effect_TransferAmmo	EffectState;
+
+	History = `XCOMHISTORY;
+
+	foreach History.IterateByClassType(class'XComGameState_Effect_TransferAmmo', EffectState)
+	{
+		EffectState.RemoveEffect(NewGameState, NewGameState, true);
+	}
+
+	return ELR_NoInterrupt;
 }
