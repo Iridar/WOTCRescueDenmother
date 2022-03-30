@@ -208,9 +208,6 @@ simulated function OnEffectRemoved(const out EffectAppliedData ApplyEffectParame
 		BattleData = XComGameState_BattleData(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_BattleData'));
 		BattleData = XComGameState_BattleData(NewGameState.ModifyStateObject(class'XComGameState_BattleData', BattleData.ObjectID));
 		BattleData.RewardUnits.AddItem(UnitState.GetReference());	
-
-		// Add supply pack even is she's recovered dead in case player has means to bring her back to life, e.g. Infirmaria Ex Mortis
-		//class'Denmother'.static.AddItemToHQInventory('IRI_Keeper_SupplyPack', NewGameState);	
 		
 		if (!bAlive)
 		{
