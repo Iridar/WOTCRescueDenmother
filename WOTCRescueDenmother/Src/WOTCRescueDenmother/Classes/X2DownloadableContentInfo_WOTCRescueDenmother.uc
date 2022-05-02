@@ -132,6 +132,50 @@ static event OnExitPostMissionSequence()
 	}
 }
 
+// Keep it here for a while to fix broken units for people.
+static function OnLoadedSavedGameWithDLCExisting ()
+{
+	local X2DownloadableContentInfo_WOTCRescueDenmother CDO;
+
+	CDO = X2DownloadableContentInfo_WOTCRescueDenmother(class'XComEngine'.static.GetClassDefaultObject(class'X2DownloadableContentInfo_WOTCRescueDenmother'));
+	CDO.FixAmmo();
+}
+
+exec function FixAmmo()
+{
+	local XComGameState_Unit				UnitState;
+	local XComGameState						NewGameState;
+	local XComGameState_HeadquartersXCom	XComHQ;
+	local StateObjectReference				UnitRef;
+	local XComGameState_Item				ItemState;
+	local array<XComGameState_Item>			ItemStates;
+
+	NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Fixing ammo");
+	XComHQ = class'Denmother'.static.GetAndPrepXComHQ(NewGameState);
+
+	foreach XComHQ.Crew(UnitRef)
+	{
+		UnitState = XComGameState_Unit(NewGameState.ModifyStateObject(class'XComGameState_Unit', UnitRef.ObjectID));
+		ItemStates = UnitState.GetAllInventoryItems();
+		foreach ItemStates(ItemState)
+		{
+			if (ItemState.InventorySlot == eInvSlot_Unknown && ItemState.GetMyTemplate().IsA('X2AmmoTemplate'))
+			{	
+				ItemState = XComGameState_Item(NewGameState.ModifyStateObject(ItemState.Class, ItemState.ObjectID));
+				if (UnitState.RemoveItemFromInventory(ItemState, NewGameState))
+				{	
+					class'Helpers'.static.OutputMsg("Fixing ammo:" @ ItemState.GetMyTemplateName() @ "on unit:" @ UnitState.GetFullName());
+					`LOG("Fixing ammo:" @ ItemState.GetMyTemplateName() @ "on unit:" @ UnitState.GetFullName(), class'Denmother'.default.bLog, 'IRIDENMOTHER');
+
+					XComHQ.PutItemInInventory(NewGameState, ItemState);
+				}	
+			}
+		}
+	}
+
+	`GAMERULES.SubmitGameState(NewGameState);
+}
+
 exec function GiveDenmother()
 {
 	local XComGameState_Unit				UnitState;

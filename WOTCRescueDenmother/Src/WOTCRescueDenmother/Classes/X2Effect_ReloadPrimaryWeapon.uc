@@ -113,7 +113,32 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 		NewEffectState.RemoveEffect(NewGameState, NewGameState, true);
 	}
 }
+/*
+private function XComGameState_Object GetAndPrepStateObject(int ObjectID, XComGameState NewGameState)
+{
+	local XComGameState_Object StateObject;
 
+	StateObject = NewGameState.GetGameStateForObjectID(ObjectID);
+	if (StateObject != none)
+	{
+		return StateObject;
+	}
+
+	StateObject = `XCOMHISTORY.GetGameStateForObjectID(ObjectID);
+	if (StateObject != none)
+	{
+		StateObject = NewGameState.ModifyStateObject(StateObject.Class, StateObject.ObjectID);
+	}
+
+	if (StateObject == none)
+	{
+		`LOG("WARNING :: Failed to get state object with ObjectID:" @ ObjectID, class'Denmother'.default.bLog, 'IRIDENMOTHER');
+		`LOG(GetScriptTrace(), class'Denmother'.default.bLog, 'IRIDENMOTHER');
+	}
+
+	return StateObject;
+}
+*/
 simulated function OnEffectRemoved(const out EffectAppliedData ApplyEffectParameters, XComGameState NewGameState, bool bCleansed, XComGameState_Effect RemovedEffectState)
 {
 	local XComGameState_Effect_TransferAmmo TransferAmmo;

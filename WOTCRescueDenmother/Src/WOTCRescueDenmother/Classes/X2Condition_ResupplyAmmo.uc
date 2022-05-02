@@ -78,11 +78,8 @@ event name CallMeetsConditionWithSource(XComGameState_BaseObject kTarget, XComGa
 	local X2AmmoTemplate		AmmoTemplate;
 	local X2AmmoTemplate		TargetAmmoTemplate;
 
-	
-	SourceUnit = XComGameState_Unit(kSource);
 	TargetUnit = XComGameState_Unit(kTarget);
-	
-	if (SourceUnit != none && TargetUnit != none)
+	if (TargetUnit != none)
 	{
 		PrimaryWeapon = TargetUnit.GetPrimaryWeapon();
 		if (PrimaryWeapon == none)
@@ -95,16 +92,20 @@ event name CallMeetsConditionWithSource(XComGameState_BaseObject kTarget, XComGa
 		}
 		else
 		{
-			AmmoTemplate = GetExperimentalAmmoTemplate(SourceUnit, PrimaryWeapon);
-			if (AmmoTemplate == none)
-				return 'AA_AmmoAlreadyFull';
+			SourceUnit = XComGameState_Unit(kSource);
+			if (SourceUnit != none)
+			{
+				AmmoTemplate = GetExperimentalAmmoTemplate(SourceUnit, PrimaryWeapon);
+				if (AmmoTemplate == none)
+					return 'AA_AmmoAlreadyFull';
 
-			TargetAmmoTemplate = X2AmmoTemplate(PrimaryWeapon.GetLoadedAmmoTemplate(none));
-			if (TargetAmmoTemplate == none || TargetAmmoTemplate.DataName == AmmoTemplate.DataName)
-				return 'AA_AmmoAlreadyFull';
+				TargetAmmoTemplate = X2AmmoTemplate(PrimaryWeapon.GetLoadedAmmoTemplate(none));
+				if (TargetAmmoTemplate != none && TargetAmmoTemplate.DataName == AmmoTemplate.DataName)
+					return 'AA_AmmoAlreadyFull';
 
-			// If we're still here, shooter has experimental ammo, and the target has no experimental ammo, or at least it is different from our experimental ammo.
-			return 'AA_Success';
+				// If we're still here, shooter has experimental ammo, and the target has no experimental ammo, or at least it is different from our experimental ammo.
+				return 'AA_Success';
+			}
 		}
 	}
 	

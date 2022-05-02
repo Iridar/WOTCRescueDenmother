@@ -36,11 +36,21 @@ final function bool ApplyNewAmmo(XComGameState_Unit SourceUnit, XComGameState_Un
 		return false;
 	}
 
+	WeaponTemplate = X2WeaponTemplate(ItemState.GetMyTemplate());
+	if (WeaponTemplate == none || !AmmoTemplate.IsWeaponValidForAmmo(WeaponTemplate) || WeaponTemplate.Abilities.Find('HotLoadAmmo') == INDEX_NONE)
+	{
+		`LOG(WeaponTemplate.DataName @ "Does not support ammo:" @ AmmoTemplate.DataName, class'Denmother'.default.bLog, 'IRIDENMOTHER');
+		return false;
+	}
+
 	// 2. Abort if the soldier already has the same experimental ammo, 
 	// or if we fail to unequip it.
 	if (ItemState.LoadedAmmo.ObjectID != 0)
 	{	
-		OldAmmoState = XComGameState_Item(`XCOMHISTORY.GetGameStateForObjectID(ItemState.LoadedAmmo.ObjectID));
+		OldAmmoState = XComGameState_Item(NewGameState.GetGameStateForObjectID(ItemState.LoadedAmmo.ObjectID));
+		if (OldAmmoState == none)
+			OldAmmoState = XComGameState_Item(`XCOMHISTORY.GetGameStateForObjectID(ItemState.LoadedAmmo.ObjectID));
+
 		if (OldAmmoState != none)
 		{
 			if (OldAmmoState.GetMyTemplateName() == AmmoTemplate.DataName)
@@ -55,18 +65,6 @@ final function bool ApplyNewAmmo(XComGameState_Unit SourceUnit, XComGameState_Un
 			}
 		}
 	}
-
-
-
-
-	WeaponTemplate = X2WeaponTemplate(ItemState.GetMyTemplate());
-	if (WeaponTemplate == none || !AmmoTemplate.IsWeaponValidForAmmo(WeaponTemplate) || WeaponTemplate.Abilities.Find('HotLoadAmmo') == INDEX_NONE)
-	{
-		`LOG(WeaponTemplate.DataName @ "Does not support ammo:" @ AmmoTemplate.DataName, class'Denmother'.default.bLog, 'IRIDENMOTHER');
-		return false;
-	}
-	
-	
 
 	// 3. Create new ammo item state and attempt to equip it.
 	WeaponRef = ItemState.GetReference();
@@ -90,14 +88,17 @@ final function bool ApplyNewAmmo(XComGameState_Unit SourceUnit, XComGameState_Un
 		ItemState.LoadedAmmo = NewAmmoRef;
 		bAmmoApplied = true;
 	}
-	else
+
+	TargetUnit.bIgnoreItemEquipRestrictions = bOriginalIgnoreRestrictions;
+
+	if (!bAmmoApplied)
 	{
 		// If we fail, attempt to equip the old ammo back.
 		`LOG("Failed to equip new ammo into slot:" @ NewAmmoSlot, class'Denmother'.default.bLog, 'IRIDENMOTHER');
 		MaybeEquipOldAmmo(TargetUnit, NewGameState);
 		return false;
 	}
-	TargetUnit.bIgnoreItemEquipRestrictions = bOriginalIgnoreRestrictions;
+	
 	
 	// 4. If new ammo is equipped, init all abilities attached to it so that stuff like AP Rounds that works via persistent effect can work.
 	PlayerState = XComGameState_Player(`XCOMHISTORY.GetGameStateForObjectID(TargetUnit.ControllingPlayer.ObjectID));			
@@ -181,6 +182,7 @@ final function ApplyOldAmmo(XComGameState NewGameState)
 	{
 		if (TargetUnit.RemoveItemFromInventory(NewAmmoState, NewGameState))
 		{
+			`LOG("Removed new ammo.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
 			NewGameState.RemoveStateObject(NewAmmoRef.ObjectID);
 		}
 		MaybeEquipOldAmmo(TargetUnit, NewGameState);
@@ -191,6 +193,7 @@ final function ApplyOldAmmo(XComGameState NewGameState)
 	//ItemState = XComGameState_Item(NewGameState.ModifyStateObject(class'XComGameState_Item', WeaponRef.ObjectID));
 	if (ItemState != none)
 	{	
+		`LOG("Setting old ammo for the affected weapon.", class'Denmother'.default.bLog, 'IRIDENMOTHER');
 		ItemState.LoadedAmmo = OldAmmoRef;
 	}
 }
