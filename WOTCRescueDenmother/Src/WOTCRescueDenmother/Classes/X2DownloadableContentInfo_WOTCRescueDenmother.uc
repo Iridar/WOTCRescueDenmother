@@ -173,7 +173,7 @@ exec function FixAmmo()
 		}
 	}
 
-	`GAMERULES.SubmitGameState(NewGameState);
+	`XCOMHISTORY.AddGameStateToHistory(NewGameState);
 }
 
 exec function GiveDenmother()
