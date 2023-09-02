@@ -133,15 +133,15 @@ static event OnExitPostMissionSequence()
 }
 
 // Keep it here for a while to fix broken units for people.
-static function OnLoadedSavedGameWithDLCExisting ()
+static event OnLoadedSavedGameToStrategy()
 {
 	local X2DownloadableContentInfo_WOTCRescueDenmother CDO;
 
 	CDO = X2DownloadableContentInfo_WOTCRescueDenmother(class'XComEngine'.static.GetClassDefaultObject(class'X2DownloadableContentInfo_WOTCRescueDenmother'));
-	CDO.FixAmmo();
+	CDO.DenmotherFixAmmo();
 }
 
-exec function FixAmmo()
+exec function DenmotherFixAmmo()
 {
 	local XComGameState_Unit				UnitState;
 	local XComGameState						NewGameState;
