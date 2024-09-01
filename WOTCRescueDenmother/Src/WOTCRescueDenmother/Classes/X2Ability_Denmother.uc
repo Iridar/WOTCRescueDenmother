@@ -471,7 +471,7 @@ static function X2AbilityTemplate PullLoot()
 	Template.AddShooterEffectExclusions();
 
 	// Target Conditions
-	LootableCondition = new class'X2Condition_Lootable';
+	LootableCondition = new class'X2Condition_Lootable_Denmother';
 	LootableCondition.bRestrictRange = false;
 	Template.AbilityTargetConditions.AddItem(LootableCondition);
 
@@ -479,7 +479,7 @@ static function X2AbilityTemplate PullLoot()
 	VisibilityCondition.bRequireLOS = true;
 	Template.AbilityTargetConditions.AddItem(VisibilityCondition);
 
-	LootableCondition = new class'X2Condition_Lootable';
+	LootableCondition = new class'X2Condition_Lootable_Denmother';
 	//  Note: the multi target handles restricting the range on these based on the primary target's location
 	Template.AbilityMultiTargetConditions.AddItem(LootableCondition);
 

@@ -135,6 +135,9 @@ tags= war of the chosen, soldier class, soldier customization, weapon</Descripti
     <Content Include="Src\WOTCRescueDenmother\Classes\X2Condition_BandageThrow.uc">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Src\WOTCRescueDenmother\Classes\X2Condition_Lootable_Denmother.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\WOTCRescueDenmother\Classes\X2Condition_ResupplyAmmo.uc">
       <SubType>Content</SubType>
     </Content>

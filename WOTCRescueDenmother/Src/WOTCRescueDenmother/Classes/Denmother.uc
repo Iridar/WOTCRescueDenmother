@@ -391,7 +391,6 @@ static function XComGameState_Unit CreateDenmotherUnit(XComGameState NewGameStat
 		if (idx == 0)
 		{
 			NewUnitState.RankUpSoldier(NewGameState, default.DenmotherSoldierClass);
-			NewUnitState.ApplyInventoryLoadout(NewGameState, 'DenmotherLoadout');
 			NewUnitState.bNeedsNewClassPopup = false;
 		}
 		else
@@ -399,6 +398,8 @@ static function XComGameState_Unit CreateDenmotherUnit(XComGameState NewGameStat
 			NewUnitState.RankUpSoldier(NewGameState, default.DenmotherSoldierClass);
 		}
 	}
+
+	NewUnitState.ApplyInventoryLoadout(NewGameState, 'DenmotherLoadout');
 		
 	//	This should put the Denmother's recruit date at the start of the campaign, if I understand correctly.
 	class'X2StrategyGameRulesetDataStructures'.static.SetTime(NewUnitState.m_RecruitDate, 0, 0, 0, 
